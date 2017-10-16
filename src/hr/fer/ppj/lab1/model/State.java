@@ -11,4 +11,5 @@ public class State {
     public String getState() {
         return state;
     }
+
 }

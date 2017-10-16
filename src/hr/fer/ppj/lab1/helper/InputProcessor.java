@@ -10,13 +10,14 @@ import java.util.List;
 import java.util.Scanner;
 
 /**
- * Class for processing input of GLA
- * Format:
+ * Class for processing input of GLA.
+ * <br>
+ * Input format:
  * <ul>
- * <li>{regexName} regexExpression</li>
+ * <li>regexName | regexExpression</li>
  * <li>%X states</li>
  * <li>%L identifiers</li>
- * <li>ruleName regexExpression {actions}</li>
+ * <li>ruleName | regexExpression | actions</li>
  * </ul>
  */
 public class InputProcessor {
@@ -32,6 +33,9 @@ public class InputProcessor {
         startProcessing();
     }
 
+    /**
+     * Method for extracting regex expressions, states, identifiers and processing rules
+     */
     private void startProcessing() {
         String line;
         int mode = 0;
@@ -71,18 +75,20 @@ public class InputProcessor {
             }
 
             if (line.startsWith("{") && mode == 1) {
-                StringBuilder rule = new StringBuilder();
-                rule.append(line);
+                StringBuilder sb = new StringBuilder();
+                sb.append(line);
 
-                while (scanner.hasNext()) {
+                while (scanner.hasNextLine()) {
                     line = scanner.nextLine();
-                    rule.append(line);
+                    sb.append(line);
+
                     if (line.equals("}")) {
                         break;
                     }
                 }
 
-                ruleList.add(new Rule(rule.toString()));
+                String rule = sb.toString();
+                ruleList.add(new Rule(rule));
             }
 
         }
@@ -107,6 +113,9 @@ public class InputProcessor {
         return ruleList;
     }
 
+    /**
+     * Method for replacing references to simple regex expressions in more complex regex expressions
+     */
     private void simplifyRegexList() {
         for (Regex regex : regexList) {
             String name = regex.getName();
@@ -120,6 +129,9 @@ public class InputProcessor {
         }
     }
 
+    /**
+     * Method for replacing references to simple regex expressions in more complex regex expressions of every rule
+     */
     private void simplifyRuleList() {
         for (Rule rule : ruleList) {
             String regexExpression = rule.getRegex().getExpression();

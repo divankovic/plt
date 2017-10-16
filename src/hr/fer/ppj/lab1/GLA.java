@@ -16,18 +16,24 @@ public class GLA {
     /**
      * Path to the output file of generator
      */
-    private final static String FILEPATH = "./analizator/definition.ser";
+    private final static String SERIALIZATION_FILE_PATH = "./analizator/definition.ser";
 
     /**
      * Entry point
      */
     public static void main(String[] args) throws IOException {
+
         setupStdIO();
 
-        Scanner scanner = new Scanner(System.in);
-        InputProcessor inputProcessor = new InputProcessor(scanner);
+        try (Scanner scanner = new Scanner(System.in)) {
 
-        serializeData(inputProcessor);
+            InputProcessor inputProcessor = new InputProcessor(scanner);
+            serializeData(inputProcessor);
+
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+        }
+
     }
 
     /**
@@ -43,7 +49,7 @@ public class GLA {
      * Files to save: rules, states, identifiers, automaton for every regex.
      */
     private static void serializeData(InputProcessor inputProcessor) throws IOException {
-        File file = new File(FILEPATH);
+        File file = new File(SERIALIZATION_FILE_PATH);
         FileOutputStream fos = new FileOutputStream(file);
         ObjectOutputStream oos = new ObjectOutputStream(fos);
     }
