@@ -22,12 +22,18 @@ public class GLA {
      * Entry point
      */
     public static void main(String[] args) throws IOException {
+
         setupStdIO();
 
-        Scanner scanner = new Scanner(System.in);
-        InputProcessor inputProcessor = new InputProcessor(scanner);
+        try (Scanner scanner = new Scanner(System.in)) {
 
-        serializeData(inputProcessor);
+            InputProcessor inputProcessor = new InputProcessor(scanner);
+            serializeData(inputProcessor);
+
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+        }
+
     }
 
     /**

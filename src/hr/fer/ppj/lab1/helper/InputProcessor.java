@@ -32,6 +32,9 @@ public class InputProcessor {
         startProcessing();
     }
 
+    /**
+     *
+     */
     private void startProcessing() {
         String line;
         int mode = 0;
@@ -74,9 +77,10 @@ public class InputProcessor {
                 StringBuilder rule = new StringBuilder();
                 rule.append(line);
 
-                while (scanner.hasNext()) {
+                while (scanner.hasNextLine()) {
                     line = scanner.nextLine();
                     rule.append(line);
+
                     if (line.equals("}")) {
                         break;
                     }
