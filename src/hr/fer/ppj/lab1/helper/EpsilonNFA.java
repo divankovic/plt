@@ -67,7 +67,7 @@ public class EpsilonNFA {
                 nka.addTransition(new TransitionKey(rightState, "$"), temp[1]);
             }
         } else {
-           /* boolean prefixed = false;
+            boolean prefixed = false;
             int lastState = leftState;
             for (int i = 0; i < expression.length(); i++) {
                 int a, b;
@@ -78,7 +78,7 @@ public class EpsilonNFA {
                         transitionSymbol='\t';
                     }
                 }
-            }*/
+            }
         }
         return null;
     }
