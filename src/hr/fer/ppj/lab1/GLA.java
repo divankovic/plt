@@ -1,25 +1,35 @@
 package hr.fer.ppj.lab1;
 
 import hr.fer.ppj.lab1.helper.InputProcessor;
-import hr.fer.ppj.lab1.model.Regex;
 
-import java.util.List;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.Scanner;
 
 public class GLA {
 
-    public static void main(String[] args) {
+    private final static String FILEPATH = "./analizator/definition.ser";
+
+    public static void main(String[] args) throws IOException {
         setupStdIO();
 
         Scanner scanner = new Scanner(System.in);
         InputProcessor inputProcessor = new InputProcessor(scanner);
 
-        List<Regex> regexList = inputProcessor.getRegexList();
+        serializeData(inputProcessor);
     }
 
     private static void setupStdIO() {
 //        System.setIn();
 //        System.setOut();
+    }
+
+    private static void serializeData(InputProcessor inputProcessor) throws IOException {
+        File file = new File(FILEPATH);
+        FileOutputStream fos = new FileOutputStream(file);
+        ObjectOutputStream oos = new ObjectOutputStream(fos);
     }
 
 }

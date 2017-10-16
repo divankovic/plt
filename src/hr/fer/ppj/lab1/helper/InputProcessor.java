@@ -5,16 +5,17 @@ import hr.fer.ppj.lab1.model.Regex;
 import hr.fer.ppj.lab1.model.Rule;
 import hr.fer.ppj.lab1.model.State;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
 public class InputProcessor {
 
     private Scanner scanner;
-    private List<Regex> regexList;
-    private List<State> stateList;
-    private List<Identifier> identifierList;
-    private List<Rule> ruleList;
+    private List<Regex> regexList = new ArrayList<>();
+    private List<State> stateList = new ArrayList<>();
+    private List<Identifier> identifierList = new ArrayList<>();
+    private List<Rule> ruleList = new ArrayList<>();
 
     public InputProcessor(Scanner scanner) {
         this.scanner = scanner;
@@ -30,29 +31,54 @@ public class InputProcessor {
 
             if (line.startsWith("{") && mode == 0) {
                 regexList.add(new Regex(line.trim()));
+                continue;
+            }
 
-            } else if (line.startsWith("%X")) {
+            if (line.startsWith("%X")) {
                 mode = 1;
                 line = line.replace("%X", "").trim();
 
-                for (String state : line.split("\\s+")) {
+                String[] states = line.split("\\s+");
+
+                for (String state : states) {
                     stateList.add(new State(state));
                 }
 
-            } else if (line.startsWith("%L")) {
+                continue;
+            }
+
+            if (line.startsWith("%L")) {
                 mode = 1;
                 line = line.replace("%L", "").trim();
 
-                for (String identifier : line.split("\\s+")) {
+                String[] identifiers = line.split("\\s+");
+
+                for (String identifier : identifiers) {
                     identifierList.add(new Identifier(identifier));
                 }
 
-            } else {
+                continue;
+            }
 
+            if (line.startsWith("{") && mode == 1) {
+                StringBuilder rule = new StringBuilder();
+                rule.append(line);
+
+                while (scanner.hasNext()) {
+                    line = scanner.nextLine();
+                    rule.append(line);
+                    if (line.equals("}")) {
+                        break;
+                    }
+                }
+
+                ruleList.add(new Rule(rule.toString()));
             }
 
         }
 
+        simplifyRegexList();
+        simplifyRuleList();
     }
 
     public List<Regex> getRegexList() {
@@ -69,6 +95,32 @@ public class InputProcessor {
 
     public List<Rule> getRuleList() {
         return ruleList;
+    }
+
+    private void simplifyRegexList() {
+        for (Regex regex : regexList) {
+            String name = regex.getName();
+            String expression = regex.getExpression();
+
+            for (Regex otherRegex : regexList) {
+                if (otherRegex.getExpression().contains(name)) {
+                    otherRegex.setExpression(otherRegex.getExpression().replace(name, "(" + expression + ")"));
+                }
+            }
+        }
+    }
+
+    private void simplifyRuleList() {
+        for (Rule rule : ruleList) {
+            String name = rule.getRegex().getName();
+            String expression = rule.getRegex().getExpression();
+
+            for (Rule otherRule : ruleList) {
+                if (otherRule.getRegex().getExpression().contains(name)) {
+                    otherRule.getRegex().setExpression(otherRule.getRegex().getExpression().replace(name, "(" + expression + ")"));
+                }
+            }
+        }
     }
 
 }
