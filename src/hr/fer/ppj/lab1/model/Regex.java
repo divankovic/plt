@@ -13,8 +13,13 @@ public class Regex {
 
     private void parseRegex() {
         String[] regexParts = this.regex.trim().split("\\s+");
-        name = regexParts[0];
-        expression = regexParts[1];
+        if (regexParts.length > 1) {
+            name = regexParts[0];
+            expression = regexParts[1];
+        } else {
+            name = "blank";
+            expression = regexParts[0];
+        }
     }
 
     public String getName() {

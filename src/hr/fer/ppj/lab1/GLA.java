@@ -8,10 +8,19 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.Scanner;
 
+/**
+ * Lexical analyser generator.
+ */
 public class GLA {
 
+    /**
+     * Path to the output file of generator
+     */
     private final static String FILEPATH = "./analizator/definition.ser";
 
+    /**
+     * Entry point
+     */
     public static void main(String[] args) throws IOException {
         setupStdIO();
 
@@ -21,11 +30,18 @@ public class GLA {
         serializeData(inputProcessor);
     }
 
+    /**
+     * Standard I/O redirection
+     */
     private static void setupStdIO() {
 //        System.setIn();
 //        System.setOut();
     }
 
+    /**
+     * Saving data for LA.
+     * Files to save: rules, states, identifiers, automaton for every regex.
+     */
     private static void serializeData(InputProcessor inputProcessor) throws IOException {
         File file = new File(FILEPATH);
         FileOutputStream fos = new FileOutputStream(file);

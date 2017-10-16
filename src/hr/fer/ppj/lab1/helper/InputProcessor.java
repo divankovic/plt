@@ -9,6 +9,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+/**
+ * Class for processing input of GLA
+ * Format:
+ * <ul>
+ * <li>{regexName} regexExpression</li>
+ * <li>%X states</li>
+ * <li>%L identifiers</li>
+ * <li>ruleName regexExpression {actions}</li>
+ * </ul>
+ */
 public class InputProcessor {
 
     private Scanner scanner;
@@ -112,12 +122,11 @@ public class InputProcessor {
 
     private void simplifyRuleList() {
         for (Rule rule : ruleList) {
-            String name = rule.getRegex().getName();
-            String expression = rule.getRegex().getExpression();
+            String regexExpression = rule.getRegex().getExpression();
 
-            for (Rule otherRule : ruleList) {
-                if (otherRule.getRegex().getExpression().contains(name)) {
-                    otherRule.getRegex().setExpression(otherRule.getRegex().getExpression().replace(name, "(" + expression + ")"));
+            for (Regex regex : regexList) {
+                if (regexExpression.contains(regex.getName())) {
+                    rule.getRegex().setExpression(regexExpression.replace(regex.getName(), "(" + regex.getExpression() + ")"));
                 }
             }
         }
