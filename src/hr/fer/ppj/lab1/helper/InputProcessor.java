@@ -29,11 +29,26 @@ public class InputProcessor {
             line = scanner.nextLine();
 
             if (line.startsWith("{") && mode == 0) {
-                regexList.add(new Regex(line));
-            }
-            if (line.startsWith("%S")) {
+                regexList.add(new Regex(line.trim()));
+
+            } else if (line.startsWith("%X")) {
                 mode = 1;
-                stateList.add(new State(line));
+                line = line.replace("%X", "").trim();
+
+                for (String state : line.split("\\s+")) {
+                    stateList.add(new State(state));
+                }
+
+            } else if (line.startsWith("%L")) {
+                mode = 1;
+                line = line.replace("%L", "").trim();
+
+                for (String identifier : line.split("\\s+")) {
+                    identifierList.add(new Identifier(identifier));
+                }
+
+            } else {
+
             }
 
         }
