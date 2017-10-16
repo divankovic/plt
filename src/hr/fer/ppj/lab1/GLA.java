@@ -16,7 +16,7 @@ public class GLA {
     /**
      * Path to the output file of generator
      */
-    private final static String FILEPATH = "./analizator/definition.ser";
+    private final static String SERIALIZATION_FILE_PATH = "./analizator/definition.ser";
 
     /**
      * Entry point
@@ -49,7 +49,7 @@ public class GLA {
      * Files to save: rules, states, identifiers, automaton for every regex.
      */
     private static void serializeData(InputProcessor inputProcessor) throws IOException {
-        File file = new File(FILEPATH);
+        File file = new File(SERIALIZATION_FILE_PATH);
         FileOutputStream fos = new FileOutputStream(file);
         ObjectOutputStream oos = new ObjectOutputStream(fos);
     }
