@@ -22,6 +22,21 @@ public class InputProcessor {
     }
 
     private void startProcessing() {
+        String line;
+        int mode = 0;
+
+        while (scanner.hasNextLine()) {
+            line = scanner.nextLine();
+
+            if (line.startsWith("{") && mode == 0) {
+                regexList.add(new Regex(line));
+            }
+            if (line.startsWith("%S")) {
+                mode = 1;
+                stateList.add(new State(line));
+            }
+
+        }
 
     }
 
