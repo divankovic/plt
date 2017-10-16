@@ -8,6 +8,11 @@ public class InputProcessor {
 
     public InputProcessor(Scanner scanner) {
         this.scanner = scanner;
+        startProcessing();
+    }
+
+    private void startProcessing() {
+        
     }
 
 }
