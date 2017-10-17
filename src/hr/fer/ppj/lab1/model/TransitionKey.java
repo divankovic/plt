@@ -1,7 +1,8 @@
 package hr.fer.ppj.lab1.model;
 
-import hr.fer.ppj.lab1.model.State;
-
+/**
+ * Represents a key consisting of a state and a symbol, which is used in ENFA transitions
+ */
 public class TransitionKey {
     private int state;
     private char symbol;
