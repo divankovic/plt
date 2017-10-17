@@ -27,6 +27,7 @@ public class InputProcessor {
     private List<State> stateList = new ArrayList<>();
     private List<Identifier> identifierList = new ArrayList<>();
     private List<Rule> ruleList = new ArrayList<>();
+    private List<EpsilonNFA> epsilonNFAList = new ArrayList<>();
 
     public InputProcessor(Scanner scanner) {
         this.scanner = scanner;
@@ -95,6 +96,7 @@ public class InputProcessor {
 
         simplifyRegexList();
         simplifyRuleList();
+        generateENFAFromAllRules();
     }
 
     public List<Regex> getRegexList() {
@@ -111,6 +113,10 @@ public class InputProcessor {
 
     public List<Rule> getRuleList() {
         return ruleList;
+    }
+
+    public List<EpsilonNFA> getEpsilonNFAList() {
+        return epsilonNFAList;
     }
 
     /**
@@ -141,6 +147,15 @@ public class InputProcessor {
                     rule.getRegex().setExpression(regexExpression.replace(regex.getName(), "(" + regex.getExpression() + ")"));
                 }
             }
+        }
+    }
+
+    /**
+     * Method for generating epsilon NF automatons from regex expressions from known rules
+     */
+    private void generateENFAFromAllRules() {
+        for (Rule rule : ruleList) {
+            epsilonNFAList.add(new EpsilonNFA(rule.getRegex()));
         }
     }
 
