@@ -22,7 +22,7 @@ public class GLA {
     /**
      * Path to the output file of generator
      */
-    private final static String SERIALIZATION_FILE_PATH = "./analizator/definition.ser";
+    public final static String SERIALIZATION_FILE_PATH = "./analizator/definition.ser";
 
     /**
      * Entry point
