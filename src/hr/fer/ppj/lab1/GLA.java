@@ -11,7 +11,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
@@ -67,11 +66,7 @@ public class GLA {
             List<State> stateList = inputProcessor.getStateList();
             List<Identifier> identifierList = inputProcessor.getIdentifierList();
             List<Rule> ruleList = inputProcessor.getRuleList();
-
-            List<EpsilonNFA> epsilonNFAList = new ArrayList<>();
-            for (Rule rule : ruleList) {
-                epsilonNFAList.add(new EpsilonNFA(rule.getRegex()));
-            }
+            List<EpsilonNFA> epsilonNFAList = inputProcessor.getEpsilonNFAList();
 
             oos.writeObject(regexList);
             oos.writeObject(stateList);
