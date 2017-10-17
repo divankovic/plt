@@ -4,9 +4,9 @@ import hr.fer.ppj.lab1.model.State;
 
 public class TransitionKey {
     private int state;
-    private String symbol;
+    private char symbol;
 
-    public TransitionKey(int state, String symbol) {
+    public TransitionKey(int state, char symbol) {
         this.state = state;
         this.symbol = symbol;
     }
@@ -19,11 +19,11 @@ public class TransitionKey {
         this.state = state;
     }
 
-    public String getSymbol() {
+    public char getSymbol() {
         return symbol;
     }
 
-    public void setSymbol(String symbol) {
+    public void setSymbol(char symbol) {
         this.symbol = symbol;
     }
 }
