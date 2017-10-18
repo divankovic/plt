@@ -4,9 +4,7 @@ import hr.fer.ppj.lab1.model.Regex;
 import hr.fer.ppj.lab1.model.Rule;
 import hr.fer.ppj.lab1.model.TransitionKey;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Represents an epsilon nondeterministic finite automaton
@@ -16,7 +14,7 @@ public class EpsilonNFA {
     private int numberOfStates;
     private Rule rule;
     private int[] statePair;
-    private HashMap<TransitionKey, Integer> transitionStateHashMap = new HashMap<>();
+    private LinkedHashMap<TransitionKey, List<Integer>> transitionStateHashMap = new LinkedHashMap<>();
 
     public EpsilonNFA(Rule rule) {
         numberOfStates = 0;
@@ -24,8 +22,15 @@ public class EpsilonNFA {
         statePair = convert(rule.getRegex());
     }
 
+    //for testing purposes
+    public EpsilonNFA(Regex regex){
+        numberOfStates = 0;
+        statePair = convert(regex);
+    }
+
     /**
      * Creates a new state of the automaton
+     *
      * @return index of the new state ( int )
      */
     private int newState() {
@@ -35,13 +40,14 @@ public class EpsilonNFA {
 
     /**
      * Checks whether the symbol at the position i in regex is an operator or not
+     *
      * @param regex
-     * @param i - position of the symbol
+     * @param i     - position of the symbol
      * @return true if symbol is an operator, false otherwise
      */
     private static boolean isOperator(Regex regex, int i) {
         int cnt = 0;
-        while (i - 1 >= 0 && regex.getExpression().charAt(i-1) == '\\') {
+        while (i - 1 >= 0 && regex.getExpression().charAt(i - 1) == '\\') {
             cnt++;
             i--;
         }
@@ -51,6 +57,7 @@ public class EpsilonNFA {
     /**
      * The method converts a regular expression regex to Epsilon nondeterministic finite automaton by adding the transitions
      * to the automaton's transition map
+     *
      * @param regex - regular expression
      * @return a pair consisting of the starting and the last state of the automaton
      */
@@ -156,21 +163,68 @@ public class EpsilonNFA {
 
     /**
      * Adds the transition to ENFA's transition map
+     *
      * @param key
      * @param state
      */
     private void addTransition(TransitionKey key, Integer state) {
-        transitionStateHashMap.put(key, state);
+        List<Integer> states = transitionStateHashMap.get(key);
+        if (!states.contains(state)) {
+            states.add(state);
+        }
     }
 
-    public boolean recognizes(Regex regex){
+    public boolean recognizes(String expression) {
 
+        List<Integer> currentStates = new LinkedList<>();
+        currentStates.add(0);
+        epsilonSurrounding(currentStates);
 
+        for (int i = 0, n = expression.length(); i < n; i++) {
+
+            List<Integer> transitionStates = new LinkedList<>();
+            int finalI = i;
+
+            currentStates.forEach(state -> {
+                List<Integer> newStates = transitionStateHashMap.get(new TransitionKey(state, expression.charAt(finalI)));
+                if (newStates != null) {
+                    newStates.forEach(newState -> {
+                        if (!transitionStates.contains(newState)) {
+                            transitionStates.add(newState);
+                        }
+                    });
+                }
+            });
+
+            epsilonSurrounding(transitionStates);
+            currentStates.clear();
+            currentStates.addAll(transitionStates);
+        }
+
+        if(currentStates.contains(numberOfStates-1)){
+            return true;
+        }
         return false;
     }
 
+    private void epsilonSurrounding(List<Integer> currentStates) {
 
-    public HashMap<TransitionKey, Integer> getTransitionStateHashMap() {
+        Stack<Integer> stack = new Stack<>();
+        currentStates.forEach(stack::push);
+
+        while (!stack.empty()) {
+            int state = stack.pop();
+            List<Integer> states = transitionStateHashMap.get(new TransitionKey(state, '$'));
+            states.forEach(y -> {
+                if (!currentStates.contains(y)) {
+                    currentStates.add(y);
+                    stack.push(y);
+                }
+            });
+        }
+    }
+
+    public LinkedHashMap<TransitionKey, List<Integer>> getTransitionStateHashMap() {
         return transitionStateHashMap;
     }
 

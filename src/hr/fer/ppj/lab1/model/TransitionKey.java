@@ -27,4 +27,14 @@ public class TransitionKey {
     public void setSymbol(char symbol) {
         this.symbol = symbol;
     }
+
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof TransitionKey)) {
+            return false;
+        }
+        TransitionKey another = (TransitionKey) obj;
+        return this.state == another.state && this.symbol == another.symbol;
+    }
 }
