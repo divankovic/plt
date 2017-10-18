@@ -1,6 +1,7 @@
 package hr.fer.ppj.lab1.helper;
 
 import hr.fer.ppj.lab1.model.Regex;
+import hr.fer.ppj.lab1.model.Rule;
 import hr.fer.ppj.lab1.model.TransitionKey;
 
 import java.util.HashMap;
@@ -8,29 +9,26 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * Respresents an epsilon nondeterministic finite automaton
+ * Represents an epsilon nondeterministic finite automaton
  */
 public class EpsilonNFA {
 
     private int numberOfStates;
-    private Regex regex;
+    private Rule rule;
+    private int[] statePair;
     private HashMap<TransitionKey, Integer> transitionStateHashMap = new HashMap<>();
 
-
-    public EpsilonNFA() {
+    public EpsilonNFA(Rule rule) {
         numberOfStates = 0;
-    }
-
-    public EpsilonNFA(Regex regex) {
-        numberOfStates = 0;
-        this.regex = regex;
+        this.rule = rule;
+        statePair = convert(rule.getRegex());
     }
 
     /**
      * Creates a new state of the automaton
      * @return index of the new state ( int )
      */
-    public int newState() {
+    private int newState() {
         numberOfStates++;
         return numberOfStates - 1;
     }
@@ -51,12 +49,12 @@ public class EpsilonNFA {
     }
 
     /**
-     * The method converts a regular expression regex to Epsilon nondeterministic finite automaton
+     * The method converts a regular expression regex to Epsilon nondeterministic finite automaton by adding the transitions
+     * to the automaton's transition map
      * @param regex - regular expression
-     * @param automaton - ENFA
      * @return a pair consisting of the starting and the last state of the automaton
      */
-    public static int[] convert(Regex regex, EpsilonNFA automaton) {
+    private int[] convert(Regex regex) {
         List<String> choices = new LinkedList<>();
         int numberOfBraces = 0;
         String expression = regex.getExpression();
@@ -77,13 +75,13 @@ public class EpsilonNFA {
             choices.add(expression.substring(last, expression.length()));
         }
 
-        int leftState = automaton.newState();
-        int rightState = automaton.newState();
+        int leftState = newState();
+        int rightState = newState();
         if (foundChoiceOperator) {
             for (int i = 0, n = choices.size(); i < n; i++) {
-                int[] temp = convert(new Regex(choices.get(i)), automaton);
-                automaton.addTransition(new TransitionKey(leftState, '$'), temp[0]);
-                automaton.addTransition(new TransitionKey(rightState, '$'), temp[1]);
+                int[] temp = convert(new Regex(choices.get(i)));
+                addTransition(new TransitionKey(leftState, '$'), temp[0]);
+                addTransition(new TransitionKey(rightState, '$'), temp[1]);
             }
         } else {
             boolean prefixed = false;
@@ -102,21 +100,21 @@ public class EpsilonNFA {
                     } else {
                         transitionSymbol = expression.charAt(i);
                     }
-                    a = automaton.newState();
-                    b = automaton.newState();
-                    automaton.addTransition(new TransitionKey(a, transitionSymbol), b);
+                    a = newState();
+                    b = newState();
+                    addTransition(new TransitionKey(a, transitionSymbol), b);
                 } else {
                     if (expression.charAt(i) == '\\') {
                         prefixed = true;
                         continue;
                     }
                     if (expression.charAt(i) != '(') {
-                        a = automaton.newState();
-                        b = automaton.newState();
+                        a = newState();
+                        b = newState();
                         if (expression.charAt(i) == '$') {
-                            automaton.addTransition(new TransitionKey(a, '$'), b);
+                            addTransition(new TransitionKey(a, '$'), b);
                         } else {
-                            automaton.addTransition(new TransitionKey(a, expression.charAt(i)), b);
+                            addTransition(new TransitionKey(a, expression.charAt(i)), b);
                         }
                     } else {
                         int j = i + 1;
@@ -126,7 +124,7 @@ public class EpsilonNFA {
                                 break;
                             }
                         }
-                        int[] temp = convert(new Regex(expression.substring(i + 1, j)), automaton);
+                        int[] temp = convert(new Regex(expression.substring(i + 1, j)));
                         a = temp[0];
                         b = temp[1];
                         i = j + 1;
@@ -136,19 +134,19 @@ public class EpsilonNFA {
                 if (i + 1 < expression.length() && expression.charAt(i + 1) == '*') {
                     int x = a;
                     int y = b;
-                    a = automaton.newState();
-                    b = automaton.newState();
-                    automaton.addTransition(new TransitionKey(a, '$'), x);
-                    automaton.addTransition(new TransitionKey(y, '$'), b);
-                    automaton.addTransition(new TransitionKey(a, '$'), b);
-                    automaton.addTransition(new TransitionKey(y, '$'), x);
+                    a = newState();
+                    b = newState();
+                    addTransition(new TransitionKey(a, '$'), x);
+                    addTransition(new TransitionKey(y, '$'), b);
+                    addTransition(new TransitionKey(a, '$'), b);
+                    addTransition(new TransitionKey(y, '$'), x);
                     i++;
                 }
 
-                automaton.addTransition(new TransitionKey(lastState, '$'), a);
+                addTransition(new TransitionKey(lastState, '$'), a);
                 lastState = b;
             }
-            automaton.addTransition(new TransitionKey(lastState, '$'), rightState);
+            addTransition(new TransitionKey(lastState, '$'), rightState);
         }
         int[] result = new int[2];
         result[0] = leftState;
@@ -161,11 +159,26 @@ public class EpsilonNFA {
      * @param key
      * @param state
      */
-    public void addTransition(TransitionKey key, Integer state) {
+    private void addTransition(TransitionKey key, Integer state) {
         transitionStateHashMap.put(key, state);
     }
 
+    public boolean recognizes(Regex regex){
+
+
+        return false;
+    }
+
+
     public HashMap<TransitionKey, Integer> getTransitionStateHashMap() {
         return transitionStateHashMap;
+    }
+
+    public Rule getRule() {
+        return rule;
+    }
+
+    public int[] getStatePair() {
+        return statePair;
     }
 }
