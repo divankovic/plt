@@ -88,7 +88,7 @@ public class EpsilonNFA {
             for (int i = 0, n = choices.size(); i < n; i++) {
                 int[] temp = convert(new Regex(choices.get(i)));
                 addTransition(new TransitionKey(leftState, '$'), temp[0]);
-                addTransition(new TransitionKey(rightState, '$'), temp[1]);
+                addTransition(new TransitionKey(temp[1], '$'),rightState);
             }
         } else {
             boolean prefixed = false;
@@ -206,7 +206,7 @@ public class EpsilonNFA {
             currentStates.addAll(transitionStates);
         }
 
-        if(currentStates.contains(numberOfStates-1)){
+        if(currentStates.contains(statePair[1])){
             return true;
         }
         return false;
