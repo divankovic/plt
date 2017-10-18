@@ -34,8 +34,4 @@ public class Regex {
         this.expression = expression;
     }
 
-    public int getExpressionLength() {
-        return expression.length();
-    }
-
 }

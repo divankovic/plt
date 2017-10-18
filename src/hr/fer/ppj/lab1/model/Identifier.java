@@ -8,8 +8,4 @@ public class Identifier {
         this.identifier = identifier;
     }
 
-    public String getIdentifier() {
-        return identifier;
-    }
-
 }

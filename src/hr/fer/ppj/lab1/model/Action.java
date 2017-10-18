@@ -23,10 +23,6 @@ public class Action {
         parseAction();
     }
 
-    public String getAction() {
-        return action;
-    }
-
     public ActionType getActionType() {
         return actionType;
     }
