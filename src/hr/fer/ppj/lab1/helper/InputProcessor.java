@@ -155,7 +155,7 @@ public class InputProcessor {
      */
     private void generateENFAFromAllRules() {
         for (Rule rule : ruleList) {
-            epsilonNFAList.add(new EpsilonNFA(rule.getRegex()));
+            epsilonNFAList.add(new EpsilonNFA(rule));
         }
     }
 
