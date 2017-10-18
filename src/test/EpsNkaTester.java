@@ -7,8 +7,8 @@ public class EpsNkaTester {
 
     public static void main(String[] args) {
 
-        String regexExpression = "(abc)*";
-        String testRegex = "abcabcabc";
+        String regexExpression = "(a|b)*cc";
+        String testRegex = "ababbbaaacc";
 
         EpsilonNFA automaton = new EpsilonNFA(new Regex(regexExpression));
 

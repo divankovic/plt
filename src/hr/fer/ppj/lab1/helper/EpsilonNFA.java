@@ -134,7 +134,7 @@ public class EpsilonNFA {
                         int[] temp = convert(new Regex(expression.substring(i + 1, j)));
                         a = temp[0];
                         b = temp[1];
-                        i = j + 1;
+                        i = j;
                     }
                 }
 
