@@ -169,7 +169,12 @@ public class EpsilonNFA {
      */
     private void addTransition(TransitionKey key, Integer state) {
         List<Integer> states = transitionStateHashMap.get(key);
-        if (!states.contains(state)) {
+        if(states == null){
+            states = new LinkedList<>();
+            states.add(state);
+            transitionStateHashMap.put(key,states);
+        }
+        else if (!states.contains(state)) {
             states.add(state);
         }
     }
@@ -215,12 +220,14 @@ public class EpsilonNFA {
         while (!stack.empty()) {
             int state = stack.pop();
             List<Integer> states = transitionStateHashMap.get(new TransitionKey(state, '$'));
-            states.forEach(y -> {
-                if (!currentStates.contains(y)) {
-                    currentStates.add(y);
-                    stack.push(y);
-                }
-            });
+            if(states!=null) {
+                states.forEach(y -> {
+                    if (!currentStates.contains(y)) {
+                        currentStates.add(y);
+                        stack.push(y);
+                    }
+                });
+            }
         }
     }
 
