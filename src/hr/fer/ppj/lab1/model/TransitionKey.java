@@ -1,5 +1,7 @@
 package hr.fer.ppj.lab1.model;
 
+import com.sun.corba.se.impl.orbutil.ObjectUtility;
+
 /**
  * Represents a key consisting of a state and a symbol, which is used in ENFA transitions
  */
@@ -36,5 +38,10 @@ public class TransitionKey {
         }
         TransitionKey another = (TransitionKey) obj;
         return this.state == another.state && this.symbol == another.symbol;
+    }
+
+    @Override
+    public int hashCode() {
+        return Integer.hashCode(state)+Character.hashCode(symbol);
     }
 }

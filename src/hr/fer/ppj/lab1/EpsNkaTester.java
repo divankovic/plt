@@ -9,8 +9,8 @@ public class EpsNkaTester {
         /*TransitionKey first = new TransitionKey(1,'a');
         TransitionKey second = new TransitionKey(1,'a');
         System.out.println(first.equals(second));*/
-        Regex regex = new Regex("a|b");
+        Regex regex = new Regex("a*");
         EpsilonNFA automaton = new EpsilonNFA(regex);
-        System.out.println(automaton.recognizes("a"));
+        System.out.println(automaton.recognizes("aaaa"));
     }
 }
