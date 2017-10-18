@@ -108,15 +108,15 @@ public class LA {
 
         while (last <= end) {
 
-//            for (EpsilonNFA epsilonNFA : epsilonNFAList) {
-//                if (epsilonNFA.getState().equals(currentState) && epsilonNFA.recognizes(program.substring(first, last))) {
-//                    positiveENFA.add(epsilonNFA);
-//                }
-//            }
-//
-//            if (!positiveENFA.isEmpty()) {
-//                last++;
-//            }
+            for (EpsilonNFA epsilonNFA : epsilonNFAList) {
+                if (epsilonNFA.getRule().getState().equals(currentState) && epsilonNFA.recognizes(program.substring(first, last))) {
+                    positiveENFA.add(epsilonNFA);
+                }
+            }
+
+            if (!positiveENFA.isEmpty()) {
+                last++;
+            }
 
         }
 
