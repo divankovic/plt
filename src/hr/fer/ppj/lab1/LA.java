@@ -47,15 +47,18 @@ public class LA {
             System.err.println(e.getMessage());
             System.exit(1);
         }
+
         //tryOut();
         runLexer();
     }
 
+    /**
+     *
+     */
     private static void tryOut() {
         EpsilonNFA epsilonNFA = epsilonNFAList.get(5);
-                System.out.println(epsilonNFA.recognizes("\\( \\)"));
+        System.out.println(epsilonNFA.recognizes("\\( \\)"));
     }
-
 
     /**
      * Standard I/O redirection
@@ -118,7 +121,7 @@ public class LA {
         while (last <= end) {
 
             for (EpsilonNFA epsilonNFA : epsilonNFAList) {
-                if (epsilonNFA.getRule().getState().equals(currentState) && epsilonNFA.recognizes(program.substring(first, last+1))) {
+                if (epsilonNFA.getRule().getState().equals(currentState) && epsilonNFA.recognizes(program.substring(first, last + 1))) {
                     positiveENFA.add(epsilonNFA);
                 }
             }
