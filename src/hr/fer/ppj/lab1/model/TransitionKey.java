@@ -1,9 +1,11 @@
 package hr.fer.ppj.lab1.model;
 
+import java.io.Serializable;
+
 /**
  * Represents a key consisting of a state and a symbol, which is used in ENFA transitions
  */
-public class TransitionKey {
+public class TransitionKey implements Serializable{
 
     private int state;
     private char symbol;

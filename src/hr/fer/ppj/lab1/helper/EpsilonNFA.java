@@ -4,6 +4,7 @@ import hr.fer.ppj.lab1.model.Regex;
 import hr.fer.ppj.lab1.model.Rule;
 import hr.fer.ppj.lab1.model.TransitionKey;
 
+import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -12,7 +13,7 @@ import java.util.Stack;
 /**
  * Represents an epsilon nondeterministic finite automaton
  */
-public class EpsilonNFA {
+public class EpsilonNFA implements Serializable{
 
     private int[] statePair;
     private int numberOfStates;

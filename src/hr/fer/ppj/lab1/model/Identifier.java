@@ -1,6 +1,8 @@
 package hr.fer.ppj.lab1.model;
 
-public class Identifier {
+import java.io.Serializable;
+
+public class Identifier implements Serializable{
 
     private String identifier;
 

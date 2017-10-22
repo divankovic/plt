@@ -1,9 +1,10 @@
 package hr.fer.ppj.lab1.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Rule {
+public class Rule implements Serializable{
 
     private String rule;
     private State state;

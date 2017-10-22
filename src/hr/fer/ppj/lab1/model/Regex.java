@@ -1,6 +1,8 @@
 package hr.fer.ppj.lab1.model;
 
-public class Regex {
+import java.io.Serializable;
+
+public class Regex implements Serializable{
 
     private String regex;
     private String name;

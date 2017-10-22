@@ -1,6 +1,8 @@
 package hr.fer.ppj.lab1.model;
 
-public class State {
+import java.io.Serializable;
+
+public class State implements Serializable{
 
     private String state;
 

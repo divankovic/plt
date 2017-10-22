@@ -2,10 +2,12 @@ package hr.fer.ppj.lab1.model;
 
 import hr.fer.ppj.lab1.enums.ActionType;
 
+import java.io.Serializable;
+
 /**
  * Class that represents single action
  */
-public class Action {
+public class Action implements Serializable{
 
     private String action;
     private ActionType actionType;
