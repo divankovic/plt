@@ -32,11 +32,13 @@ public class LA {
 
         setupStdIO();
 
-        try {
-            Scanner scanner = new Scanner(System.in);
-            readInputProgram(scanner);
+        try (Scanner scanner = new Scanner(System.in)){
 
             deserializeData();
+
+            readInputProgram(scanner);
+
+
 
         } catch (Exception e) {
             System.err.println(e.getMessage());
@@ -56,7 +58,7 @@ public class LA {
 
 
     /**
-     * Method for reading program for standard input
+     * Method for reading program from standard input
      */
     private static void readInputProgram(Scanner scanner) {
         StringBuilder sb = new StringBuilder();

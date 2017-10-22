@@ -36,8 +36,6 @@ public class GLA {
             InputProcessor inputProcessor = new InputProcessor(scanner);
             serializeData(inputProcessor);
 
-        } catch (Exception e) {
-            System.err.println(e.getMessage());
         }
 
     }

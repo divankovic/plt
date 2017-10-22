@@ -39,18 +39,16 @@ public class InputProcessor {
      */
     private void startProcessing() {
         String line;
-        int mode = 0;
 
         while (scanner.hasNextLine()) {
             line = scanner.nextLine();
 
-            if (line.startsWith("{") && mode == 0) {
+            if (line.startsWith("{")) {
                 regexList.add(new Regex(line.trim()));
                 continue;
             }
 
             if (line.startsWith("%X")) {
-                mode = 1;
                 line = line.replace("%X", "").trim();
 
                 String[] states = line.split("\\s+");
@@ -63,7 +61,6 @@ public class InputProcessor {
             }
 
             if (line.startsWith("%L")) {
-                mode = 1;
                 line = line.replace("%L", "").trim();
 
                 String[] identifiers = line.split("\\s+");
@@ -75,17 +72,19 @@ public class InputProcessor {
                 continue;
             }
 
-            if (line.startsWith("{") && mode == 1) {
+            if (line.startsWith("<")) {
                 StringBuilder sb = new StringBuilder();
                 sb.append(line);
 
                 while (scanner.hasNextLine()) {
                     line = scanner.nextLine();
-                    sb.append(line);
-
                     if (line.equals("}")) {
+                        sb.append(line);
                         break;
+                    }else {
+                        sb.append(line+"\n");
                     }
+                    
                 }
 
                 String rule = sb.toString();
