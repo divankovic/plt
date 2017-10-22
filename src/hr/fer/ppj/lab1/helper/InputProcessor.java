@@ -146,7 +146,7 @@ public class InputProcessor {
 
             for (Regex regex : regexList) {
                 if (regexExpression.contains(regex.getName())) {
-                    rule.getRegex().setExpression(regexExpression.replace(regex.getName(), "(" + regex.getExpression() + ")"));
+                    rule.getRegex().setExpression(regexExpression.replace(regex.getName(), regex.getExpression()));
                 }
             }
         }

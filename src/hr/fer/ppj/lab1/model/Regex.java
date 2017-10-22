@@ -14,7 +14,7 @@ public class Regex implements Serializable {
     }
 
     private void parseRegex() {
-        String[] regexParts = this.regex.trim().split("\\s+");
+        String[] regexParts = this.regex.trim().split(" ");
         if (regexParts.length > 1) {
             name = regexParts[0];
             expression = regexParts[1];
