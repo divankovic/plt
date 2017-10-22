@@ -20,7 +20,7 @@ public class GLA {
      * Path to the output file of generator
      */
     public final static String SERIALIZATION_FILE_PATH = "./src/analizator/definition.ser";
-    private final static String TEST_FILE_INPUT_PATH = "./src/res/in/minusLang.lan";
+    private final static String TEST_FILE_INPUT_PATH = "./src/res/in/minusLang.in";
     private final static String TEST_FILE_OUTPUT_PATH = "./src/res/out/GLA_out.txt";
 
     /**

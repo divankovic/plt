@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Rule implements Serializable{
+public class Rule implements Serializable {
 
     private String rule;
     private State state;

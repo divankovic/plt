@@ -7,7 +7,7 @@ import java.io.Serializable;
 /**
  * Class that represents single action
  */
-public class Action implements Serializable{
+public class Action implements Serializable {
 
     private String action;
     private ActionType actionType;
