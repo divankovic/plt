@@ -2,7 +2,7 @@ package hr.fer.ppj.lab1.model;
 
 import java.io.Serializable;
 
-public class Identifier implements Serializable{
+public class Identifier implements Serializable {
 
     private String identifier;
 

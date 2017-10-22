@@ -5,7 +5,7 @@ import java.io.Serializable;
 /**
  * Represents a key consisting of a state and a symbol, which is used in ENFA transitions
  */
-public class TransitionKey implements Serializable{
+public class TransitionKey implements Serializable {
 
     private int state;
     private char symbol;
@@ -14,7 +14,6 @@ public class TransitionKey implements Serializable{
         this.state = state;
         this.symbol = symbol;
     }
-
 
     @Override
     public boolean equals(Object obj) {

@@ -2,7 +2,7 @@ package hr.fer.ppj.lab1.model;
 
 import java.io.Serializable;
 
-public class Regex implements Serializable{
+public class Regex implements Serializable {
 
     private String regex;
     private String name;

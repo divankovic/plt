@@ -17,7 +17,7 @@ public class LA {
     /**
      * Constants
      */
-    private final static String TEST_FILE_INPUT_PATH = "./src/res/in/minusLang.lan";
+    private final static String TEST_FILE_INPUT_PATH = "./src/res/in/minusLang.in";
     private final static String TEST_FILE_OUTPUT_PATH = "./src/res/out/LA_out.txt";
 
     /**
