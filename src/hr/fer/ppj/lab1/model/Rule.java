@@ -34,7 +34,7 @@ public class Rule {
         regex = new Regex(parts[0].substring(1).split(">")[1]);
 
         for (String part : parts) {
-            if (part.equals("{") || part.equals("}")) {
+            if (part.equals("{") || part.equals("}") || part.startsWith("<")) {
                 continue;
             }
             actionList.add(new Action(part));

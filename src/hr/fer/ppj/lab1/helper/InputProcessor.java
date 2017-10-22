@@ -42,6 +42,9 @@ public class InputProcessor {
 
         while (scanner.hasNextLine()) {
             line = scanner.nextLine();
+            if(line.equals("\n")){
+                break;
+            }
 
             if (line.startsWith("{")) {
                 regexList.add(new Regex(line.trim()));
