@@ -141,7 +141,7 @@ public class LA {
                 for (Action action : actions) {
                     switch (action.getActionType()) {
                         case LEX_TOKEN:
-                            System.out.println(action.getArgument() + " " + numberOfRows + " " + program.substring(first, last));
+                            System.out.println(action.getName() + " " + numberOfRows + " " + program.substring(first, last));
                             first = last;
                             break;
                         case MINUS:
