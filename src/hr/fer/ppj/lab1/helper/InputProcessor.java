@@ -145,8 +145,10 @@ public class InputProcessor {
             String regexExpression = rule.getRegex().getExpression();
 
             for (Regex regex : regexList) {
-                if (regexExpression.contains(regex.getName())) {
+                if (regexExpression.equals(regex.getName())) {
                     rule.getRegex().setExpression(regexExpression.replace(regex.getName(), regex.getExpression()));
+                }else if(regexExpression.contains(regex.getName())){
+                    rule.getRegex().setExpression(regexExpression.replace(regex.getName(), "("+regex.getExpression()+")"));
                 }
             }
         }

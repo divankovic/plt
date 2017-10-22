@@ -62,7 +62,7 @@ public class LA {
      */
     private static void setupStdIO() throws IOException {
         System.setIn(new FileInputStream(new File(TEST_FILE_INPUT_PATH)));
-        //System.setOut(new PrintStream(new File(TEST_FILE_OUTPUT_PATH)));
+        System.setOut(new PrintStream(new File(TEST_FILE_OUTPUT_PATH)));
     }
 
 
