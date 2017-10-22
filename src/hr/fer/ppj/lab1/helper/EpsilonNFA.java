@@ -145,11 +145,18 @@ public class EpsilonNFA implements Serializable {
                     } else {
 
                         int j = i + 1;
-
+                        int extra=0;
                         for (int z = i + 1; z < expression.length(); z++) {
+                            if(expression.charAt(z)=='('){
+                                extra++;
+                            }
                             if (expression.charAt(z) == ')') {
-                                j = z;
-                                break;
+                                if(extra==0) {
+                                    j = z;
+                                    break;
+                                }else{
+                                    extra--;
+                                }
                             }
                         }
 

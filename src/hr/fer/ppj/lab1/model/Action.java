@@ -41,8 +41,12 @@ public class Action implements Serializable{
     private void parseAction() {
 
         if (action.trim().split("\\s+").length == 1) {
-            actionType = action.equals("-") ? ActionType.MINUS : ActionType.LEX_TOKEN;
-            if(actionType.equals(ActionType.LEX_TOKEN)){
+            if(action.equals("-")){
+                actionType = ActionType.MINUS;
+            }else if(action.equals(NEW_LINE)){
+                actionType = ActionType.NEW_LINE;
+            }else {
+                actionType = ActionType.LEX_TOKEN;
                 name = action;
             }
             return;

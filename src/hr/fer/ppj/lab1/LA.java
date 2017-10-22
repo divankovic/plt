@@ -71,11 +71,9 @@ public class LA {
      */
     private static void readInputProgram(Scanner scanner) {
         StringBuilder sb = new StringBuilder();
-
         while (scanner.hasNextLine()) {
-            sb.append(scanner.nextLine());
+            sb.append(scanner.nextLine()+"\n");
         }
-
         program = sb.toString();
     }
 
@@ -112,24 +110,21 @@ public class LA {
 
         State currentState = stateList.get(0);
         List<EpsilonNFA> positiveENFA = new ArrayList<>();
+        List<EpsilonNFA> lastPositiveENFA = new ArrayList<>();
 
         int first = 0, last = 0;
         int end = program.length() - 1;
 
         while (last <= end) {
 
-            boolean added = false;
-
             for (EpsilonNFA epsilonNFA : epsilonNFAList) {
                 if (epsilonNFA.getRule().getState().equals(currentState) && epsilonNFA.recognizes(program.substring(first, last+1))) {
                     positiveENFA.add(epsilonNFA);
-                    added = true;
                 }
             }
 
-            if (!positiveENFA.isEmpty() && !added) {
-                EpsilonNFA nfa = positiveENFA.get(positiveENFA.size() - 1);
-                positiveENFA.clear();
+            if (!positiveENFA.isEmpty()) {
+                EpsilonNFA nfa = positiveENFA.get(0);
                 List<Action> actions = nfa.getRule().getActionList();
 
                 for (Action action : actions) {
