@@ -42,7 +42,7 @@ public class InputProcessor {
 
         while (scanner.hasNextLine()) {
             line = scanner.nextLine();
-            if(line.equals("\n")){
+            if(line.equals("")){
                 break;
             }
 
