@@ -5,10 +5,7 @@ import hr.fer.ppj.lab1.model.Rule;
 import hr.fer.ppj.lab1.model.TransitionKey;
 
 import java.io.Serializable;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
 
 /**
  * Represents an epsilon nondeterministic finite automaton
@@ -19,11 +16,14 @@ public class EpsilonNFA implements Serializable {
     private int numberOfStates;
     private Rule rule;
     private LinkedHashMap<TransitionKey, List<Integer>> transitionStateHashMap = new LinkedHashMap<>();
+    private List<Integer> currentStates = new LinkedList<>();
+    private int numberOfTransitions;
 
     public EpsilonNFA(Rule rule) {
         this.numberOfStates = 0;
         this.rule = rule;
         this.statePair = convert(rule.getRegex());
+        reset();
     }
 
     /**
@@ -145,16 +145,16 @@ public class EpsilonNFA implements Serializable {
                     } else {
 
                         int j = i + 1;
-                        int extra=0;
+                        int extra = 0;
                         for (int z = i + 1; z < expression.length(); z++) {
-                            if(expression.charAt(z)=='('){
+                            if (expression.charAt(z) == '(') {
                                 extra++;
                             }
                             if (expression.charAt(z) == ')') {
-                                if(extra==0) {
+                                if (extra == 0) {
                                     j = z;
                                     break;
-                                }else{
+                                } else {
                                     extra--;
                                 }
                             }
@@ -254,6 +254,34 @@ public class EpsilonNFA implements Serializable {
         return currentStates.contains(statePair[1]);
     }
 
+    public void transition(char c) {
+
+        List<Integer> transitionStates = new LinkedList<>();
+
+        currentStates.forEach(state -> {
+
+            List<Integer> newStates = transitionStateHashMap.get(new TransitionKey(state, c));
+
+            if (newStates != null) {
+                newStates.forEach(newState -> {
+                    if (!transitionStates.contains(newState)) {
+                        transitionStates.add(newState);
+                    }
+                });
+            }
+
+        });
+
+        epsilonSurrounding(transitionStates);
+        currentStates.clear();
+        currentStates.addAll(transitionStates);
+        if(currentStates.isEmpty()){
+            numberOfTransitions = 0;
+        }else {
+            numberOfTransitions += 1;
+        }
+    }
+
     /**
      * Method for calculating epsilon transitions of current state list
      */
@@ -284,4 +312,49 @@ public class EpsilonNFA implements Serializable {
         return rule;
     }
 
+    public List<Integer> getCurrentStates() {
+        return this.currentStates;
+    }
+
+    public int getAcceptableState() {
+        return statePair[1];
+    }
+
+    public void reset(){
+        numberOfTransitions=0;
+        currentStates.clear();
+        currentStates.add(statePair[0]);
+        epsilonSurrounding(currentStates);
+    }
+
+    public int getNumberOfTransitions(){
+        return numberOfTransitions;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        EpsilonNFA that = (EpsilonNFA) o;
+
+        if (numberOfStates != that.numberOfStates) return false;
+        if (numberOfTransitions != that.numberOfTransitions) return false;
+        if (!Arrays.equals(statePair, that.statePair)) return false;
+        if (rule != null ? !rule.equals(that.rule) : that.rule != null) return false;
+        if (transitionStateHashMap != null ? !transitionStateHashMap.equals(that.transitionStateHashMap) : that.transitionStateHashMap != null)
+            return false;
+        return currentStates != null ? currentStates.equals(that.currentStates) : that.currentStates == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Arrays.hashCode(statePair);
+        result = 31 * result + numberOfStates;
+        result = 31 * result + (rule != null ? rule.hashCode() : 0);
+        result = 31 * result + (transitionStateHashMap != null ? transitionStateHashMap.hashCode() : 0);
+        result = 31 * result + (currentStates != null ? currentStates.hashCode() : 0);
+        result = 31 * result + numberOfTransitions;
+        return result;
+    }
 }

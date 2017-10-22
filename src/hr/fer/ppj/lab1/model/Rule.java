@@ -30,10 +30,15 @@ public class Rule implements Serializable {
 
     private void parseRule() {
         String[] parts = rule.split("\n");
-
-        state = new State(parts[0].substring(1).split(">")[0]);
-        regex = new Regex(parts[0].substring(1).split(">")[1]);
-
+        int idx=0;
+        for(int i = 1,n=parts[0].length();i<n;i++){
+            if(parts[0].charAt(i)=='>'){
+                idx = i;
+                break;
+            }
+        }
+        state = new State(parts[0].substring(1,idx));
+        regex = new Regex(parts[0].substring(idx+1));
         for (String part : parts) {
             if (part.equals("{") || part.equals("}") || part.startsWith("<")) {
                 continue;

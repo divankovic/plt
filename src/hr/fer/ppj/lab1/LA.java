@@ -18,7 +18,7 @@ public class LA {
     /**
      * Constants
      */
-    private final static String TEST_FILE_INPUT_PATH = "./src/res/in/minusLang.in";
+    private final static String TEST_FILE_INPUT_PATH = "./src/res/in/c.in";
     private final static String TEST_FILE_OUTPUT_PATH = "./src/res/out/LA_out.txt";
 
     /**
@@ -49,17 +49,9 @@ public class LA {
             System.exit(1);
         }
 
-        //tryOut();
         runLexer();
     }
 
-    /**
-     *
-     */
-    private static void tryOut() {
-        EpsilonNFA epsilonNFA = epsilonNFAList.get(5);
-        System.out.println(epsilonNFA.recognizes("\\( \\)"));
-    }
 
     /**
      * Standard I/O redirection
@@ -76,7 +68,7 @@ public class LA {
     private static void readInputProgram(Scanner scanner) {
         StringBuilder sb = new StringBuilder();
         while (scanner.hasNextLine()) {
-            sb.append(scanner.nextLine()+"\n");
+            sb.append(scanner.nextLine() + "\n");
         }
         program = sb.toString();
     }
@@ -118,28 +110,28 @@ public class LA {
         //end - last read character of the program
         //last - index of the character of the longest recognized program prefix
 
-        int start=0,end=0,last=0;
+        int start = 0, end = 0, last = 0;
 
         //index of the acceptable ENFA in ENFA's list
-        int acceptable=-1;
+        int acceptable = -1;
 
-        while(end <= program.length()-1){
+        while (end <= program.length() - 1) {
             boolean empty = true;
             boolean accepts = false;
 
-            for(EpsilonNFA epsilonNFA : epsilonNFAList){
-                if(epsilonNFA.getRule().getState().equals(currentState)){
-                    if(!epsilonNFA.getCurrentStates().isEmpty()) {
+            for (EpsilonNFA epsilonNFA : epsilonNFAList) {
+                if (epsilonNFA.getRule().getState().equals(currentState)) {
+                    if (!epsilonNFA.getCurrentStates().isEmpty()) {
                         empty = false;
                     }
-                    if(epsilonNFA.getCurrentStates().contains(epsilonNFA.getAcceptableState())){
-                        if(acceptable == -1) {
+                    if (epsilonNFA.getCurrentStates().contains(epsilonNFA.getAcceptableState())) {
+                        if (acceptable == -1) {
                             acceptable = epsilonNFAList.indexOf(epsilonNFA);
                         }
-                        if(epsilonNFA.getNumberOfTransitions() > epsilonNFAList.get(acceptable).getNumberOfTransitions()){
+                        if (epsilonNFA.getNumberOfTransitions() > epsilonNFAList.get(acceptable).getNumberOfTransitions()) {
                             acceptable = epsilonNFAList.indexOf(epsilonNFA);
-                        }else if(epsilonNFA.getNumberOfTransitions() == epsilonNFAList.get(acceptable).getNumberOfTransitions()){
-                            if(epsilonNFAList.indexOf(epsilonNFA)<acceptable){
+                        } else if (epsilonNFA.getNumberOfTransitions() == epsilonNFAList.get(acceptable).getNumberOfTransitions()) {
+                            if (epsilonNFAList.indexOf(epsilonNFA) < acceptable) {
                                 acceptable = epsilonNFAList.indexOf(epsilonNFA);
                             }
                         }
@@ -148,45 +140,48 @@ public class LA {
                 }
             }
 
-            if(!empty && !accepts){
+            if (!empty && !accepts) {
                 char c = program.charAt(end++);
-                for(EpsilonNFA epsilonNFA : epsilonNFAList){
-                    if(epsilonNFA.getRule().getState().equals(currentState)){
+                for (EpsilonNFA epsilonNFA : epsilonNFAList) {
+                    if (epsilonNFA.getRule().getState().equals(currentState)) {
                         epsilonNFA.transition(c);
                     }
                 }
             }
 
-            if(accepts){
-                last = end-1;
+            if (accepts && end < program.length() - 1) {
+                last = end - 1;
                 char c = program.charAt(end++);
-                for(EpsilonNFA epsilonNFA : epsilonNFAList){
-                    if(epsilonNFA.getRule().getState().equals(currentState)){
+                for (EpsilonNFA epsilonNFA : epsilonNFAList) {
+                    if (epsilonNFA.getRule().getState().equals(currentState)) {
                         epsilonNFA.transition(c);
                     }
                 }
+                continue;
             }
 
-            if(empty){
+            if (empty || (accepts && end == program.length() - 1)) {
                 //there has been a mistake
-                if(acceptable==-1){
-                    System.out.println(start);
-                    start+=1;
+                if (acceptable == -1) {
+                    System.err.println(program.charAt(start));
+                    start += 1;
+                    last = start;
                     end = start;
-                }else{
+                    resetENFAs();
+                } else {
                     EpsilonNFA positiveENFA = epsilonNFAList.get(acceptable);
                     List<Action> actions = positiveENFA.getRule().getActionList();
 
                     for (Action action : actions) {
                         if (action.getActionType().equals(ActionType.GO_BACK)) {
-                            last = start + Integer.parseInt(action.getArgument())-1;
+                            last = start + Integer.parseInt(action.getArgument()) - 1;
                         }
                     }
 
                     for (Action action : actions) {
                         switch (action.getActionType()) {
                             case LEX_TOKEN:
-                                System.out.println(action.getName() + " " + numberOfRows + " " + program.substring(start, last+1));
+                                System.out.println(action.getName() + " " + numberOfRows + " " + program.substring(start, last + 1));
                                 break;
                             case MINUS:
                                 break;
@@ -199,7 +194,7 @@ public class LA {
                         }
 
                     }
-                    last+=1;
+                    last += 1;
                     start = last;
                     end = last;
                     resetENFAs();
@@ -211,7 +206,7 @@ public class LA {
     }
 
     private static void resetENFAs() {
-        for(EpsilonNFA epsilonNFA : epsilonNFAList){
+        for (EpsilonNFA epsilonNFA : epsilonNFAList) {
             epsilonNFA.reset();
         }
     }

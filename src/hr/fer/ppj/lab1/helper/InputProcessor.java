@@ -126,14 +126,9 @@ public class InputProcessor {
      */
     private void simplifyRegexList() {
         for (Regex regex : regexList) {
-            String name = regex.getName();
-            String expression = regex.getExpression();
-
             for (Regex otherRegex : regexList) {
-                if (otherRegex.getExpression().equals(name)) {
-                    otherRegex.setExpression(otherRegex.getExpression().replace(name, expression));
-                }else if (otherRegex.getExpression().contains(name)) {
-                    otherRegex.setExpression(otherRegex.getExpression().replace(name, "(" + expression + ")"));
+                if (regex.getExpression().contains(otherRegex.getName())) {
+                    regex.setExpression(regex.getExpression().replace(otherRegex.getName(), "(" + otherRegex.getExpression() + ")"));
                 }
             }
         }
@@ -144,13 +139,10 @@ public class InputProcessor {
      */
     private void simplifyRuleList() {
         for (Rule rule : ruleList) {
-            String regexExpression = rule.getRegex().getExpression();
 
             for (Regex regex : regexList) {
-                if (regexExpression.equals(regex.getName())) {
-                    rule.getRegex().setExpression(regexExpression.replace(regex.getName(), regex.getExpression()));
-                }else if(regexExpression.contains(regex.getName())){
-                    rule.getRegex().setExpression(regexExpression.replace(regex.getName(), "("+regex.getExpression()+")"));
+                if(rule.getRegex().getExpression().contains(regex.getName())){
+                    rule.getRegex().setExpression(rule.getRegex().getExpression().replace(regex.getName(), "("+regex.getExpression()+")"));
                 }
             }
         }
