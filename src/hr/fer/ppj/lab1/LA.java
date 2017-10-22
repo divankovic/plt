@@ -1,10 +1,8 @@
 package hr.fer.ppj.lab1;
 
+import hr.fer.ppj.lab1.enums.ActionType;
 import hr.fer.ppj.lab1.helper.EpsilonNFA;
-import hr.fer.ppj.lab1.model.Identifier;
-import hr.fer.ppj.lab1.model.Regex;
-import hr.fer.ppj.lab1.model.Rule;
-import hr.fer.ppj.lab1.model.State;
+import hr.fer.ppj.lab1.model.*;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -25,6 +23,7 @@ public class LA {
     private static List<Identifier> identifierList;
     private static List<Rule> ruleList;
     private static List<EpsilonNFA> epsilonNFAList;
+    private static int numberOfRows = 1;
 
     /**
      * Entry point
@@ -107,17 +106,46 @@ public class LA {
         int end = program.length() - 1;
 
         while (last <= end) {
-
+            boolean added = false;
             for (EpsilonNFA epsilonNFA : epsilonNFAList) {
                 if (epsilonNFA.getRule().getState().equals(currentState) && epsilonNFA.recognizes(program.substring(first, last))) {
                     positiveENFA.add(epsilonNFA);
+                    added = true;
                 }
             }
 
-            if (!positiveENFA.isEmpty()) {
+            if (!positiveENFA.isEmpty() && !added) {
+                EpsilonNFA nfa = positiveENFA.get(positiveENFA.size()-1);
+                positiveENFA.clear();
+                List<Action> actions = nfa.getRule().getActionList();
+
+                for (Action action : actions){
+                    if(action.getActionType().equals(ActionType.GO_BACK)){
+                        last = Integer.parseInt(action.getArgument());
+                    }
+                }
+
+                for (Action action : actions){
+                    switch (action.getActionType()){
+                        case LEX_TOKEN:
+                            System.out.println(action.getArgument()+" "+numberOfRows+" "+program.substring(first,last));
+                            first = last;
+                            break;
+                        case MINUS:
+                            first = last;
+                            break;
+                        case NEW_LINE:
+                            numberOfRows+=1;
+                            break;
+                        case ENTER_STATE:
+                            currentState = new State(action.getArgument());
+                            break;
+                    }
+
+                }
+            }else{
                 last++;
             }
-
         }
 
     }
