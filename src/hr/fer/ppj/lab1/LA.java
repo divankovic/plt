@@ -6,6 +6,7 @@ import hr.fer.ppj.lab1.model.*;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Scanner;
 
@@ -112,54 +113,107 @@ public class LA {
     private static void runLexer() {
 
         State currentState = stateList.get(0);
-        List<EpsilonNFA> positiveENFA = new ArrayList<>();
-        List<EpsilonNFA> lastPositiveENFA = new ArrayList<>();
 
-        int first = 0, last = 0;
-        int end = program.length() - 1;
+        //start - beginning of the unanalyzed part of the program
+        //end - last read character of the program
+        //last - index of the character of the longest recognized program prefix
 
-        while (last <= end) {
+        int start=0,end=0,last=0;
 
-            for (EpsilonNFA epsilonNFA : epsilonNFAList) {
-                if (epsilonNFA.getRule().getState().equals(currentState) && epsilonNFA.recognizes(program.substring(first, last + 1))) {
-                    positiveENFA.add(epsilonNFA);
+        //index of the acceptable ENFA in ENFA's list
+        int acceptable=-1;
+
+        while(end <= program.length()-1){
+            boolean empty = true;
+            boolean accepts = false;
+
+            for(EpsilonNFA epsilonNFA : epsilonNFAList){
+                if(epsilonNFA.getRule().getState().equals(currentState)){
+                    if(!epsilonNFA.getCurrentStates().isEmpty()) {
+                        empty = false;
+                    }
+                    if(epsilonNFA.getCurrentStates().contains(epsilonNFA.getAcceptableState())){
+                        if(acceptable == -1) {
+                            acceptable = epsilonNFAList.indexOf(epsilonNFA);
+                        }
+                        if(epsilonNFA.getNumberOfTransitions() > epsilonNFAList.get(acceptable).getNumberOfTransitions()){
+                            acceptable = epsilonNFAList.indexOf(epsilonNFA);
+                        }else if(epsilonNFA.getNumberOfTransitions() == epsilonNFAList.get(acceptable).getNumberOfTransitions()){
+                            if(epsilonNFAList.indexOf(epsilonNFA)<acceptable){
+                                acceptable = epsilonNFAList.indexOf(epsilonNFA);
+                            }
+                        }
+                        accepts = true;
+                    }
                 }
             }
 
-            if (!positiveENFA.isEmpty()) {
-                EpsilonNFA nfa = positiveENFA.get(0);
-                List<Action> actions = nfa.getRule().getActionList();
-
-                for (Action action : actions) {
-                    if (action.getActionType().equals(ActionType.GO_BACK)) {
-                        last = Integer.parseInt(action.getArgument());
+            if(!empty && !accepts){
+                char c = program.charAt(end++);
+                for(EpsilonNFA epsilonNFA : epsilonNFAList){
+                    if(epsilonNFA.getRule().getState().equals(currentState)){
+                        epsilonNFA.transition(c);
                     }
                 }
+            }
 
-                for (Action action : actions) {
-                    switch (action.getActionType()) {
-                        case LEX_TOKEN:
-                            System.out.println(action.getName() + " " + numberOfRows + " " + program.substring(first, last));
-                            first = last;
-                            break;
-                        case MINUS:
-                            first = last;
-                            break;
-                        case NEW_LINE:
-                            numberOfRows += 1;
-                            break;
-                        case ENTER_STATE:
-                            currentState = new State(action.getArgument());
-                            break;
+            if(accepts){
+                last = end-1;
+                char c = program.charAt(end++);
+                for(EpsilonNFA epsilonNFA : epsilonNFAList){
+                    if(epsilonNFA.getRule().getState().equals(currentState)){
+                        epsilonNFA.transition(c);
+                    }
+                }
+            }
+
+            if(empty){
+                //there has been a mistake
+                if(acceptable==-1){
+                    System.out.println(start);
+                    start+=1;
+                    end = start;
+                }else{
+                    EpsilonNFA positiveENFA = epsilonNFAList.get(acceptable);
+                    List<Action> actions = positiveENFA.getRule().getActionList();
+
+                    for (Action action : actions) {
+                        if (action.getActionType().equals(ActionType.GO_BACK)) {
+                            last = start + Integer.parseInt(action.getArgument())-1;
+                        }
                     }
 
+                    for (Action action : actions) {
+                        switch (action.getActionType()) {
+                            case LEX_TOKEN:
+                                System.out.println(action.getName() + " " + numberOfRows + " " + program.substring(start, last+1));
+                                break;
+                            case MINUS:
+                                break;
+                            case NEW_LINE:
+                                numberOfRows += 1;
+                                break;
+                            case ENTER_STATE:
+                                currentState = new State(action.getArgument());
+                                break;
+                        }
+
+                    }
+                    last+=1;
+                    start = last;
+                    end = last;
+                    resetENFAs();
+                    acceptable = -1;
                 }
-            } else {
-                last++;
             }
 
         }
+    }
 
+    private static void resetENFAs() {
+        for(EpsilonNFA epsilonNFA : epsilonNFAList){
+            epsilonNFA.reset();
+        }
     }
 
 }
