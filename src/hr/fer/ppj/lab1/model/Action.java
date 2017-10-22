@@ -7,9 +7,10 @@ import java.io.Serializable;
 /**
  * Class that represents single action
  */
-public class Action implements Serializable {
+public class Action implements Serializable{
 
     private String action;
+    private String name;
     private ActionType actionType;
     private String argument;
 
@@ -25,6 +26,7 @@ public class Action implements Serializable {
         parseAction();
     }
 
+    public String getName(){return action;}
     public ActionType getActionType() {
         return actionType;
     }
@@ -40,7 +42,9 @@ public class Action implements Serializable {
 
         if (action.trim().split("\\s+").length == 1) {
             actionType = action.equals("-") ? ActionType.MINUS : ActionType.LEX_TOKEN;
-            argument = "";
+            if(actionType.equals(ActionType.LEX_TOKEN)){
+                name = action;
+            }
             return;
         }
 
