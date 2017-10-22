@@ -74,17 +74,17 @@ public class InputProcessor {
 
             if (line.startsWith("<")) {
                 StringBuilder sb = new StringBuilder();
-                sb.append(line);
+                sb.append(line).append("\n");
 
                 while (scanner.hasNextLine()) {
                     line = scanner.nextLine();
                     if (line.equals("}")) {
                         sb.append(line);
                         break;
-                    }else {
-                        sb.append(line+"\n");
+                    } else {
+                        sb.append(line).append("\n");
                     }
-                    
+
                 }
 
                 String rule = sb.toString();
