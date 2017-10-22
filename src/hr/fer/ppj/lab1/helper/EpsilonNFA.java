@@ -13,7 +13,7 @@ import java.util.Stack;
 /**
  * Represents an epsilon nondeterministic finite automaton
  */
-public class EpsilonNFA implements Serializable{
+public class EpsilonNFA implements Serializable {
 
     private int[] statePair;
     private int numberOfStates;

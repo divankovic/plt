@@ -7,10 +7,7 @@ import hr.fer.ppj.lab1.model.Regex;
 import hr.fer.ppj.lab1.model.Rule;
 import hr.fer.ppj.lab1.model.State;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.util.List;
 import java.util.Scanner;
 
@@ -22,7 +19,9 @@ public class GLA {
     /**
      * Path to the output file of generator
      */
-    public final static String SERIALIZATION_FILE_PATH = "./analizator/definition.ser";
+    public final static String SERIALIZATION_FILE_PATH = "./src/analizator/definition.ser";
+    private final static String TEST_FILE_INPUT_PATH = "./src/res/in/minusLang.in";
+    private final static String TEST_FILE_OUTPUT_PATH = "./src/res/out/GLA_out.txt";
 
     /**
      * Entry point
@@ -36,6 +35,8 @@ public class GLA {
             InputProcessor inputProcessor = new InputProcessor(scanner);
             serializeData(inputProcessor);
 
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
         }
 
     }
@@ -43,9 +44,9 @@ public class GLA {
     /**
      * Standard I/O redirection
      */
-    private static void setupStdIO() {
-//        System.setIn();
-//        System.setOut();
+    private static void setupStdIO() throws IOException {
+        System.setIn(new FileInputStream(new File(TEST_FILE_INPUT_PATH)));
+        System.setOut(new PrintStream(new File(TEST_FILE_OUTPUT_PATH)));
     }
 
     /**

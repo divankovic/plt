@@ -4,10 +4,7 @@ import hr.fer.ppj.lab1.enums.ActionType;
 import hr.fer.ppj.lab1.helper.EpsilonNFA;
 import hr.fer.ppj.lab1.model.*;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -17,6 +14,15 @@ import java.util.Scanner;
  */
 public class LA {
 
+    /**
+     * Constants
+     */
+    private final static String TEST_FILE_INPUT_PATH = "./src/res/in/minusLang.lan";
+    private final static String TEST_FILE_OUTPUT_PATH = "./src/res/out/LA_out.txt";
+
+    /**
+     *
+     */
     private static String program;
     private static List<Regex> regexList;
     private static List<State> stateList;
@@ -28,32 +34,29 @@ public class LA {
     /**
      * Entry point
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
 
         setupStdIO();
 
-        try (Scanner scanner = new Scanner(System.in)){
-
-            deserializeData();
+        try (Scanner scanner = new Scanner(System.in)) {
 
             readInputProgram(scanner);
-
-
+            deserializeData();
 
         } catch (Exception e) {
             System.err.println(e.getMessage());
             System.exit(1);
         }
 
-        runLexer();
+        //runLexer();
     }
 
     /**
      * Standard I/O redirection
      */
-    private static void setupStdIO() {
-//        System.setIn();
-//        System.setOut();
+    private static void setupStdIO() throws IOException {
+        System.setIn(new FileInputStream(new File(TEST_FILE_INPUT_PATH)));
+        System.setOut(new PrintStream(new File(TEST_FILE_OUTPUT_PATH)));
     }
 
 
@@ -108,7 +111,9 @@ public class LA {
         int end = program.length() - 1;
 
         while (last <= end) {
+
             boolean added = false;
+
             for (EpsilonNFA epsilonNFA : epsilonNFAList) {
                 if (epsilonNFA.getRule().getState().equals(currentState) && epsilonNFA.recognizes(program.substring(first, last))) {
                     positiveENFA.add(epsilonNFA);
@@ -117,27 +122,27 @@ public class LA {
             }
 
             if (!positiveENFA.isEmpty() && !added) {
-                EpsilonNFA nfa = positiveENFA.get(positiveENFA.size()-1);
+                EpsilonNFA nfa = positiveENFA.get(positiveENFA.size() - 1);
                 positiveENFA.clear();
                 List<Action> actions = nfa.getRule().getActionList();
 
-                for (Action action : actions){
-                    if(action.getActionType().equals(ActionType.GO_BACK)){
+                for (Action action : actions) {
+                    if (action.getActionType().equals(ActionType.GO_BACK)) {
                         last = Integer.parseInt(action.getArgument());
                     }
                 }
 
-                for (Action action : actions){
-                    switch (action.getActionType()){
+                for (Action action : actions) {
+                    switch (action.getActionType()) {
                         case LEX_TOKEN:
-                            System.out.println(action.getArgument()+" "+numberOfRows+" "+program.substring(first,last));
+                            System.out.println(action.getArgument() + " " + numberOfRows + " " + program.substring(first, last));
                             first = last;
                             break;
                         case MINUS:
                             first = last;
                             break;
                         case NEW_LINE:
-                            numberOfRows+=1;
+                            numberOfRows += 1;
                             break;
                         case ENTER_STATE:
                             currentState = new State(action.getArgument());
@@ -145,9 +150,10 @@ public class LA {
                     }
 
                 }
-            }else{
+            } else {
                 last++;
             }
+
         }
 
     }
