@@ -7,7 +7,7 @@ import java.io.Serializable;
 /**
  * Class that represents single action
  */
-public class Action implements Serializable{
+public class Action implements Serializable {
 
     private String action;
     private String name;
@@ -26,7 +26,10 @@ public class Action implements Serializable{
         parseAction();
     }
 
-    public String getName(){return action;}
+    public String getName() {
+        return action;
+    }
+
     public ActionType getActionType() {
         return actionType;
     }
@@ -41,14 +44,16 @@ public class Action implements Serializable{
     private void parseAction() {
 
         if (action.trim().split("\\s+").length == 1) {
-            if(action.equals("-")){
+
+            if (action.equals("-")) {
                 actionType = ActionType.MINUS;
-            }else if(action.equals(NEW_LINE)){
+            } else if (action.equals(NEW_LINE)) {
                 actionType = ActionType.NEW_LINE;
-            }else {
+            } else {
                 actionType = ActionType.LEX_TOKEN;
                 name = action;
             }
+
             return;
         }
 

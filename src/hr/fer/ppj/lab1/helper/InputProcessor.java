@@ -42,7 +42,7 @@ public class InputProcessor {
 
         while (scanner.hasNextLine()) {
             line = scanner.nextLine();
-            if(line.equals("")){
+            if (line.equals("")) {
                 break;
             }
 
@@ -125,27 +125,32 @@ public class InputProcessor {
      * Method for replacing references to simple regex expressions in more complex regex expressions
      */
     private void simplifyRegexList() {
+
         for (Regex regex : regexList) {
             for (Regex otherRegex : regexList) {
                 if (regex.getExpression().contains(otherRegex.getName())) {
-                    regex.setExpression(regex.getExpression().replace(otherRegex.getName(), "(" + otherRegex.getExpression() + ")"));
+                    String replacement = "(" + regex.getExpression() + ")";
+                    regex.setExpression(regex.getExpression().replace(otherRegex.getName(), replacement));
                 }
             }
         }
+
     }
 
     /**
      * Method for replacing references to simple regex expressions in more complex regex expressions of every rule
      */
     private void simplifyRuleList() {
-        for (Rule rule : ruleList) {
 
+        for (Rule rule : ruleList) {
             for (Regex regex : regexList) {
-                if(rule.getRegex().getExpression().contains(regex.getName())){
-                    rule.getRegex().setExpression(rule.getRegex().getExpression().replace(regex.getName(), "("+regex.getExpression()+")"));
+                if (rule.getRegex().getExpression().contains(regex.getName())) {
+                    String replacement = "(" + regex.getExpression() + ")";
+                    rule.getRegex().setExpression(rule.getRegex().getExpression().replace(regex.getName(), replacement));
                 }
             }
         }
+
     }
 
     /**

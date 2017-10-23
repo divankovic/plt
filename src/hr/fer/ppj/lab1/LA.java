@@ -5,8 +5,6 @@ import hr.fer.ppj.lab1.helper.EpsilonNFA;
 import hr.fer.ppj.lab1.model.*;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Scanner;
 
@@ -66,10 +64,12 @@ public class LA {
      * Method for reading program from standard input
      */
     private static void readInputProgram(Scanner scanner) {
+
         StringBuilder sb = new StringBuilder();
         while (scanner.hasNextLine()) {
-            sb.append(scanner.nextLine() + "\n");
+            sb.append(scanner.nextLine()).append("\n");
         }
+
         program = sb.toString();
     }
 
@@ -120,14 +120,19 @@ public class LA {
             boolean accepts = false;
 
             for (EpsilonNFA epsilonNFA : epsilonNFAList) {
+
                 if (epsilonNFA.getRule().getState().equals(currentState)) {
+
                     if (!epsilonNFA.getCurrentStates().isEmpty()) {
                         empty = false;
                     }
+
                     if (epsilonNFA.getCurrentStates().contains(epsilonNFA.getAcceptableState())) {
+
                         if (acceptable == -1) {
                             acceptable = epsilonNFAList.indexOf(epsilonNFA);
                         }
+
                         if (epsilonNFA.getNumberOfTransitions() > epsilonNFAList.get(acceptable).getNumberOfTransitions()) {
                             acceptable = epsilonNFAList.indexOf(epsilonNFA);
                         } else if (epsilonNFA.getNumberOfTransitions() == epsilonNFAList.get(acceptable).getNumberOfTransitions()) {
@@ -135,40 +140,52 @@ public class LA {
                                 acceptable = epsilonNFAList.indexOf(epsilonNFA);
                             }
                         }
+
                         accepts = true;
                     }
+
                 }
+
             }
 
             if (!empty && !accepts) {
+
                 char c = program.charAt(end++);
+
                 for (EpsilonNFA epsilonNFA : epsilonNFAList) {
                     if (epsilonNFA.getRule().getState().equals(currentState)) {
                         epsilonNFA.transition(c);
                     }
                 }
+
             }
 
             if (accepts && end < program.length() - 1) {
+
                 last = end - 1;
                 char c = program.charAt(end++);
+
                 for (EpsilonNFA epsilonNFA : epsilonNFAList) {
                     if (epsilonNFA.getRule().getState().equals(currentState)) {
                         epsilonNFA.transition(c);
                     }
                 }
+
                 continue;
             }
 
             if (empty || (accepts && end == program.length() - 1)) {
+
                 //there has been a mistake
                 if (acceptable == -1) {
-                    System.err.println(program.charAt(start));
+                    System.err.println("ERROR ON LINE " + numberOfRows + ": " + program.charAt(start));
                     start += 1;
                     last = start;
                     end = start;
                     resetENFAs();
+
                 } else {
+
                     EpsilonNFA positiveENFA = epsilonNFAList.get(acceptable);
                     List<Action> actions = positiveENFA.getRule().getActionList();
 
@@ -194,6 +211,7 @@ public class LA {
                         }
 
                     }
+
                     last += 1;
                     start = last;
                     end = last;
@@ -201,7 +219,6 @@ public class LA {
                     acceptable = -1;
                 }
             }
-
         }
     }
 

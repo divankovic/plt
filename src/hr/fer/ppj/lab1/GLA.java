@@ -28,7 +28,7 @@ public class GLA {
      */
     public static void main(String[] args) throws IOException {
 
-       //setupStdIO();
+        //setupStdIO();
 
         try (Scanner scanner = new Scanner(System.in)) {
 

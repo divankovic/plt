@@ -5,7 +5,7 @@ import java.io.Serializable;
 /**
  * The class respresents a state of lexical analyzer generator
  */
-public class State implements Serializable{
+public class State implements Serializable {
 
     private String state;
 
@@ -14,11 +14,12 @@ public class State implements Serializable{
     }
 
     @Override
-    public boolean equals(Object object){
-        if(!(object instanceof State)){
+    public boolean equals(Object object) {
+        if (!(object instanceof State)) {
             return false;
         }
         State another = (State) object;
         return this.state.equals(another.state);
     }
+
 }

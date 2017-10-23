@@ -47,6 +47,7 @@ public class EpsilonNFA implements Serializable {
      * Checks whether the symbol at the position i in regex is an operator or not
      */
     private static boolean isOperator(Regex regex, int i) {
+
         int cnt = 0;
         while (i - 1 >= 0 && regex.getExpression().charAt(i - 1) == '\\') {
             cnt++;
@@ -94,7 +95,7 @@ public class EpsilonNFA implements Serializable {
             for (String choice : choices) {
                 int[] temp = convert(new Regex(choice));
 
-                addTransition(new TransitionKey(leftState,epsilonSign), temp[0]);
+                addTransition(new TransitionKey(leftState, epsilonSign), temp[0]);
                 addTransition(new TransitionKey(temp[1], epsilonSign), rightState);
             }
 
@@ -257,7 +258,6 @@ public class EpsilonNFA implements Serializable {
 
     /**
      * The method performs a transition of the ENFA for char c
-     * @param c - transition character
      */
     public void transition(char c) {
 
@@ -280,11 +280,13 @@ public class EpsilonNFA implements Serializable {
         epsilonSurrounding(transitionStates);
         currentStates.clear();
         currentStates.addAll(transitionStates);
-        if(currentStates.isEmpty()){
+
+        if (currentStates.isEmpty()) {
             numberOfTransitions = 0;
-        }else {
-            numberOfTransitions += 1;
+        } else {
+            numberOfTransitions++;
         }
+
     }
 
     /**
@@ -325,17 +327,17 @@ public class EpsilonNFA implements Serializable {
         return statePair[1];
     }
 
-    /**The method resets ENFA to his starting state
-     *
+    /**
+     * The method resets ENFA to his starting state
      */
-    public void reset(){
-        numberOfTransitions=0;
+    public void reset() {
+        numberOfTransitions = 0;
         currentStates.clear();
         currentStates.add(statePair[0]);
         epsilonSurrounding(currentStates);
     }
 
-    public int getNumberOfTransitions(){
+    public int getNumberOfTransitions() {
         return numberOfTransitions;
     }
 
