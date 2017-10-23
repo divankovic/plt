@@ -12,7 +12,7 @@ import java.util.*;
  */
 public class EpsilonNFA implements Serializable {
 
-    public static char dollarSignReplacement = 7;
+    public char epsilonSign = 0;
     private int[] statePair;
     private int numberOfStates;
     private Rule rule;
@@ -94,8 +94,8 @@ public class EpsilonNFA implements Serializable {
             for (String choice : choices) {
                 int[] temp = convert(new Regex(choice));
 
-                addTransition(new TransitionKey(leftState, '$'), temp[0]);
-                addTransition(new TransitionKey(temp[1], '$'), rightState);
+                addTransition(new TransitionKey(leftState,epsilonSign), temp[0]);
+                addTransition(new TransitionKey(temp[1], epsilonSign), rightState);
             }
 
         } else {
@@ -118,11 +118,7 @@ public class EpsilonNFA implements Serializable {
                     } else if (expression.charAt(i) == '_') {
                         transitionSymbol = ' ';
                     } else {
-                        if(expression.charAt(i)=='$'){
-                            transitionSymbol = dollarSignReplacement;
-                        }else {
-                            transitionSymbol = expression.charAt(i);
-                        }
+                        transitionSymbol = expression.charAt(i);
                     }
 
                     a = newState();
@@ -142,7 +138,7 @@ public class EpsilonNFA implements Serializable {
                         b = newState();
 
                         if (expression.charAt(i) == '$') {
-                            addTransition(new TransitionKey(a, '$'), b);
+                            addTransition(new TransitionKey(a, epsilonSign), b);
                         } else {
                             addTransition(new TransitionKey(a, expression.charAt(i)), b);
                         }
@@ -182,19 +178,19 @@ public class EpsilonNFA implements Serializable {
                     a = newState();
                     b = newState();
 
-                    addTransition(new TransitionKey(a, '$'), x);
-                    addTransition(new TransitionKey(y, '$'), b);
-                    addTransition(new TransitionKey(a, '$'), b);
-                    addTransition(new TransitionKey(y, '$'), x);
+                    addTransition(new TransitionKey(a, epsilonSign), x);
+                    addTransition(new TransitionKey(y, epsilonSign), b);
+                    addTransition(new TransitionKey(a, epsilonSign), b);
+                    addTransition(new TransitionKey(y, epsilonSign), x);
 
                     i++;
                 }
 
-                addTransition(new TransitionKey(lastState, '$'), a);
+                addTransition(new TransitionKey(lastState, epsilonSign), a);
                 lastState = b;
             }
 
-            addTransition(new TransitionKey(lastState, '$'), rightState);
+            addTransition(new TransitionKey(lastState, epsilonSign), rightState);
         }
 
         int[] result = new int[2];
@@ -302,7 +298,7 @@ public class EpsilonNFA implements Serializable {
         while (!stack.empty()) {
 
             int state = stack.pop();
-            List<Integer> states = transitionStateHashMap.get(new TransitionKey(state, '$'));
+            List<Integer> states = transitionStateHashMap.get(new TransitionKey(state, epsilonSign));
 
             if (states != null) {
                 states.forEach(y -> {
