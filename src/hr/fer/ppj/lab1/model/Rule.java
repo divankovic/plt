@@ -4,6 +4,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+/**The class represents a rule of the lexical analyzer generator
+ *
+ */
 public class Rule implements Serializable {
 
     private String rule;
@@ -28,6 +31,9 @@ public class Rule implements Serializable {
         return actionList;
     }
 
+    /**
+     * The method parses rule's parts
+     */
     private void parseRule() {
         String[] parts = rule.split("\n");
         int idx=0;

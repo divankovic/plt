@@ -2,6 +2,9 @@ package hr.fer.ppj.lab1.model;
 
 import java.io.Serializable;
 
+/**
+ * The class respresents a state of lexical analyzer generator
+ */
 public class State implements Serializable{
 
     private String state;

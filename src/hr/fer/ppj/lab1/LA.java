@@ -37,7 +37,7 @@ public class LA {
      */
     public static void main(String[] args) throws IOException {
 
-        setupStdIO();
+        //setupStdIO();
 
         try (Scanner scanner = new Scanner(System.in)) {
 
@@ -205,6 +205,9 @@ public class LA {
         }
     }
 
+    /**
+     * The method resets all epsilon nondeterministic finite automatons in epsilonNFAList
+     */
     private static void resetENFAs() {
         for (EpsilonNFA epsilonNFA : epsilonNFAList) {
             epsilonNFA.reset();

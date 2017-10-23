@@ -2,6 +2,9 @@ package hr.fer.ppj.lab1.model;
 
 import java.io.Serializable;
 
+/**
+ * The class represents a regular expression
+ */
 public class Regex implements Serializable {
 
     private String regex;
@@ -13,6 +16,9 @@ public class Regex implements Serializable {
         parseRegex();
     }
 
+    /**
+     * parses regex to name and expression
+     */
     private void parseRegex() {
         String[] regexParts = this.regex.trim().split(" ");
         if (regexParts.length > 1) {

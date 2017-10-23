@@ -254,6 +254,10 @@ public class EpsilonNFA implements Serializable {
         return currentStates.contains(statePair[1]);
     }
 
+    /**
+     * The method performs a transition of the ENFA for char c
+     * @param c - transition character
+     */
     public void transition(char c) {
 
         List<Integer> transitionStates = new LinkedList<>();
@@ -320,6 +324,9 @@ public class EpsilonNFA implements Serializable {
         return statePair[1];
     }
 
+    /**The method resets ENFA to his starting state
+     *
+     */
     public void reset(){
         numberOfTransitions=0;
         currentStates.clear();
