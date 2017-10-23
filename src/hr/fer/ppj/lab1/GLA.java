@@ -20,7 +20,7 @@ public class GLA {
      * Path to the output file of generator
      */
     final static String SERIALIZATION_FILE_PATH = "./src/analizator/definition.ser";
-    private final static String TEST_FILE_INPUT_PATH = "./src/res/in/c.lan";
+    private final static String TEST_FILE_INPUT_PATH = "./src/res/in/simplePpjLang.lan";
     private final static String TEST_FILE_OUTPUT_PATH = "./src/res/out/GLA_out.txt";
 
     /**
@@ -28,7 +28,7 @@ public class GLA {
      */
     public static void main(String[] args) throws IOException {
 
-        //setupStdIO();
+        setupStdIO();
 
         try (Scanner scanner = new Scanner(System.in)) {
 

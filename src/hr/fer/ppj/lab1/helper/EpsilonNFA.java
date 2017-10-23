@@ -12,6 +12,7 @@ import java.util.*;
  */
 public class EpsilonNFA implements Serializable {
 
+    public static char dollarSignReplacement = 7;
     private int[] statePair;
     private int numberOfStates;
     private Rule rule;
@@ -117,7 +118,11 @@ public class EpsilonNFA implements Serializable {
                     } else if (expression.charAt(i) == '_') {
                         transitionSymbol = ' ';
                     } else {
-                        transitionSymbol = expression.charAt(i);
+                        if(expression.charAt(i)=='$'){
+                            transitionSymbol = dollarSignReplacement;
+                        }else {
+                            transitionSymbol = expression.charAt(i);
+                        }
                     }
 
                     a = newState();

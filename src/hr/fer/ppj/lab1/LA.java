@@ -18,7 +18,7 @@ public class LA {
     /**
      * Constants
      */
-    private final static String TEST_FILE_INPUT_PATH = "./src/res/in/c.in";
+    private final static String TEST_FILE_INPUT_PATH = "./src/res/in/simplePpjLang.in";
     private final static String TEST_FILE_OUTPUT_PATH = "./src/res/out/LA_out.txt";
 
     /**
@@ -37,7 +37,7 @@ public class LA {
      */
     public static void main(String[] args) throws IOException {
 
-        //setupStdIO();
+        setupStdIO();
 
         try (Scanner scanner = new Scanner(System.in)) {
 
@@ -152,6 +152,9 @@ public class LA {
             if (accepts && end < program.length() - 1) {
                 last = end - 1;
                 char c = program.charAt(end++);
+                if(c=='$'){
+                    c = EpsilonNFA.dollarSignReplacement;
+                }
                 for (EpsilonNFA epsilonNFA : epsilonNFAList) {
                     if (epsilonNFA.getRule().getState().equals(currentState)) {
                         epsilonNFA.transition(c);
