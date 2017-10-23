@@ -28,7 +28,7 @@ public class GLA {
      */
     public static void main(String[] args) throws IOException {
 
-        setupStdIO();
+        setupStdIO(args);
 
         try (Scanner scanner = new Scanner(System.in)) {
 
@@ -44,8 +44,14 @@ public class GLA {
     /**
      * Standard I/O redirection
      */
-    private static void setupStdIO() throws IOException {
-        System.setIn(new FileInputStream(new File(TEST_FILE_INPUT_PATH)));
+    private static void setupStdIO(String[] args) throws IOException {
+
+        if (args.length != 0) {
+            System.setIn(new FileInputStream(new File(args[0])));
+        } else {
+            System.setIn(new FileInputStream(new File(TEST_FILE_INPUT_PATH)));
+        }
+
         System.setOut(new PrintStream(new File(TEST_FILE_OUTPUT_PATH)));
     }
 

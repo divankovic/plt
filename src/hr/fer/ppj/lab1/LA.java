@@ -5,8 +5,6 @@ import hr.fer.ppj.lab1.helper.EpsilonNFA;
 import hr.fer.ppj.lab1.model.*;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Scanner;
 
@@ -37,7 +35,7 @@ public class LA {
      */
     public static void main(String[] args) throws IOException {
 
-        setupStdIO();
+        setupStdIO(args);
 
         try (Scanner scanner = new Scanner(System.in)) {
 
@@ -56,8 +54,14 @@ public class LA {
     /**
      * Standard I/O redirection
      */
-    private static void setupStdIO() throws IOException {
-        System.setIn(new FileInputStream(new File(TEST_FILE_INPUT_PATH)));
+    private static void setupStdIO(String[] args) throws IOException {
+
+        if (args.length != 0) {
+            System.setIn(new FileInputStream(new File(args[0])));
+        } else {
+            System.setIn(new FileInputStream(new File(TEST_FILE_INPUT_PATH)));
+        }
+
         System.setOut(new PrintStream(new File(TEST_FILE_OUTPUT_PATH)));
     }
 
@@ -65,10 +69,11 @@ public class LA {
     /**
      * Method for reading program from standard input
      */
+
     private static void readInputProgram(Scanner scanner) {
         StringBuilder sb = new StringBuilder();
         while (scanner.hasNextLine()) {
-            sb.append(scanner.nextLine() + "\n");
+            sb.append(scanner.nextLine()).append("\n");
         }
         program = sb.toString();
     }
