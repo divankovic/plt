@@ -16,7 +16,7 @@ public class LA {
     /**
      * Constants
      */
-    private final static String TEST_FILE_INPUT_PATH = "./src/res/in/simplePpjLang.in";
+    private final static String TEST_FILE_INPUT_PATH = "./src/res/in/c.in";
     private final static String TEST_FILE_OUTPUT_PATH = "./src/res/out/LA_out.txt";
 
     /**

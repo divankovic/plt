@@ -284,7 +284,7 @@ public class EpsilonNFA implements Serializable {
         if (currentStates.isEmpty()) {
             numberOfTransitions = 0;
         } else {
-            numberOfTransitions++;
+            ++numberOfTransitions;
         }
 
     }

@@ -129,7 +129,7 @@ public class InputProcessor {
         for (Regex regex : regexList) {
             for (Regex otherRegex : regexList) {
                 if (regex.getExpression().contains(otherRegex.getName())) {
-                    String replacement = "(" + regex.getExpression() + ")";
+                    String replacement = "(" + otherRegex.getExpression() + ")";
                     regex.setExpression(regex.getExpression().replace(otherRegex.getName(), replacement));
                 }
             }
