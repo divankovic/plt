@@ -35,7 +35,7 @@ cmake-build-debug/
 ## Plugin-specific files:
 
 # IntelliJ
-/res.out/
+/hr.fer.ppj.lab1.res.out/
 
 # mpeltonen/sbt-idea plugin
 .idea_modules/

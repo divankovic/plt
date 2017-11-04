@@ -16,8 +16,8 @@ public class LA {
     /**
      * Constants
      */
-    private final static String TEST_FILE_INPUT_PATH = "./src/res/in/c.in";
-    private final static String TEST_FILE_OUTPUT_PATH = "./src/res/out/LA_out.txt";
+    private final static String TEST_FILE_INPUT_PATH = "./src/hr.fer.ppj.lab1.res/in/c.in";
+    private final static String TEST_FILE_OUTPUT_PATH = "./src/hr.fer.ppj.lab1.res/out/LA_out.txt";
 
     /**
      *

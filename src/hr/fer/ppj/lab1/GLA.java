@@ -19,9 +19,9 @@ public class GLA {
     /**
      * Path to the output file of generator
      */
-    final static String SERIALIZATION_FILE_PATH = "./src/analizator/definition.ser";
-    private final static String TEST_FILE_INPUT_PATH = "./src/res/in/c.lan";
-    private final static String TEST_FILE_OUTPUT_PATH = "./src/res/out/GLA_out.txt";
+    final static String SERIALIZATION_FILE_PATH = "./src/hr.fer.ppj.lab1.analizator/definition.ser";
+    private final static String TEST_FILE_INPUT_PATH = "./src/hr.fer.ppj.lab1.res/in/c.lan";
+    private final static String TEST_FILE_OUTPUT_PATH = "./src/hr.fer.ppj.lab1.res/out/GLA_out.txt";
 
     /**
      * Entry point

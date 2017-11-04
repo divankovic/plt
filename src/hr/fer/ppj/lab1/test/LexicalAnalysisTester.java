@@ -1,4 +1,4 @@
-package test;
+package hr.fer.ppj.lab1.test;
 
 import hr.fer.ppj.lab1.GLA;
 import hr.fer.ppj.lab1.LA;
@@ -15,8 +15,8 @@ import java.util.List;
  */
 public class LexicalAnalysisTester {
 
-    private static final String PATH_PREFIX_IN = "./src/res/in/";
-    private static final String PATH_PREFIX_OUT = "./src/res/out/";
+    private static final String PATH_PREFIX_IN = "./src/hr.fer.ppj.lab1.res/in/";
+    private static final String PATH_PREFIX_OUT = "./src/hr.fer.ppj.lab1.res/out/";
 
     private static final String LANG_FILE = ".lan";
     private static final String INPUT_FILE = ".in";

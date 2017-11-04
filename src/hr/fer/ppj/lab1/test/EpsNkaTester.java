@@ -1,4 +1,4 @@
-package test;
+package hr.fer.ppj.lab1.test;
 
 import hr.fer.ppj.lab1.helper.EpsilonNFA;
 import hr.fer.ppj.lab1.model.Regex;
