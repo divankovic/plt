@@ -17,6 +17,9 @@ public class GSA {
     private final static String TEST_FILE_INPUT_PATH = "./src/hr.fer.ppj.lab2.res/in/";
     private final static String TEST_FILE_OUTPUT_PATH = "./src/hr.fer.ppj.lab2.res/out/GSA_out.txt";
 
+    /**
+     * Entry point
+     */
     public static void main(String[] args) {
 
         //setupStdIO();
