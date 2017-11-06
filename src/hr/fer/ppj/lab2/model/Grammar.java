@@ -9,10 +9,13 @@ import java.util.Map;
 
 public class Grammar {
 
-    private static String dotSymbol = "*";
+    public static String dotSymbol = "*";
     private List<String> emptyNonTerminalSymbols;
+    private int[][] startsWithSymbolTable;
     private HashMap<String, List<GrammarProduction>> productionMap;
     private HashMap<String, List<Clause>> clauseMap;
+    private int n = GSA.nonterminalSymbols.size();
+    private int m = GSA.terminalSymbols.size();
 
     public Grammar() {
         this.productionMap = GSA.productionsMap;
@@ -57,21 +60,137 @@ public class Grammar {
 
             });
         }
+
+        findEmptyNonTerminalSymbols();
+        fillStartsWithSymbolTable();
     }
 
-    public boolean startingWith(String clause, String symbol){
-        return false;
+    private void fillStartsWithSymbolTable() {
+        startsWithSymbolTable = new int[n + m][n + m];
+
+        //starts directly with -- ZAPOČINJE IZRAVNO ZNAKOM
+        for (Map.Entry<String, List<GrammarProduction>> entry : productionMap.entrySet()) {
+            List<GrammarProduction> productions = entry.getValue();
+            for (GrammarProduction production : productions) {
+                List<String> productionElements = production.getRightSide();
+                for (String element : productionElements) {
+                    if (GSA.terminalSymbols.contains(element)) {
+                        startsWithSymbolTable[GSA.nonterminalSymbols.indexOf(entry.getKey())][n - 1 + GSA.terminalSymbols.indexOf(element)] = 1;
+                        break;
+                    } else {
+                        startsWithSymbolTable[GSA.nonterminalSymbols.indexOf(entry.getKey())][GSA.nonterminalSymbols.indexOf(element)] = 1;
+                        if (!emptyNonTerminalSymbols.contains(element)) {
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        //starts with -- ZAPOČINJE ZNAKOM
+        for (int i = 0; i < n + m; i++) {
+            startsWithSymbolTable[i][i] = 1;
+            for (int j = 0; j < n + m; j++) {
+                if (i == j) {
+                    continue;
+                }
+                if (startsWithSymbolTable[i][j] == 1) {
+                    for (int z = 0; z < n + m; z++) {
+                        if (z == j) {
+                            continue;
+                        }
+                        if (startsWithSymbolTable[j][z] == 1) {
+                            startsWithSymbolTable[i][z] = 1;
+                        }
+                    }
+                }
+            }
+        }
+
+    }
+
+    private void findEmptyNonTerminalSymbols() {
+        //add all symbols that have epsilonproductions
+        emptyNonTerminalSymbols = new LinkedList<>();
+        for (Map.Entry<String, List<GrammarProduction>> entry : productionMap.entrySet()) {
+            List<GrammarProduction> productions = entry.getValue();
+            productions.forEach(production -> {
+                if (production.getRightSide().get(0).equals("$")) {
+                    if (emptyNonTerminalSymbols.contains(production.getLeftSide())) {
+                        emptyNonTerminalSymbols.add(production.getLeftSide());
+                    }
+                }
+            });
+        }
+
+        boolean added = true;
+
+        while (added) {
+            added = false;
+            for (Map.Entry<String, List<GrammarProduction>> entry : productionMap.entrySet()) {
+                if (emptyNonTerminalSymbols.contains(entry.getKey())) {
+                    continue;
+                }
+                List<GrammarProduction> productions = entry.getValue();
+                for (GrammarProduction production : productions) {
+                    boolean empty = true;
+                    List<String> productionElements = production.getRightSide();
+                    for (String element : productionElements) {
+                        if (GSA.terminalSymbols.contains(element) || (GSA.nonterminalSymbols.contains(element) && !emptyNonTerminalSymbols.contains(element))) {
+                            empty = false;
+                            break;
+                        }
+                    }
+                    if (empty) {
+                        emptyNonTerminalSymbols.add(entry.getKey());
+                        added = true;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    public List<String> getStartingWith(List<String> elements) {
+        List<String> startingSymbols = new LinkedList<>();
+        if (elements.isEmpty()) {
+            return startingSymbols;
+        }
+
+        for (String element : elements) {
+            if (GSA.terminalSymbols.contains(element)) {
+                if (!startingSymbols.contains(element)) {
+                    startingSymbols.add(element);
+                }
+                break;
+            } else {
+                int i = GSA.nonterminalSymbols.indexOf(element);
+                for (int j = n; j < n + m; j++) {
+                    if (startsWithSymbolTable[i][j] == 1) {
+                        if (!startingSymbols.contains(GSA.terminalSymbols.get(j - n))) {
+                            startingSymbols.add(GSA.terminalSymbols.get(j - n));
+                        }
+                    }
+
+                }
+                if (!emptyNonTerminalSymbols.contains(element)) {
+                    break;
+                }
+            }
+        }
+
+        return startingSymbols;
+
     }
 
 
-    public Clause shiftDotForClause(Clause clause){
+    public Clause shiftDotForClause(Clause clause) {
         return null;
     }
 
-    public boolean isSymbolEmpty(String symbol){
+    public boolean isSymbolEmpty(String symbol) {
         return emptyNonTerminalSymbols.contains(symbol);
     }
-
 
 
 }
