@@ -16,9 +16,10 @@ import java.util.*;
  */
 public class EpsilonNFA implements Serializable {
 
+    private LinkedList<Clause>[][] transitions;
     private HashMap<String, List<Clause>> clauseMap;
-    private Set<Clause> states;
-    private Set<Clause> finalStates;
+    private List<Clause> states;
+    private List<Clause> finalStates;
     private Set<String> inputSymbols;
     private String initialState;
 
@@ -401,10 +402,12 @@ public class EpsilonNFA implements Serializable {
         initialState = GSA.nonterminalSymbols.get(0);
         clauseMap = grammar.getClauseMap();
 
-        states = new TreeSet<>();
+        states = new LinkedList<>();
         for (List<Clause> clauseList : clauseMap.values()) {
             for (Clause clause : clauseList) {
-                states.add(clause);
+                if (!states.contains(clause)) {
+                    states.add(clause);
+                }
             }
         }
 
@@ -418,16 +421,16 @@ public class EpsilonNFA implements Serializable {
 
     private void startBuildingTransitions() {
 
-        int numOfClauses = clauseMap.keySet().size();
-        int numOfInputSymbols = inputSymbols.size();
-
         List<Clause> clauses = new LinkedList<>();
         clauses.addAll(states);
 
         List<String> symbols = new LinkedList<>();
         symbols.addAll(inputSymbols);
 
-        List<Clause>[][] transitions = new LinkedList[numOfClauses][numOfInputSymbols];
+        int numOfClauses = clauses.size();
+        int numOfInputSymbols = symbols.size();
+
+        transitions = (LinkedList<Clause>[][]) new LinkedList[numOfClauses][numOfInputSymbols];
 
         for (Clause clause : states) {
 
@@ -444,9 +447,11 @@ public class EpsilonNFA implements Serializable {
             int clauseIndex = clauses.indexOf(clause);
             int symbolIndex = symbols.indexOf(transitionSymbol);
 
-            List<Clause> nextClause = transitions[clauseIndex][symbolIndex];
+            LinkedList<Clause> nextClause = transitions[clauseIndex][symbolIndex];
+
             if (nextClause == null) {
                 nextClause = new LinkedList<>();
+                transitions[clauseIndex][symbolIndex] = nextClause;
             }
 
             nextClause.add(grammar.shiftDotForClause(clause));
@@ -469,11 +474,23 @@ public class EpsilonNFA implements Serializable {
                 rightSide.add(0, Grammar.dotSymbol);
 
                 List<String> clauseSublist = grammarProduction.getRightSide().subList(transitionSymbolIndex + 1, grammarProduction.getRightSide().size());
-                List<String> symbolSet = grammar.startingWith(clauseSublist);
+                List<String> symbolSet = null;
+
+                try {
+                    symbolSet = grammar.startingWith(clauseSublist);
+                } catch (Exception e) {
+                    System.err.println(e);
+                }
 
                 nextClause.add(new Clause(leftSide, rightSide, symbolSet));
             }
 
+        }
+
+        for (int i = 0; i < numOfClauses; ++i) {
+            for (int j = 0; j < numOfInputSymbols; ++j) {
+                System.out.println(transitions[i][j]);
+            }
         }
 
     }

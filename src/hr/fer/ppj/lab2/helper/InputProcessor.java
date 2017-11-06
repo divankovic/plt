@@ -65,7 +65,8 @@ public class InputProcessor {
                 productionsMap.put(leftSide, new LinkedList<>());
             }
 
-            List<String> rightSides = Arrays.asList(rightSide.trim().split("\\s+"));
+            List<String> rightSides = new LinkedList<>();
+            rightSides.addAll(Arrays.asList(rightSide.trim().split("\\s+")));
             productionsMap.get(leftSide).add(new GrammarProduction(leftSide, rightSides));
         }
 
