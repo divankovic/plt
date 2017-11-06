@@ -42,11 +42,6 @@ public class GSA {
             InputProcessor inputProcessor = new InputProcessor(scanner);
             serializeData(inputProcessor);
 
-            nonterminalSymbols = inputProcessor.getNonterminalSymbols();
-            terminalSymbols = inputProcessor.getTerminalSymbols();
-            syncSymbols = inputProcessor.getSyncSymbols();
-            productionsMap = inputProcessor.getProductionsMap();
-
         } catch (Exception e) {
             System.err.println(e.getMessage());
         }
@@ -72,6 +67,11 @@ public class GSA {
             File file = new File(SERIALIZATION_FILE_PATH);
             FileOutputStream fos = new FileOutputStream(file);
             ObjectOutputStream oos = new ObjectOutputStream(fos);
+
+            nonterminalSymbols = inputProcessor.getNonterminalSymbols();
+            terminalSymbols = inputProcessor.getTerminalSymbols();
+            syncSymbols = inputProcessor.getSyncSymbols();
+            productionsMap = inputProcessor.getProductionsMap();
 
             oos.writeObject(nonterminalSymbols);
             oos.writeObject(terminalSymbols);
