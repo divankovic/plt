@@ -462,7 +462,8 @@ public class EpsilonNFA implements Serializable {
                 List<String> rightSide = grammarProduction.getRightSide();
                 rightSide.add(0, Grammar.dotSymbol);
 
-                List<String> symbolSet = grammar.startingWith(grammarProduction.getRightSide().subList(transitionSymbolIndex + 1, grammarProduction.getRightSide().size()));
+                List<String> clauseSublist = grammarProduction.getRightSide().subList(transitionSymbolIndex + 1, grammarProduction.getRightSide().size());
+                List<String> symbolSet = grammar.startingWith(clauseSublist);
 
                 nextClause.add(new Clause(leftSide, rightSide, symbolSet));
             }
