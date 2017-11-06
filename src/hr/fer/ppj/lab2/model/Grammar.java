@@ -47,14 +47,14 @@ public class Grammar {
                     List<String> dottedRightSide = new LinkedList<>();
                     dottedRightSide.addAll(production.getRightSide());
                     dottedRightSide.add(position, dotSymbol);
-                    Clause clause = new Clause(production.getLeftSide(), dottedRightSide, new LinkedList<String>());
+                    Clause clause = new Clause(production.getLeftSide(), dottedRightSide, new LinkedList<>());
                     clauses.add(clause);
                     position += 1;
                 }
                 List<String> dottedRightSide = new LinkedList<>();
                 dottedRightSide.addAll(production.getRightSide());
                 dottedRightSide.add(dotSymbol);
-                clauses.add(new Clause(production.getLeftSide(), dottedRightSide, new LinkedList<String>()));
+                clauses.add(new Clause(production.getLeftSide(), dottedRightSide, new LinkedList<>()));
 
                 clauseMap.put(keySymbol, clauses);
 
@@ -151,7 +151,7 @@ public class Grammar {
         }
     }
 
-    public List<String> getStartingWith(List<String> elements) {
+    public List<String> startingWith(List<String> elements) {
         List<String> startingSymbols = new LinkedList<>();
         if (elements.isEmpty()) {
             return startingSymbols;
@@ -183,14 +183,16 @@ public class Grammar {
 
     }
 
-
     public Clause shiftDotForClause(Clause clause) {
-        return null;
+        List<String> symbols = clause.getSymbols();
+        int index = symbols.indexOf(dotSymbol);
+        symbols.remove(dotSymbol);
+        if(index == symbols.size()-1){
+            symbols.add(dotSymbol);
+        }else{
+            symbols.add(index+1,dotSymbol);
+        }
+
+        return new Clause(clause.getLeftSide(),clause.getRightSide(),symbols);
     }
-
-    public boolean isSymbolEmpty(String symbol) {
-        return emptyNonTerminalSymbols.contains(symbol);
-    }
-
-
 }
