@@ -11,6 +11,7 @@ public class Grammar {
 
     public Grammar(HashMap<String, String> productionMap) {
         this.productionMap = productionMap;
+
     }
 
     public Grammar(List<String> nonTerminalSymbols, List<GrammarProduction> grammarProductions) {
