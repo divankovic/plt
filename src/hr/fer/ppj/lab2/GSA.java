@@ -24,10 +24,10 @@ public class GSA {
     /**
      *
      */
-    static List<String> nonterminalSymbols;
-    static List<String> terminalSymbols;
-    static List<String> syncSymbols;
-    static HashMap<String, List<GrammarProduction>> productionsMap;
+    public static List<String> nonterminalSymbols;
+    public static List<String> terminalSymbols;
+    public static List<String> syncSymbols;
+    public static HashMap<String, List<GrammarProduction>> productionsMap;
 
     /**
      * Entry point
