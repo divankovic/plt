@@ -7,17 +7,17 @@ import java.util.*;
 public class Grammar {
 
     private static String dotSymbol = "*";
-    private HashMap<NonTerminalSymbol, List<GrammarProduction>> productionMap;
-    private HashMap<NonTerminalSymbol, List<GrammarProduction>> dottedProductionMap;
+    private HashMap<String, List<GrammarProduction>> productionMap;
+    private HashMap<String, List<GrammarProduction>> dottedProductionMap;
 
-    public Grammar(HashMap<NonTerminalSymbol, List<GrammarProduction>> productionMap) {
+    public Grammar(HashMap<String, List<GrammarProduction>> productionMap) {
         this.productionMap = productionMap;
         createDottedProductionMap();
     }
 
     private void createDottedProductionMap() {
-        for(Map.Entry<NonTerminalSymbol,List<GrammarProduction>> entry : productionMap.entrySet()){
-            NonTerminalSymbol keySymbol = entry.getKey();
+        for(Map.Entry<String,List<GrammarProduction>> entry : productionMap.entrySet()){
+            String keySymbol = entry.getKey();
             List<GrammarProduction> productions = entry.getValue();
             List<GrammarProduction> dottedProductions = new LinkedList<>();
 
