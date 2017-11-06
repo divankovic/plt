@@ -1,6 +1,7 @@
 package hr.fer.ppj.lab2;
 
 import hr.fer.ppj.lab2.helper.InputProcessor;
+import hr.fer.ppj.lab2.model.Grammar;
 import hr.fer.ppj.lab2.model.GrammarProduction;
 
 import java.io.*;
@@ -43,9 +44,11 @@ public class GSA {
             System.out.println(nonterminalSymbols);
             System.out.println(terminalSymbols);
             System.out.println(syncSymbols);
-            System.out.println(productionsMap);
+            System.out.println(productionsMap+"\n");
 
-            // Grammar grammar = new Grammar(inputProcessor.getProductionsMap());
+            Grammar grammar = new Grammar(inputProcessor.getProductionsMap());
+            System.out.println(grammar.getProductionMap()+"\n");
+            System.out.println(grammar.getDottedProductionMap());
 
         } catch (Exception e) {
             e.printStackTrace();

@@ -16,7 +16,16 @@ public class Grammar {
         createDottedProductionMap();
     }
 
+    public HashMap<String, List<GrammarProduction>> getProductionMap() {
+        return productionMap;
+    }
+
+    public HashMap<String, List<GrammarProduction>> getDottedProductionMap() {
+        return dottedProductionMap;
+    }
+
     private void createDottedProductionMap() {
+        dottedProductionMap = new HashMap<>();
         for (Map.Entry<String, List<GrammarProduction>> entry : productionMap.entrySet()) {
             String keySymbol = entry.getKey();
             List<GrammarProduction> productions = entry.getValue();
@@ -31,7 +40,7 @@ public class Grammar {
                     dottedRightSide.add(position, dotSymbol);
                     GrammarProduction dottedProduction = new GrammarProduction(production.getLeftSide(), dottedRightSide);
                     dottedProductions.add(dottedProduction);
-                    position += 2;
+                    position += 1;
                 }
                 List<String> dottedRightSide = new LinkedList<>();
                 dottedRightSide.addAll(production.getRightSide());
@@ -42,6 +51,8 @@ public class Grammar {
 
             });
         }
+
+
     }
 
 
