@@ -64,4 +64,20 @@ public class InputProcessor {
 
     }
 
+    public List<String> getNonterminalSymbols() {
+        return nonterminalSymbols;
+    }
+
+    public List<String> getTerminalSymbols() {
+        return terminalSymbols;
+    }
+
+    public List<String> getSyncSymbols() {
+        return syncSymbols;
+    }
+
+    public HashMap<String, String> getProductionsMap() {
+        return productionsMap;
+    }
+
 }
