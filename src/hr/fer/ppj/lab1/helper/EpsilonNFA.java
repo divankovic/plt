@@ -413,6 +413,7 @@ public class EpsilonNFA implements Serializable {
         inputSymbols = new TreeSet<>();
         inputSymbols.addAll(GSA.nonterminalSymbols);
         inputSymbols.addAll(GSA.terminalSymbols);
+        inputSymbols.add(String.valueOf(epsilonSign));
     }
 
     private void startBuildingTransitions() {
@@ -437,7 +438,6 @@ public class EpsilonNFA implements Serializable {
             }
 
             String transitionSymbol = clause.getRightSide().get(transitionSymbolIndex);
-            String symbolAfterTransitionSymbol = clause.getRightSide().get(transitionSymbolIndex + 1);
 
             // b) transitions
 
@@ -454,6 +454,12 @@ public class EpsilonNFA implements Serializable {
             // c) transitions
 
             List<GrammarProduction> nextClauses = grammar.getProductionMap().get(clause.getLeftSide());
+
+            symbolIndex = symbols.indexOf(transitionSymbol);
+            nextClause = transitions[clauseIndex][symbolIndex];
+            if (nextClause == null) {
+                nextClause = new LinkedList<>();
+            }
 
             for (GrammarProduction grammarProduction : nextClauses) {
 
