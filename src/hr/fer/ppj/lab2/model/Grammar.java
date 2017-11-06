@@ -9,6 +9,7 @@ public class Grammar {
 
     private static String dotSymbol = "*";
     private List<String> nonTerminalSymbols;
+    private List<String> emptyNonTerminalSymbols;
     private HashMap<String, List<GrammarProduction>> productionMap;
     private HashMap<String, List<Clause>> clauseMap;
 
@@ -68,7 +69,11 @@ public class Grammar {
     }
 
     public Clause shiftDotForClause(Clause clause){
+        return null;
+    }
 
+    public boolean isSymbolEmpty(String symbol){
+        return emptyNonTerminalSymbols.contains(symbol);
     }
 
 
