@@ -8,14 +8,12 @@ import java.util.Map;
 public class Grammar {
 
     private static String dotSymbol = "*";
-    private List<String> nonTerminalSymbols;
     private List<String> emptyNonTerminalSymbols;
     private HashMap<String, List<GrammarProduction>> productionMap;
     private HashMap<String, List<Clause>> clauseMap;
 
-    public Grammar(HashMap<String, List<GrammarProduction>> productionMap, List<String> nonTerminalSymbols) {
+    public Grammar(HashMap<String, List<GrammarProduction>> productionMap) {
         this.productionMap = productionMap;
-        this.nonTerminalSymbols = nonTerminalSymbols;
         initialize();
     }
 
@@ -63,10 +61,6 @@ public class Grammar {
         return false;
     }
 
-
-    public String getInitialState(){
-        return nonTerminalSymbols.get(0);
-    }
 
     public Clause shiftDotForClause(Clause clause){
         return null;
