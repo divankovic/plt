@@ -8,30 +8,33 @@ import java.util.Map;
 public class Grammar {
 
     private static String dotSymbol = "*";
-    private String startingNonTerminalSymbol;
+    private List<String> nonTerminalSymbols;
     private HashMap<String, List<GrammarProduction>> productionMap;
-    private HashMap<String, List<GrammarProduction>> dottedProductionMap;
+    private HashMap<String, List<Clause>> clauseMap;
 
-    public Grammar(HashMap<String, List<GrammarProduction>> productionMap, String startingNonTerminalSymbol) {
+    public Grammar(HashMap<String, List<GrammarProduction>> productionMap, List<String> nonTerminalSymbols) {
         this.productionMap = productionMap;
-        this.startingNonTerminalSymbol = startingNonTerminalSymbol;
-        createDottedProductionMap();
+        this.nonTerminalSymbols = nonTerminalSymbols;
+        initialize();
     }
 
     public HashMap<String, List<GrammarProduction>> getProductionMap() {
         return productionMap;
     }
 
-    public HashMap<String, List<GrammarProduction>> getDottedProductionMap() {
-        return dottedProductionMap;
+    public HashMap<String, List<Clause>> getClauseMap() {
+        return clauseMap;
     }
 
-    private void createDottedProductionMap() {
-        dottedProductionMap = new HashMap<>();
+    private void initialize() {
+
+        //creating dotted production map
+
+        clauseMap = new HashMap<>();
         for (Map.Entry<String, List<GrammarProduction>> entry : productionMap.entrySet()) {
             String keySymbol = entry.getKey();
             List<GrammarProduction> productions = entry.getValue();
-            List<GrammarProduction> dottedProductions = new LinkedList<>();
+            List<Clause> clauses = new LinkedList<>();
 
             productions.forEach(production -> {
                 int position = 0;
@@ -40,21 +43,33 @@ public class Grammar {
                     List<String> dottedRightSide = new LinkedList<>();
                     dottedRightSide.addAll(production.getRightSide());
                     dottedRightSide.add(position, dotSymbol);
-                    GrammarProduction dottedProduction = new GrammarProduction(production.getLeftSide(), dottedRightSide);
-                    dottedProductions.add(dottedProduction);
+                    Clause clause = new Clause(production.getLeftSide(), dottedRightSide, new LinkedList<String>());
+                    clauses.add(clause);
                     position += 1;
                 }
                 List<String> dottedRightSide = new LinkedList<>();
                 dottedRightSide.addAll(production.getRightSide());
                 dottedRightSide.add(dotSymbol);
-                dottedProductions.add(new GrammarProduction(production.getLeftSide(), dottedRightSide));
+                clauses.add(new Clause(production.getLeftSide(), dottedRightSide, new LinkedList<String>()));
 
-                dottedProductionMap.put(keySymbol, dottedProductions);
+                clauseMap.put(keySymbol, clauses);
 
             });
         }
     }
 
+    public boolean startingWith(String clause, String symbol){
+        return false;
+    }
+
+
+    public String getInitialState(){
+        return nonTerminalSymbols.get(0);
+    }
+
+    public Clause shiftDotForClause(Clause clause){
+
+    }
 
 
 

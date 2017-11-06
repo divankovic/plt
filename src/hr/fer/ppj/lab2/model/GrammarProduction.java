@@ -5,8 +5,8 @@ import java.util.List;
 
 public class GrammarProduction implements Serializable {
 
-    private String leftSide;
-    private List<String> rightSide;
+    protected String leftSide;
+    protected List<String> rightSide;
 
     public GrammarProduction(String leftSide, List<String> rightSide) {
         this.leftSide = leftSide;
