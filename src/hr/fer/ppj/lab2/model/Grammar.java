@@ -1,8 +1,9 @@
 package hr.fer.ppj.lab2.model;
 
-import com.sun.scenario.effect.impl.state.LinearConvolveKernel;
-
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 public class Grammar {
 
@@ -16,28 +17,28 @@ public class Grammar {
     }
 
     private void createDottedProductionMap() {
-        for(Map.Entry<String,List<GrammarProduction>> entry : productionMap.entrySet()){
+        for (Map.Entry<String, List<GrammarProduction>> entry : productionMap.entrySet()) {
             String keySymbol = entry.getKey();
             List<GrammarProduction> productions = entry.getValue();
             List<GrammarProduction> dottedProductions = new LinkedList<>();
 
-            productions.forEach(production->{
+            productions.forEach(production -> {
                 int position = 0;
                 int length = production.getRightSide().size();
-                while(position<length){
+                while (position < length) {
                     List<String> dottedRightSide = new LinkedList<>();
                     dottedRightSide.addAll(production.getRightSide());
-                    dottedRightSide.add(position,dotSymbol);
-                    GrammarProduction dottedProduction = new GrammarProduction(production.getLeftSide(),dottedRightSide);
+                    dottedRightSide.add(position, dotSymbol);
+                    GrammarProduction dottedProduction = new GrammarProduction(production.getLeftSide(), dottedRightSide);
                     dottedProductions.add(dottedProduction);
-                    position +=2;
+                    position += 2;
                 }
                 List<String> dottedRightSide = new LinkedList<>();
                 dottedRightSide.addAll(production.getRightSide());
                 dottedRightSide.add(dotSymbol);
-                dottedProductions.add(new GrammarProduction(production.getLeftSide(),dottedRightSide));
+                dottedProductions.add(new GrammarProduction(production.getLeftSide(), dottedRightSide));
 
-                dottedProductionMap.put(keySymbol,dottedProductions);
+                dottedProductionMap.put(keySymbol, dottedProductions);
 
             });
         }

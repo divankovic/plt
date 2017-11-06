@@ -1,13 +1,8 @@
 package hr.fer.ppj.lab2.helper;
 
-import hr.fer.ppj.lab2.model.NonTerminalSymbol;
-import hr.fer.ppj.lab2.model.SyncTerminalSymbol;
-import hr.fer.ppj.lab2.model.TerminalSymbol;
+import hr.fer.ppj.lab2.model.GrammarProduction;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 /**
  * Class for input processing
@@ -15,10 +10,10 @@ import java.util.Scanner;
 public class InputProcessor {
 
     private Scanner scanner;
-    private List<NonTerminalSymbol> nonterminalSymbols;
-    private List<TerminalSymbol> terminalSymbols;
-    private List<SyncTerminalSymbol> syncSymbols;
-    private HashMap<String, List<String>> productionsMap;
+    private List<String> nonterminalSymbols;
+    private List<String> terminalSymbols;
+    private List<String> syncSymbols;
+    private HashMap<String, List<GrammarProduction>> productionsMap;
 
     /**
      *
@@ -42,59 +37,53 @@ public class InputProcessor {
 
         line = scanner.nextLine();
         parts = line.replace("%V", "").trim().split("\\s+");
-        for (String part : parts) {
-            nonterminalSymbols.add(new NonTerminalSymbol(part));
-        }
+        Collections.addAll(nonterminalSymbols, parts);
 
         line = scanner.nextLine();
         parts = line.replace("%T", "").trim().split("\\s+");
-        for (String part : parts) {
-            terminalSymbols.add(new TerminalSymbol(part));
-        }
+        Collections.addAll(terminalSymbols, parts);
 
         line = scanner.nextLine();
         parts = line.replace("%Syn", "").trim().split("\\s+");
-        for (String part : parts) {
-            syncSymbols.add(new SyncTerminalSymbol(part));
-        }
+        Collections.addAll(syncSymbols, parts);
 
-        String key = null;
-        String value;
+        String rightSide;
+        String leftSide = null;
 
         while (scanner.hasNextLine()) {
 
             line = scanner.nextLine();
 
             if (!line.startsWith(" ")) {
-                key = line;
+                leftSide = line;
                 continue;
             } else {
-                value = line;
+                rightSide = line;
             }
 
-            if (!productionsMap.containsKey(key)) {
-                productionsMap.put(key, new LinkedList<>());
+            if (!productionsMap.containsKey(leftSide)) {
+                productionsMap.put(leftSide, new LinkedList<>());
             }
 
-            productionsMap.get(key).add(value);
-
+            List<String> rightSides = Arrays.asList(rightSide.trim().split("\\s+"));
+            productionsMap.get(leftSide).add(new GrammarProduction(leftSide, rightSides));
         }
 
     }
 
-    public List<NonTerminalSymbol> getNonterminalSymbols() {
+    public List<String> getNonterminalSymbols() {
         return nonterminalSymbols;
     }
 
-    public List<TerminalSymbol> getTerminalSymbols() {
+    public List<String> getTerminalSymbols() {
         return terminalSymbols;
     }
 
-    public List<SyncTerminalSymbol> getSyncSymbols() {
+    public List<String> getSyncSymbols() {
         return syncSymbols;
     }
 
-    public HashMap<String, List<String>> getProductionsMap() {
+    public HashMap<String, List<GrammarProduction>> getProductionsMap() {
         return productionsMap;
     }
 

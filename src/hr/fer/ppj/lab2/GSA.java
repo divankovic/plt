@@ -1,10 +1,7 @@
 package hr.fer.ppj.lab2;
 
 import hr.fer.ppj.lab2.helper.InputProcessor;
-import hr.fer.ppj.lab2.model.Grammar;
-import hr.fer.ppj.lab2.model.NonTerminalSymbol;
-import hr.fer.ppj.lab2.model.SyncTerminalSymbol;
-import hr.fer.ppj.lab2.model.TerminalSymbol;
+import hr.fer.ppj.lab2.model.GrammarProduction;
 
 import java.io.*;
 import java.util.HashMap;
@@ -26,10 +23,10 @@ public class GSA {
     /**
      *
      */
-    private static List<NonTerminalSymbol> nonterminalSymbols;
-    private static List<TerminalSymbol> terminalSymbols;
-    private static List<SyncTerminalSymbol> syncSymbols;
-    private static HashMap<String, List<String>> productionsMap;
+    private static List<String> nonterminalSymbols;
+    private static List<String> terminalSymbols;
+    private static List<String> syncSymbols;
+    private static HashMap<String, List<GrammarProduction>> productionsMap;
 
     /**
      * Entry point
@@ -42,11 +39,18 @@ public class GSA {
 
             InputProcessor inputProcessor = new InputProcessor(scanner);
             serializeData(inputProcessor);
-            //Grammar grammar = new Grammar(inputProcessor.getProductionsMap());
+
+            System.out.println(nonterminalSymbols);
+            System.out.println(terminalSymbols);
+            System.out.println(syncSymbols);
+            System.out.println(productionsMap);
+
+            // Grammar grammar = new Grammar(inputProcessor.getProductionsMap());
 
         } catch (Exception e) {
-            System.err.println(e.getMessage());
+            e.printStackTrace();
         }
+
     }
 
     /**

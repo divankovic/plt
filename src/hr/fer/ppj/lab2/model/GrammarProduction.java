@@ -1,8 +1,10 @@
 package hr.fer.ppj.lab2.model;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class GrammarProduction {
+public class GrammarProduction implements Serializable {
+
     private String leftSide;
     private List<String> rightSide;
 
@@ -15,15 +17,13 @@ public class GrammarProduction {
         return leftSide;
     }
 
-    public void setLeftSide(String leftSide) {
-        this.leftSide = leftSide;
-    }
-
     public List<String> getRightSide() {
         return rightSide;
     }
 
-    public void setRightSide(List<String> rightSide) {
-        this.rightSide = rightSide;
+    @Override
+    public String toString() {
+        return leftSide + "->" + rightSide;
     }
+
 }
