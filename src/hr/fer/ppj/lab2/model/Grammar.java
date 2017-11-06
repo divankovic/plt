@@ -1,5 +1,7 @@
 package hr.fer.ppj.lab2.model;
 
+import hr.fer.ppj.lab2.GSA;
+
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -12,8 +14,8 @@ public class Grammar {
     private HashMap<String, List<GrammarProduction>> productionMap;
     private HashMap<String, List<Clause>> clauseMap;
 
-    public Grammar(HashMap<String, List<GrammarProduction>> productionMap) {
-        this.productionMap = productionMap;
+    public Grammar() {
+        this.productionMap = GSA.productionsMap;
         initialize();
     }
 
