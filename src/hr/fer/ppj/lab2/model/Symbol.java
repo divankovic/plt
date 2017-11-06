@@ -1,6 +1,7 @@
 package hr.fer.ppj.lab2.model;
 
 public class Symbol {
+
     protected String symbol;
 
     public Symbol(String symbol) {
@@ -14,4 +15,10 @@ public class Symbol {
     public void setSymbol(String symbol) {
         this.symbol = symbol;
     }
+
+    @Override
+    public String toString() {
+        return symbol;
+    }
+
 }

@@ -1,6 +1,13 @@
 package hr.fer.ppj.lab2.helper;
 
-import java.util.*;
+import hr.fer.ppj.lab2.model.NonTerminalSymbol;
+import hr.fer.ppj.lab2.model.SyncTerminalSymbol;
+import hr.fer.ppj.lab2.model.TerminalSymbol;
+
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Scanner;
 
 /**
  * Class for input processing
@@ -8,10 +15,10 @@ import java.util.*;
 public class InputProcessor {
 
     private Scanner scanner;
-    private List<String> nonterminalSymbols;
-    private List<String> terminalSymbols;
-    private List<String> syncSymbols;
-    private HashMap<String, String> productionsMap;
+    private List<NonTerminalSymbol> nonterminalSymbols;
+    private List<TerminalSymbol> terminalSymbols;
+    private List<SyncTerminalSymbol> syncSymbols;
+    private HashMap<String, List<String>> productionsMap;
 
     /**
      *
@@ -35,48 +42,59 @@ public class InputProcessor {
 
         line = scanner.nextLine();
         parts = line.replace("%V", "").trim().split("\\s+");
-        Collections.addAll(nonterminalSymbols, parts);
+        for (String part : parts) {
+            nonterminalSymbols.add(new NonTerminalSymbol(part));
+        }
 
         line = scanner.nextLine();
         parts = line.replace("%T", "").trim().split("\\s+");
-        Collections.addAll(terminalSymbols, parts);
+        for (String part : parts) {
+            terminalSymbols.add(new TerminalSymbol(part));
+        }
 
         line = scanner.nextLine();
         parts = line.replace("%Syn", "").trim().split("\\s+");
-        Collections.addAll(syncSymbols, parts);
+        for (String part : parts) {
+            syncSymbols.add(new SyncTerminalSymbol(part));
+        }
+
+        String key = null;
+        String value;
 
         while (scanner.hasNextLine()) {
 
-            String key = null;
-            String value = null;
-
             line = scanner.nextLine();
 
-            if (line.startsWith("\\s+")) {
+            if (!line.startsWith(" ")) {
                 key = line;
                 continue;
             } else {
                 value = line;
             }
 
-            productionsMap.put(key, value);
+            if (!productionsMap.containsKey(key)) {
+                productionsMap.put(key, new LinkedList<>());
+            }
+
+            productionsMap.get(key).add(value);
+
         }
 
     }
 
-    public List<String> getNonterminalSymbols() {
+    public List<NonTerminalSymbol> getNonterminalSymbols() {
         return nonterminalSymbols;
     }
 
-    public List<String> getTerminalSymbols() {
+    public List<TerminalSymbol> getTerminalSymbols() {
         return terminalSymbols;
     }
 
-    public List<String> getSyncSymbols() {
+    public List<SyncTerminalSymbol> getSyncSymbols() {
         return syncSymbols;
     }
 
-    public HashMap<String, String> getProductionsMap() {
+    public HashMap<String, List<String>> getProductionsMap() {
         return productionsMap;
     }
 
