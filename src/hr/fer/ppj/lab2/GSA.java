@@ -14,7 +14,6 @@ public class GSA {
     /**
      * Path to the output file of generator
      */
-    private List<String> nonTerminalSymbols;
     final static String SERIALIZATION_FILE_PATH = "./src/hr.fer.ppj.lab2.analizator/definition.ser";
     private final static String TEST_FILE_INPUT_PATH = "./src/hr.fer.ppj.lab2.res/in/";
     private final static String TEST_FILE_OUTPUT_PATH = "./src/hr.fer.ppj.lab2.res/out/GSA_out.txt";
@@ -22,9 +21,9 @@ public class GSA {
     /**
      * Entry point
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
 
-        //setupStdIO();
+        setupStdIO();
 
         try (Scanner scanner = new Scanner(System.in)) {
 
