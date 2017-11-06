@@ -8,11 +8,13 @@ import java.util.Map;
 public class Grammar {
 
     private static String dotSymbol = "*";
+    private String startingNonTerminalSymbol;
     private HashMap<String, List<GrammarProduction>> productionMap;
     private HashMap<String, List<GrammarProduction>> dottedProductionMap;
 
-    public Grammar(HashMap<String, List<GrammarProduction>> productionMap) {
+    public Grammar(HashMap<String, List<GrammarProduction>> productionMap, String startingNonTerminalSymbol) {
         this.productionMap = productionMap;
+        this.startingNonTerminalSymbol = startingNonTerminalSymbol;
         createDottedProductionMap();
     }
 
@@ -51,9 +53,9 @@ public class Grammar {
 
             });
         }
-
-
     }
+
+
 
 
 }
