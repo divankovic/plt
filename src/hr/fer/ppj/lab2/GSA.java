@@ -1,6 +1,7 @@
 package hr.fer.ppj.lab2;
 
 import hr.fer.ppj.lab2.helper.InputProcessor;
+import hr.fer.ppj.lab2.model.Grammar;
 import hr.fer.ppj.lab2.model.NonTerminalSymbol;
 import hr.fer.ppj.lab2.model.SyncTerminalSymbol;
 import hr.fer.ppj.lab2.model.TerminalSymbol;
@@ -41,11 +42,11 @@ public class GSA {
 
             InputProcessor inputProcessor = new InputProcessor(scanner);
             serializeData(inputProcessor);
+            //Grammar grammar = new Grammar(inputProcessor.getProductionsMap());
 
         } catch (Exception e) {
             System.err.println(e.getMessage());
         }
-
     }
 
     /**
