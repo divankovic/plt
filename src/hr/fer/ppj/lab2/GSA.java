@@ -24,10 +24,10 @@ public class GSA {
     /**
      *
      */
-    private static List<String> nonterminalSymbols;
-    private static List<String> terminalSymbols;
-    private static List<String> syncSymbols;
-    private static HashMap<String, List<GrammarProduction>> productionsMap;
+    static List<String> nonterminalSymbols;
+    static List<String> terminalSymbols;
+    static List<String> syncSymbols;
+    static HashMap<String, List<GrammarProduction>> productionsMap;
 
     /**
      * Entry point
@@ -44,11 +44,11 @@ public class GSA {
             System.out.println(nonterminalSymbols);
             System.out.println(terminalSymbols);
             System.out.println(syncSymbols);
-            System.out.println(productionsMap+"\n");
+            System.out.println(productionsMap + "\n");
 
-            Grammar grammar = new Grammar(inputProcessor.getProductionsMap());
-            System.out.println(grammar.getProductionMap()+"\n");
-            System.out.println(grammar.getDottedProductionMap());
+            Grammar grammar = new Grammar();
+            System.out.println(grammar.getProductionMap() + "\n");
+            System.out.println(grammar.getClauseMap());
 
         } catch (Exception e) {
             e.printStackTrace();
