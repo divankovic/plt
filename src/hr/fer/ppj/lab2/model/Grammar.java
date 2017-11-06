@@ -1,6 +1,7 @@
 package hr.fer.ppj.lab2.model;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 
 public class Grammar {
@@ -12,6 +13,20 @@ public class Grammar {
     }
 
     private void fillMap(List<String> nonTerminalSymbols, List<GrammarProduction> grammarProductions) {
+        nonTerminalSymbols.forEach(nonTerminalSymbol->{
+            grammarProductions.forEach(grammarProduction -> {
+                if(grammarProduction.getLeftSide().equals(nonTerminalSymbol)){
+                    List<GrammarProduction> productionList = productions.get(nonTerminalSymbol);
+                    if(productionList == null){
+                        productionList = new LinkedList<GrammarProduction>();
+                        productionList.add(grammarProduction);
+                    }
+                    else if(!productionList.contains(grammarProduction)){
+                        productionList.add(grammarProduction);
+                    }
+                }
+            });
+        });
     }
 
 
