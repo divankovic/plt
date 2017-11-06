@@ -5,23 +5,28 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class Grammar {
-    private HashMap<String,List<GrammarProduction>> productions;
-    
-    public Grammar(List<String> nonTerminalSymbols, List<GrammarProduction> grammarProductions){
+
+    private HashMap<String, List<GrammarProduction>> productions;
+    private HashMap<String, String> productionMap;
+
+    public Grammar(HashMap<String, String> productionMap) {
+        this.productionMap = productionMap;
+    }
+
+    public Grammar(List<String> nonTerminalSymbols, List<GrammarProduction> grammarProductions) {
         productions = new HashMap<>();
         fillMap(nonTerminalSymbols, grammarProductions);
     }
 
     private void fillMap(List<String> nonTerminalSymbols, List<GrammarProduction> grammarProductions) {
-        nonTerminalSymbols.forEach(nonTerminalSymbol->{
+        nonTerminalSymbols.forEach(nonTerminalSymbol -> {
             grammarProductions.forEach(grammarProduction -> {
-                if(grammarProduction.getLeftSide().equals(nonTerminalSymbol)){
+                if (grammarProduction.getLeftSide().equals(nonTerminalSymbol)) {
                     List<GrammarProduction> productionList = productions.get(nonTerminalSymbol);
-                    if(productionList == null){
+                    if (productionList == null) {
                         productionList = new LinkedList<GrammarProduction>();
                         productionList.add(grammarProduction);
-                    }
-                    else if(!productionList.contains(grammarProduction)){
+                    } else if (!productionList.contains(grammarProduction)) {
                         productionList.add(grammarProduction);
                     }
                 }
