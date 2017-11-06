@@ -5,8 +5,9 @@ import java.util.List;
 public class Clause extends GrammarProduction {
 
     private List<String> symbols;
-    public Clause(String leftSide, List<String> rightSide, List<String> symbols){
-        super(leftSide,rightSide);
+
+    public Clause(String leftSide, List<String> rightSide, List<String> symbols) {
+        super(leftSide, rightSide);
         this.symbols = symbols;
     }
 
@@ -14,7 +15,4 @@ public class Clause extends GrammarProduction {
         return symbols;
     }
 
-    public void setSymbols(List<String> symbols) {
-        this.symbols = symbols;
-    }
 }

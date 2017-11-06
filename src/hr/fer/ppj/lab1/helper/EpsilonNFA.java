@@ -3,6 +3,10 @@ package hr.fer.ppj.lab1.helper;
 import hr.fer.ppj.lab1.model.Regex;
 import hr.fer.ppj.lab1.model.Rule;
 import hr.fer.ppj.lab1.model.TransitionKey;
+import hr.fer.ppj.lab2.GSA;
+import hr.fer.ppj.lab2.model.Clause;
+import hr.fer.ppj.lab2.model.Grammar;
+import hr.fer.ppj.lab2.model.GrammarProduction;
 
 import java.io.Serializable;
 import java.util.*;
@@ -12,14 +16,25 @@ import java.util.*;
  */
 public class EpsilonNFA implements Serializable {
 
+    private HashMap<String, List<Clause>> clauseMap;
+    private Set<Clause> states;
+    private Set<Clause> finalStates;
+    private Set<String> inputSymbols;
+    private String initialState;
+
     public char epsilonSign = 0;
     private int[] statePair;
     private int numberOfStates;
-    private Rule rule;
-    private LinkedHashMap<TransitionKey, List<Integer>> transitionStateHashMap = new LinkedHashMap<>();
-    private List<Integer> currentStates = new LinkedList<>();
     private int numberOfTransitions;
 
+    private Rule rule;
+    private Grammar grammar;
+    private LinkedHashMap<TransitionKey, List<Integer>> transitionStateHashMap = new LinkedHashMap<>();
+    private List<Integer> currentStates = new LinkedList<>();
+
+    /**
+     *
+     */
     public EpsilonNFA(Rule rule) {
         this.numberOfStates = 0;
         this.rule = rule;
@@ -33,6 +48,14 @@ public class EpsilonNFA implements Serializable {
     public EpsilonNFA(Regex regex) {
         this.numberOfStates = 0;
         this.statePair = convert(regex);
+    }
+
+    /**
+     *
+     */
+    public EpsilonNFA(Grammar grammar) {
+        this.grammar = grammar;
+        convertGrammarToENFA();
     }
 
     /**
@@ -367,4 +390,86 @@ public class EpsilonNFA implements Serializable {
         result = 31 * result + numberOfTransitions;
         return result;
     }
+
+    private void convertGrammarToENFA() {
+
+        prepareData();
+        startBuildingTransitions();
+    }
+
+    private void prepareData() {
+        initialState = GSA.nonterminalSymbols.get(0);
+        clauseMap = grammar.getClauseMap();
+
+        states = new TreeSet<>();
+        for (List<Clause> clauseList : clauseMap.values()) {
+            for (Clause clause : clauseList) {
+                states.add(clause);
+            }
+        }
+
+        finalStates = states;
+
+        inputSymbols = new TreeSet<>();
+        inputSymbols.addAll(GSA.nonterminalSymbols);
+        inputSymbols.addAll(GSA.terminalSymbols);
+    }
+
+    private void startBuildingTransitions() {
+
+        int numOfClauses = clauseMap.keySet().size();
+        int numOfInputSymbols = inputSymbols.size();
+
+        List<Clause> clauses = new LinkedList<>();
+        clauses.addAll(states);
+
+        List<String> symbols = new LinkedList<>();
+        symbols.addAll(inputSymbols);
+
+        List<Clause>[][] transitions = new LinkedList[numOfClauses][numOfInputSymbols];
+
+        for (Clause clause : states) {
+
+            int transitionSymbolIndex = clause.getRightSide().indexOf(Grammar.dotSymbol) + 1;
+
+            if ((transitionSymbolIndex + 1) > clause.getRightSide().size()) {
+                continue;
+            }
+
+            String transitionSymbol = clause.getRightSide().get(transitionSymbolIndex);
+            String symbolAfterTransitionSymbol = clause.getRightSide().get(transitionSymbolIndex + 1);
+
+            // b) transitions
+
+            int clauseIndex = clauses.indexOf(clause);
+            int symbolIndex = symbols.indexOf(transitionSymbol);
+
+            List<Clause> nextClause = transitions[clauseIndex][symbolIndex];
+            if (nextClause == null) {
+                nextClause = new LinkedList<>();
+            }
+
+            nextClause.add(grammar.shiftDotForClause(clause));
+
+            // c) transitions
+
+            List<GrammarProduction> nextClauses = grammar.getProductionMap().get(clause.getLeftSide());
+
+            for (GrammarProduction grammarProduction : nextClauses) {
+
+                String leftSide = grammarProduction.getLeftSide();
+
+                List<String> rightSide = grammarProduction.getRightSide();
+                rightSide.add(0, Grammar.dotSymbol);
+
+                List<String> symbolSet = grammar.startingWith(grammarProduction.getRightSide().subList(transitionSymbolIndex + 1, grammarProduction.getRightSide().size()));
+
+                nextClause.add(new Clause(leftSide, rightSide, symbolSet));
+            }
+
+        }
+
+    }
+
+
 }
