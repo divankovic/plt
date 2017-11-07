@@ -519,12 +519,12 @@ public class EpsilonNFA implements Serializable {
                 newClauses.addAll(newClauses1);
             }
         }
-        for (Map.Entry<ClauseKey, List<Clause>> entry : transitions.entrySet()) {
+        states = clauses;
+        /*for (Map.Entry<ClauseKey, List<Clause>> entry : transitions.entrySet()) {
             System.out.println(entry.getKey() + " -> " + entry.getValue());
         }
         System.out.println();
-        states = clauses;
-        states.forEach(System.out::println);
+        states.forEach(System.out::println);*/
 
     }
 
