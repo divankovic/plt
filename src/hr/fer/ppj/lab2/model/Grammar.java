@@ -114,8 +114,6 @@ public class Grammar implements Serializable{
 
         }
 
-        printTable();
-
         //starts with -- ZAPOČINJE ZNAKOM
 
         for (int i = 0; i < n + m; i++) {
@@ -136,8 +134,6 @@ public class Grammar implements Serializable{
                 }
             }
         }
-
-        printTable();
 
     }
 
@@ -223,6 +219,19 @@ public class Grammar implements Serializable{
 
         return startingSymbols;
 
+    }
+
+    public boolean generatesEmpy(List<String> elements){
+        for(String element : elements) {
+            if (GSA.terminalSymbols.contains(element)) {
+                return false;
+            } else {
+                if (!emptyNonTerminalSymbols.contains(element)) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     public Clause shiftDotForClause(Clause clause) {

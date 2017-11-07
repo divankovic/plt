@@ -1,5 +1,6 @@
 package hr.fer.ppj.lab1.helper;
 
+import com.sun.scenario.effect.impl.state.LinearConvolveKernel;
 import hr.fer.ppj.lab1.model.Regex;
 import hr.fer.ppj.lab1.model.Rule;
 import hr.fer.ppj.lab1.model.TransitionKey;
@@ -16,6 +17,9 @@ import java.util.*;
  */
 public class EpsilonNFA implements Serializable {
 
+    //SA
+    public static String epsilonSymbol = "$";
+    private String startingState = "q0";
     private LinkedList<Clause>[][] transitions;
     private HashMap<String, List<Clause>> clauseMap;
     private List<Clause> states;
@@ -23,6 +27,8 @@ public class EpsilonNFA implements Serializable {
     private Set<String> inputSymbols;
     private String initialState;
 
+
+    //LA
     public char epsilonSign = 0;
     private int[] statePair;
     private int numberOfStates;
@@ -422,7 +428,9 @@ public class EpsilonNFA implements Serializable {
     private void startBuildingTransitions() {
 
         List<Clause> clauses = new LinkedList<>();
+        clauses.add(new Clause(startingState,new LinkedList<>(), new LinkedList<>()));
         clauses.addAll(states);
+
 
         List<String> symbols = new LinkedList<>();
         symbols.addAll(inputSymbols);
@@ -434,9 +442,25 @@ public class EpsilonNFA implements Serializable {
 
         for (Clause clause : states) {
 
-            int transitionSymbolIndex = clause.getRightSide().indexOf(Grammar.dotSymbol) + 1;
+            if(clause.getLeftSide().equals(startingState)){
+                String startNonTerminalSymbol = GSA.nonterminalSymbols.get(0);
+                List<GrammarProduction> productions = grammar.getProductionMap().get(startNonTerminalSymbol);
+                List<Clause> transition = transitions[0][symbols.indexOf(epsilonSymbol)];
+                for(GrammarProduction production : productions){
+                    List<String> rightSide = production.getRightSide();
+                    rightSide.add(0,Grammar.dotSymbol);
+                    Clause newClause = new Clause(startNonTerminalSymbol,rightSide,new LinkedList<>());
 
-            if ((transitionSymbolIndex + 1) > clause.getRightSide().size()) {
+                    if(transition == null){
+                        transition = new LinkedList<>();
+                    }
+                    transition.add(newClause);
+                }
+                continue;
+            }
+
+            int transitionSymbolIndex = clause.getRightSide().indexOf(Grammar.dotSymbol) + 1;
+            if ((transitionSymbolIndex + 1) >= clause.getRightSide().size()) {
                 continue;
             }
 
@@ -447,55 +471,58 @@ public class EpsilonNFA implements Serializable {
             int clauseIndex = clauses.indexOf(clause);
             int symbolIndex = symbols.indexOf(transitionSymbol);
 
-            LinkedList<Clause> nextClause = transitions[clauseIndex][symbolIndex];
+            LinkedList<Clause> nextClauses = transitions[clauseIndex][symbolIndex];
 
-            if (nextClause == null) {
-                nextClause = new LinkedList<>();
-                transitions[clauseIndex][symbolIndex] = nextClause;
+            if (nextClauses == null) {
+                nextClauses = new LinkedList<>();
+                transitions[clauseIndex][symbolIndex] = nextClauses;
             }
 
-            nextClause.add(grammar.shiftDotForClause(clause));
+            nextClauses.add(grammar.shiftDotForClause(clause));
 
-            // c) transitions
-
-            List<GrammarProduction> nextClauses = grammar.getProductionMap().get(clause.getLeftSide());
-
-            symbolIndex = symbols.indexOf(transitionSymbol);
-            nextClause = transitions[clauseIndex][symbolIndex];
-            if (nextClause == null) {
-                nextClause = new LinkedList<>();
+            // c) epsilon transitions
+            if (GSA.terminalSymbols.contains(transitionSymbol)) {
+                continue;
             }
 
-            for (GrammarProduction grammarProduction : nextClauses) {
+            List<GrammarProduction> productions = grammar.getProductionMap().get(transitionSymbol);
 
-                String leftSide = grammarProduction.getLeftSide();
+            List<Clause> nextEpsilonClauses = transitions[clauses.indexOf(clause)][symbols.indexOf(epsilonSymbol)];
+
+            for (GrammarProduction grammarProduction : productions) {
 
                 List<String> rightSide = grammarProduction.getRightSide();
                 rightSide.add(0, Grammar.dotSymbol);
 
-                List<String> clauseSublist = grammarProduction.getRightSide().subList(transitionSymbolIndex + 1, grammarProduction.getRightSide().size());
+                List<String> clauseSublist;
+                if (transitionSymbolIndex + 1 < clause.getRightSide().size()) {
+                    clauseSublist = clause.getRightSide().subList(transitionSymbolIndex + 1, grammarProduction.getRightSide().size() - 1);
+                } else {
+                    clauseSublist = new LinkedList<>();
+                }
                 List<String> symbolSet = null;
 
-                try {
-                    symbolSet = grammar.startingWith(clauseSublist);
-                } catch (Exception e) {
-                    System.err.println(e);
+                symbolSet = grammar.startingWith(clauseSublist);
+
+                if (clauseSublist.isEmpty() || grammar.generatesEmpy(clauseSublist)) {
+                    symbolSet.addAll(clause.getSymbols());
                 }
 
-                nextClause.add(new Clause(leftSide, rightSide, symbolSet));
+                nextEpsilonClauses.add(new Clause(transitionSymbol, rightSide, symbolSet));
             }
 
         }
-
         for (int i = 0; i < numOfClauses; ++i) {
             for (int j = 0; j < numOfInputSymbols; ++j) {
                 if (transitions[i][j] != null) {
-                    System.out.println(transitions[i][j]);
+                    System.out.println(clauses.get(i) + " : " + symbols.get(j) + " -> " + transitions[i][j]);
                 }
             }
         }
 
     }
 
-
+    public List<Clause>[][] getTransitions(){
+        return transitions;
+    }
 }
