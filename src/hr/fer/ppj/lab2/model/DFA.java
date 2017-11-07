@@ -63,7 +63,6 @@ public class DFA implements Serializable {
 
             List<Clause> next = new LinkedList<>();
 
-            // calc new state set for current symbol
             for (Clause nextState : initialState) {
 
                 List<Clause> transitionTo = epsilonNFA.getTransitionsFor(nextState, symbol);
@@ -95,15 +94,12 @@ public class DFA implements Serializable {
 
         List<Integer> tempNewStates = new LinkedList<>();
 
-        // for every new dfa state
         while (true) {
 
             boolean added = false;
 
-            // calc new state set for every symbol
             for (Integer newState : newStates) {
 
-                // calc new state set for current symbol
                 for (String symbol : symbols) {
 
                     List<Clause> next = new LinkedList<>();
