@@ -14,7 +14,6 @@ import java.util.Map;
 public class DFA implements Serializable {
 
     private EpsilonNFA epsilonNFA;
-    private List<Clause>[][] transitions;
     private List<Clause> initialState;
     private List<String> symbols;
 
@@ -28,7 +27,6 @@ public class DFA implements Serializable {
      */
     public DFA(EpsilonNFA epsilonNFA) {
         this.epsilonNFA = epsilonNFA;
-        this.transitions = epsilonNFA.getTransitions();
         this.symbols = epsilonNFA.getSymbols();
         convertToDFA();
     }
@@ -38,11 +36,12 @@ public class DFA implements Serializable {
      */
     private void convertToDFA() {
 
-        transitions = epsilonNFA.getTransitions();
-        initialState = EpsilonNFA.epsilonTransitions(epsilonNFA.getStates().get(0));
+        List<Clause> tmp = new ArrayList<>();
+        tmp.add(epsilonNFA.getStates().get(0));
+        initialState = EpsilonNFA.epsilonTransitions(tmp);
 
         HashMap<Integer, Pair> states = new HashMap<>();
-        states.put(cnt, new Pair(initialState, EpsilonNFA.epsilonSign));
+        states.put(cnt, new Pair(initialState, EpsilonNFA.epsilonSym));
         ++cnt;
 
         // for every new dfa state
@@ -59,9 +58,9 @@ public class DFA implements Serializable {
                 // calc new state set for current symbol
                 for (Clause nextState : nextStates) {
 
-                    List<Clause> tmp = epsilonNFA.getTransitionFor(nextState, symbol);
+                    List<Clause> transitionTo = epsilonNFA.getTransitionFor(nextState, symbol);
 
-                    for (Clause state : tmp) {
+                    for (Clause state : transitionTo) {
                         if (!next.contains(state)) {
                             next.add(state);
                         }
