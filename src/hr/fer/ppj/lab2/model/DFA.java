@@ -32,6 +32,9 @@ public class DFA implements Serializable {
         print();
     }
 
+    /**
+     *
+     */
     private void print() {
         System.out.println();
 
@@ -163,6 +166,21 @@ public class DFA implements Serializable {
 
         }
 
+    }
+
+
+    /**
+     *
+     */
+    public Integer getStatesSize() {
+        return states.keySet().size();
+    }
+
+    /**
+     *
+     */
+    public List<Clause> getClauseList(Integer state) {
+        return states.get(state);
     }
 
 }
