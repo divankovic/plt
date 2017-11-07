@@ -538,7 +538,11 @@ public class EpsilonNFA implements Serializable {
     }
 
     public List<Clause> getTransitionsFor(Clause nextState, String symbol) {
-        return new LinkedList<>(transitions.get(new ClauseKey(nextState, symbol)));
+        List<Clause> transition = transitions.get(new ClauseKey(nextState, symbol));
+        if(transition == null){
+            return null;
+        }
+        return new LinkedList<>(transition);
     }
 
     public List<String> getSymbols() {
