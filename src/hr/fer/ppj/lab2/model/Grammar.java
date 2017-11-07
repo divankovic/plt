@@ -66,28 +66,55 @@ public class Grammar {
     }
 
     private void fillStartsWithSymbolTable() {
+
         startsWithSymbolTable = new int[n + m][n + m];
 
         //starts directly with -- ZAPOČINJE IZRAVNO ZNAKOM
         for (Map.Entry<String, List<GrammarProduction>> entry : productionMap.entrySet()) {
+
             List<GrammarProduction> productions = entry.getValue();
+
             for (GrammarProduction production : productions) {
+
                 List<String> productionElements = production.getRightSide();
                 for (String element : productionElements) {
-                    if (GSA.terminalSymbols.contains(element)) {
-                        startsWithSymbolTable[GSA.nonterminalSymbols.indexOf(entry.getKey())][n - 1 + GSA.terminalSymbols.indexOf(element)] = 1;
+
+
+                    //***********
+                    //ovdje nesto treba
+                    if (element.equals("$")) {
                         break;
+                    }
+                    //***********
+
+                    int indexOfRow = GSA.nonterminalSymbols.indexOf(entry.getKey());
+                    int indexOfColumn;
+
+                    if (GSA.terminalSymbols.contains(element)) {
+
+                        indexOfColumn = n + GSA.terminalSymbols.indexOf(element);
+                        startsWithSymbolTable[indexOfRow][indexOfColumn] = 1;
+                        break;
+
                     } else {
-                        startsWithSymbolTable[GSA.nonterminalSymbols.indexOf(entry.getKey())][GSA.nonterminalSymbols.indexOf(element)] = 1;
+
+                        indexOfColumn = GSA.nonterminalSymbols.indexOf(element);
+                        startsWithSymbolTable[indexOfRow][indexOfColumn] = 1;
+
                         if (!emptyNonTerminalSymbols.contains(element)) {
                             break;
                         }
+
                     }
+
                 }
+
             }
+
         }
 
         //starts with -- ZAPOČINJE ZNAKOM
+
         for (int i = 0; i < n + m; i++) {
             startsWithSymbolTable[i][i] = 1;
             for (int j = 0; j < n + m; j++) {
@@ -187,12 +214,12 @@ public class Grammar {
         List<String> symbols = clause.getSymbols();
         int index = symbols.indexOf(dotSymbol);
         symbols.remove(dotSymbol);
-        if(index == symbols.size()-1){
+        if (index == symbols.size() - 1) {
             symbols.add(dotSymbol);
-        }else{
-            symbols.add(index+1,dotSymbol);
+        } else {
+            symbols.add(index + 1, dotSymbol);
         }
 
-        return new Clause(clause.getLeftSide(),clause.getRightSide(),symbols);
+        return new Clause(clause.getLeftSide(), clause.getRightSide(), symbols);
     }
 }
