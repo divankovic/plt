@@ -168,7 +168,6 @@ public class DFA implements Serializable {
 
     }
 
-
     /**
      *
      */
@@ -181,6 +180,13 @@ public class DFA implements Serializable {
      */
     public List<Clause> getClauseList(Integer state) {
         return states.get(state);
+    }
+
+    /**
+     *
+     */
+    public Integer getTransition(Integer state, String symbol) {
+        return transitions.get(new Pair(state, symbol));
     }
 
 }

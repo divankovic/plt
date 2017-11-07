@@ -12,18 +12,20 @@ import java.util.Map;
 public class Grammar implements Serializable {
 
     public static final String endOfLine = "CRLF";
-    public static String dotSymbol = "*";
+    public static final String dotSymbol = "*";
+
     private List<String> emptyNonTerminalSymbols;
-    private int[][] startsWithSymbolTable;
     private HashMap<String, List<GrammarProduction>> productionMap;
     private HashMap<String, List<Clause>> clauseMap;
+
     private int n = GSA.nonterminalSymbols.size();
     private int m = GSA.terminalSymbols.size();
+    private int[][] startsWithSymbolTable;
 
     public Grammar() {
         this.productionMap = GSA.productionsMap;
-        initialize();
 
+        initialize();
         //printTable();
     }
 
@@ -88,11 +90,13 @@ public class Grammar implements Serializable {
         fillStartsWithSymbolTable();
     }
 
+    /**
+     *
+     */
     private void fillStartsWithSymbolTable() {
 
         startsWithSymbolTable = new int[n + m][n + m];
 
-        //starts directly with -- ZAPOČINJE IZRAVNO ZNAKOM
         for (Map.Entry<String, List<GrammarProduction>> entry : productionMap.entrySet()) {
 
             List<GrammarProduction> productions = entry.getValue();
@@ -102,13 +106,9 @@ public class Grammar implements Serializable {
                 List<String> productionElements = production.getRightSide();
                 for (String element : productionElements) {
 
-
-                    //***********
-                    //ovdje nesto treba
                     if (element.equals("$")) {
                         break;
                     }
-                    //***********
 
                     int indexOfRow = GSA.nonterminalSymbols.indexOf(entry.getKey());
                     int indexOfColumn;
@@ -136,69 +136,94 @@ public class Grammar implements Serializable {
 
         }
 
-        //starts with -- ZAPOČINJE ZNAKOM
-
         for (int i = 0; i < n + m; i++) {
+
             startsWithSymbolTable[i][i] = 1;
+
             for (int j = 0; j < n + m; j++) {
+
                 if (i == j) {
                     continue;
                 }
+
                 if (startsWithSymbolTable[i][j] == 1) {
+
                     for (int z = 0; z < n + m; z++) {
+
                         if (z == j) {
                             continue;
                         }
+
                         if (startsWithSymbolTable[j][z] == 1) {
                             startsWithSymbolTable[i][z] = 1;
                         }
                     }
+
                 }
+
             }
+
         }
 
     }
 
-    //for testing purposes
+    /**
+     *
+     */
     private void printTable() {
 
         for (int i = 0; i < n + m; i++) {
             for (int j = 0; j < n + m; j++) {
                 System.out.format(" %d ", startsWithSymbolTable[i][j]);
             }
-            System.out.format("\n");
+            System.out.println();
         }
 
-        System.out.format("\n");
+        System.out.println();
         emptyNonTerminalSymbols.forEach(System.out::println);
-        System.out.format("\n");
+        System.out.println();
     }
 
+    /**
+     *
+     */
     private void findEmptyNonTerminalSymbols() {
-        //add all symbols that have epsilonproductions
+
         emptyNonTerminalSymbols = new LinkedList<>();
+
         for (Map.Entry<String, List<GrammarProduction>> entry : productionMap.entrySet()) {
+
             List<GrammarProduction> productions = entry.getValue();
+
             productions.forEach(production -> {
+
                 if (production.getRightSide().get(0).equals("$")) {
                     if (!emptyNonTerminalSymbols.contains(production.getLeftSide())) {
                         emptyNonTerminalSymbols.add(production.getLeftSide());
                     }
                 }
+
             });
+
         }
 
         boolean added = true;
 
         while (added) {
+
             added = false;
+
             for (Map.Entry<String, List<GrammarProduction>> entry : productionMap.entrySet()) {
                 if (emptyNonTerminalSymbols.contains(entry.getKey())) {
                     continue;
                 }
+
                 List<GrammarProduction> productions = entry.getValue();
+
                 for (GrammarProduction production : productions) {
+
                     boolean empty = true;
+
                     List<String> productionElements = production.getRightSide();
                     for (String element : productionElements) {
                         if (GSA.terminalSymbols.contains(element) || (GSA.nonterminalSymbols.contains(element) && !emptyNonTerminalSymbols.contains(element))) {
@@ -206,17 +231,26 @@ public class Grammar implements Serializable {
                             break;
                         }
                     }
+
                     if (empty) {
                         emptyNonTerminalSymbols.add(entry.getKey());
                         added = true;
                         break;
                     }
+
                 }
+
             }
+
         }
+
     }
 
+    /**
+     *
+     */
     public List<String> startingWith(List<String> elements) {
+
         List<String> startingSymbols = new LinkedList<>();
         if (elements.isEmpty()) {
             return startingSymbols;
@@ -224,11 +258,14 @@ public class Grammar implements Serializable {
 
         for (String element : elements) {
             if (GSA.terminalSymbols.contains(element)) {
+
                 if (!startingSymbols.contains(element)) {
                     startingSymbols.add(element);
                 }
                 break;
+
             } else {
+
                 int i = GSA.nonterminalSymbols.indexOf(element);
                 for (int j = n; j < n + m; j++) {
                     if (startsWithSymbolTable[i][j] == 1) {
@@ -248,8 +285,13 @@ public class Grammar implements Serializable {
 
     }
 
+    /**
+     *
+     */
     public boolean generatesEmpy(List<String> elements) {
+
         for (String element : elements) {
+
             if (GSA.terminalSymbols.contains(element)) {
                 return false;
             } else {
@@ -257,15 +299,23 @@ public class Grammar implements Serializable {
                     return false;
                 }
             }
+
         }
+
         return true;
     }
 
+    /**
+     *
+     */
     public Clause shiftDotForClause(Clause clause) {
+
         List<String> elements = new LinkedList<>();
         elements.addAll(clause.getRightSide());
+
         int index = elements.indexOf(dotSymbol);
         elements.remove(dotSymbol);
+
         if (index == elements.size() - 1) {
             elements.add(dotSymbol);
         } else {
