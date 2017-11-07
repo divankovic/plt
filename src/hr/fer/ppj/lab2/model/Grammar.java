@@ -35,7 +35,7 @@ public class Grammar implements Serializable{
 
         //creating dotted production map
 
-        /*clauseMap = new HashMap<>();
+        clauseMap = new HashMap<>();
         for (Map.Entry<String, List<GrammarProduction>> entry : productionMap.entrySet()) {
             String keySymbol = entry.getKey();
             List<GrammarProduction> productions = entry.getValue();
@@ -60,7 +60,7 @@ public class Grammar implements Serializable{
                 clauseMap.put(keySymbol, clauses);
 
             });
-        }*/
+        }
 
         findEmptyNonTerminalSymbols();
         fillStartsWithSymbolTable();
