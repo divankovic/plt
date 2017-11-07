@@ -20,9 +20,7 @@ public class ClauseKey {
 
     @Override
     public int hashCode() {
-        int result = clause != null ? clause.hashCode() : 0;
-        result = 31 * result + (key != null ? key.hashCode() : 0);
-        return result;
+        return clause.hashCode() + key.hashCode();
     }
 
     public Clause getClause() {
