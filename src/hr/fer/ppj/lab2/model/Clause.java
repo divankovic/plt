@@ -24,7 +24,7 @@ public class Clause extends GrammarProduction implements Comparable<Clause>,Seri
 
     @Override
     public int hashCode() {
-        return symbols.hashCode() + leftSide.hashCode() + rightSide.hashCode();
+        return leftSide.hashCode() + rightSide.hashCode();
     }
 
     @Override
@@ -33,6 +33,6 @@ public class Clause extends GrammarProduction implements Comparable<Clause>,Seri
             return false;
         }
         Clause clause = (Clause) obj;
-        return this.symbols.equals(clause.getSymbols()) && this.leftSide.equals(clause.leftSide) && this.rightSide.equals(clause.rightSide);
+        return this.leftSide.equals(clause.leftSide) && this.rightSide.equals(clause.rightSide);
     }
 }

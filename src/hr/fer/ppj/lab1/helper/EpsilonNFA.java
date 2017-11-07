@@ -440,7 +440,7 @@ public class EpsilonNFA implements Serializable {
                 List<GrammarProduction> productions = grammar.getProductionMap().get(initialNonTerminalSymbol);
                 List<Clause> transition = transitions[0][inputSymbols.indexOf(epsilonSymbol)];
                 for(GrammarProduction production : productions){
-                    List<String> rightSide = production.getRightSide();
+                    List<String> rightSide = new LinkedList(production.getRightSide());
                     if(rightSide.get(0).equals(epsilonSymbol)){
                         rightSide.clear();
                         rightSide.add(dotSymbol);
@@ -485,11 +485,15 @@ public class EpsilonNFA implements Serializable {
 
             List<GrammarProduction> productions = grammar.getProductionMap().get(transitionSymbol);
 
-            List<Clause> nextEpsilonClauses = transitions[clauses.indexOf(clause)][inputSymbols.indexOf(epsilonSymbol)];
+            LinkedList<Clause> nextEpsilonClauses = transitions[clauses.indexOf(clause)][inputSymbols.indexOf(epsilonSymbol)];
+            if(nextEpsilonClauses == null){
+                nextEpsilonClauses = new LinkedList<>();
+                transitions[clauses.indexOf(clause)][inputSymbols.indexOf(epsilonSymbol)] = nextEpsilonClauses;
+            }
 
             for (GrammarProduction grammarProduction : productions) {
 
-                List<String> rightSide = grammarProduction.getRightSide();
+                List<String> rightSide = new LinkedList(grammarProduction.getRightSide());
                 if(rightSide.get(0).equals(epsilonSymbol)){
                     rightSide.clear();
                     rightSide.add(dotSymbol);
@@ -499,7 +503,7 @@ public class EpsilonNFA implements Serializable {
 
                 List<String> clauseSublist;
                 if (transitionSymbolIndex + 1 < clause.getRightSide().size()) {
-                    clauseSublist = clause.getRightSide().subList(transitionSymbolIndex + 1, grammarProduction.getRightSide().size() - 1);
+                    clauseSublist = clause.getRightSide().subList(transitionSymbolIndex + 1, clause.getRightSide().size() - 1);
                 } else {
                     clauseSublist = new LinkedList<>();
                 }
