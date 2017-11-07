@@ -2,12 +2,13 @@ package hr.fer.ppj.lab2.model;
 
 import hr.fer.ppj.lab2.GSA;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-public class Grammar {
+public class Grammar implements Serializable{
 
     public static String dotSymbol = "*";
     private List<String> emptyNonTerminalSymbols;
@@ -34,7 +35,7 @@ public class Grammar {
 
         //creating dotted production map
 
-        clauseMap = new HashMap<>();
+        /*clauseMap = new HashMap<>();
         for (Map.Entry<String, List<GrammarProduction>> entry : productionMap.entrySet()) {
             String keySymbol = entry.getKey();
             List<GrammarProduction> productions = entry.getValue();
@@ -59,7 +60,7 @@ public class Grammar {
                 clauseMap.put(keySymbol, clauses);
 
             });
-        }
+        }*/
 
         findEmptyNonTerminalSymbols();
         fillStartsWithSymbolTable();
@@ -113,6 +114,8 @@ public class Grammar {
 
         }
 
+        printTable();
+
         //starts with -- ZAPOČINJE ZNAKOM
 
         for (int i = 0; i < n + m; i++) {
@@ -134,6 +137,18 @@ public class Grammar {
             }
         }
 
+        printTable();
+
+    }
+
+    //for testing purposes
+    private void printTable() {
+        for (int i = 0; i < n + m; i++) {
+            for (int j = 0; j < n + m; j++) {
+                System.out.format(" %d ", startsWithSymbolTable[i][j]);
+            }
+            System.out.format("\n");
+        }
     }
 
     private void findEmptyNonTerminalSymbols() {
@@ -143,7 +158,7 @@ public class Grammar {
             List<GrammarProduction> productions = entry.getValue();
             productions.forEach(production -> {
                 if (production.getRightSide().get(0).equals("$")) {
-                    if (emptyNonTerminalSymbols.contains(production.getLeftSide())) {
+                    if (!emptyNonTerminalSymbols.contains(production.getLeftSide())) {
                         emptyNonTerminalSymbols.add(production.getLeftSide());
                     }
                 }
