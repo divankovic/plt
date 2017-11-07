@@ -36,6 +36,7 @@ cmake-build-debug/
 
 # IntelliJ
 /hr/fer/ppj/lab1/res/out/*.txt
+/hr/fer/ppj/lab2/res/out/*.txt
 
 # mpeltonen/sbt-idea plugin
 .idea_modules/
