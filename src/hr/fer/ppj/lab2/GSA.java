@@ -1,11 +1,13 @@
 package hr.fer.ppj.lab2;
 
 import hr.fer.ppj.lab1.helper.EpsilonNFA;
+import hr.fer.ppj.lab2.enums.ParserActionType;
 import hr.fer.ppj.lab2.helper.InputProcessor;
 import hr.fer.ppj.lab2.model.*;
 
 import java.io.*;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Scanner;
 
@@ -29,7 +31,7 @@ public class GSA {
     public static List<String> terminalSymbols;
     public static List<String> syncSymbols;
     public static HashMap<String, List<GrammarProduction>> productionsMap;
-    public static HashMap<Pair,ParserAction> parserTable;
+    public static HashMap<Pair, ParserAction> parserTable;
     private static Grammar grammar;
     private static EpsilonNFA epsilonNFA;
     private static DFA dfa;
@@ -106,6 +108,60 @@ public class GSA {
      *
      */
     private static void generateParserActionTable() {
+
+        int dfaStates = dfa.getStatesSize();
+
+        List<Clause> accClauses = epsilonNFA.returnAcceptableClauses();
+
+        for (int i = 0; i < dfaStates; i++) {
+            List<Clause> clauses = dfa.getClauseList(i);
+
+            for (Clause clause : clauses) {
+
+                if (accClauses.contains(clause)) {
+                    parserTable.put(new Pair(i, Grammar.endOfLine), new ParserAction("", ParserActionType.ACCEPT));
+                    continue;
+                }
+
+                int symbolAfterDotindex = clause.getRightSide().indexOf(Grammar.dotSymbol) + 1;
+                String symbolAfterDot;
+                if (symbolAfterDotindex >= clause.getRightSide().size()) {
+                    symbolAfterDot = "";
+                } else {
+                    symbolAfterDot = clause.getRightSide().get(symbolAfterDotindex);
+                }
+
+                if (!symbolAfterDot.equals("")) {
+                    ParserActionType type;
+                    if (terminalSymbols.contains(symbolAfterDot)) {
+                        type = ParserActionType.SHIFT;
+
+                    } else {
+                        type = ParserActionType.PUT;
+                    }
+                    int nextState = dfa.getTransition(i, symbolAfterDot);
+                    if (nextState != -1) {
+                        parserTable.put(new Pair(i, symbolAfterDot), new ParserAction(String.valueOf(nextState), type));
+                    }
+                } else {
+                    List<String> symbols = clause.getSymbols();
+                    for (String symbol : symbols) {
+                        List<String> undottedRightSide = new LinkedList<>(clause.getRightSide());
+                        undottedRightSide.remove(Grammar.dotSymbol);
+                        StringBuilder rightSideBuilder = new StringBuilder();
+                        for (String element : undottedRightSide) {
+                            rightSideBuilder.append(element);
+                        }
+                        String rightSide = rightSideBuilder.toString();
+                        parserTable.put(new Pair(i, symbol), new ParserAction(clause.getLeftSide() + "->" + rightSide, ParserActionType.REDUCE));
+                    }
+                }
+
+
+            }
+
+
+        }
 
     }
 
