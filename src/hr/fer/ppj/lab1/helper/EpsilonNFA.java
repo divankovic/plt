@@ -5,6 +5,7 @@ import hr.fer.ppj.lab1.model.Rule;
 import hr.fer.ppj.lab1.model.TransitionKey;
 import hr.fer.ppj.lab2.GSA;
 import hr.fer.ppj.lab2.model.Clause;
+import hr.fer.ppj.lab2.model.ClauseKey;
 import hr.fer.ppj.lab2.model.Grammar;
 import hr.fer.ppj.lab2.model.GrammarProduction;
 
@@ -21,7 +22,8 @@ public class EpsilonNFA implements Serializable {
     //SA
     public static String epsilonSymbol = "$";
     private String startingState = "q0";
-    private LinkedList<Clause>[][] transitions;
+    private HashMap<ClauseKey,List<Clause>> transitions = new HashMap<>();
+    //private LinkedList<Clause>[][] transitions;
     private HashMap<String, List<Clause>> clauseMap;
     private List<Clause> states;
     private List<String> inputSymbols;
@@ -401,7 +403,7 @@ public class EpsilonNFA implements Serializable {
     private void convertGrammarToENFA() {
 
         prepareData();
-        startBuildingTransitions();
+        buildTransitions();
     }
 
     private void prepareData() {
@@ -420,118 +422,122 @@ public class EpsilonNFA implements Serializable {
 
         inputSymbols = new LinkedList<>();
         inputSymbols.addAll(GSA.nonterminalSymbols);
+        inputSymbols.remove(GSA.nonterminalSymbols.get(0));
         inputSymbols.addAll(GSA.terminalSymbols);
         inputSymbols.add(String.valueOf(epsilonSymbol));
     }
 
-    private void startBuildingTransitions() {
+    private void buildTransitions() {
 
         List<Clause> clauses = new LinkedList<>();
-        clauses.addAll(states);
+        clauses.add(states.get(0));
 
-        int numOfClauses = clauses.size();
-        int numOfInputSymbols = inputSymbols.size();
+        List<GrammarProduction> productions = grammar.getProductionMap().get(initialNonTerminalSymbol);
 
-        transitions = (LinkedList<Clause>[][]) new LinkedList[numOfClauses][numOfInputSymbols];
+        //initial transition
+        LinkedList<Clause> newClauses = new LinkedList<>();
+        LinkedList<Clause> transition = new LinkedList<>();
+        for (GrammarProduction production : productions) {
+            LinkedList<String> rightSide = new LinkedList<>(production.getRightSide());
+            addDotFirst(rightSide);
 
-        for (Clause clause : clauses) {
+            Clause newClause = new Clause(initialNonTerminalSymbol, rightSide, new LinkedList<>());
+            if(!clauses.contains(newClause)){
+                clauses.add(newClause);
+            }
+            transition.add(newClause);
 
-            if (clause.getLeftSide().equals(startingState)) {
-                List<GrammarProduction> productions = grammar.getProductionMap().get(initialNonTerminalSymbol);
-                LinkedList<Clause> transition = transitions[0][inputSymbols.indexOf(epsilonSymbol)];
+        }
+        transitions.put(new ClauseKey(clauses.get(0),epsilonSymbol),transition);
+        newClauses.addAll(transition);
+
+        while(true){
+            LinkedList<Clause> newClauses1 = new LinkedList<>();
+            for(Clause clause : newClauses){
+
+                int transitionSymbolIndex = clause.getRightSide().indexOf(dotSymbol) + 1;
+                if (transitionSymbolIndex >= clause.getRightSide().size()) {
+                    //dot is at the end
+                    continue;
+                }
+
+                String transitionSymbol = clause.getRightSide().get(transitionSymbolIndex);
+
+                //add moving dot transitions
+                LinkedList<Clause> transition1 = new LinkedList<>();
+                Clause newClause = grammar.shiftDotForClause(clause);
+                if(!clauses.contains(newClause)){
+                    clauses.add(newClause);
+                    newClauses1.add(newClause);
+                }
+                transition1.add(newClause);
+                transitions.put(new ClauseKey(clause,transitionSymbol),transition1);
+
+                //epsilon transitions
+
+                LinkedList<Clause> epsilonTransitions = new LinkedList<>();
+                if (GSA.terminalSymbols.contains(transitionSymbol)) {
+                    continue;
+                }
+
+                productions = GSA.productionsMap.get(transitionSymbol);
                 for (GrammarProduction production : productions) {
-                    List<String> rightSide = new LinkedList(production.getRightSide());
-                    if (rightSide.get(0).equals(epsilonSymbol)) {
-                        rightSide.clear();
-                        rightSide.add(dotSymbol);
+                    LinkedList<String> rightSide = new LinkedList<>(production.getRightSide());
+                    addDotFirst(rightSide);
+
+                    List<String> clauseSublist;
+                    List<String> symbolSet = new LinkedList<>();
+                    if (transitionSymbolIndex + 1 < clause.getRightSide().size()) {
+                        clauseSublist = clause.getRightSide().subList(transitionSymbolIndex + 1, clause.getRightSide().size());
+                        symbolSet.addAll(grammar.startingWith(clauseSublist));
                     } else {
-                        rightSide.add(0, dotSymbol);
+                        clauseSublist = new LinkedList<>();
                     }
-                    Clause newClause = new Clause(initialNonTerminalSymbol, rightSide, new LinkedList<>());
 
-                    if (transition == null) {
-                        transition = new LinkedList<>();
-                        transitions[0][inputSymbols.indexOf(epsilonSymbol)] = transition;
+                    if (clauseSublist.isEmpty() || grammar.generatesEmpy(clauseSublist)) {
+                        for(String symbol : clause.getSymbols()){
+                            if(!symbolSet.contains(symbol)){
+                                symbolSet.add(symbol);
+                            }
+                        }
                     }
-                    transition.add(newClause);
+
+                    Clause nClause = new Clause(transitionSymbol, rightSide, symbolSet);
+                    if(!clauses.contains(nClause)){
+                        clauses.add(nClause);
+                        newClauses1.add(nClause);
+                    }
+                    epsilonTransitions.add(nClause);
                 }
-                continue;
+                transitions.put(new ClauseKey(clause,epsilonSymbol),epsilonTransitions);
             }
-
-            int transitionSymbolIndex = clause.getRightSide().indexOf(dotSymbol) + 1;
-            if (transitionSymbolIndex >= clause.getRightSide().size()) {
-                continue;
-            }
-
-            String transitionSymbol = clause.getRightSide().get(transitionSymbolIndex);
-
-            // b) transitions
-
-            int clauseIndex = clauses.indexOf(clause);
-            int symbolIndex = inputSymbols.indexOf(transitionSymbol);
-
-            LinkedList<Clause> nextClauses = transitions[clauseIndex][symbolIndex];
-
-            if (nextClauses == null) {
-                nextClauses = new LinkedList<>();
-                transitions[clauseIndex][symbolIndex] = nextClauses;
-            }
-
-            nextClauses.add(grammar.shiftDotForClause(clause));
-
-            // c) epsilon transitions
-            if (GSA.terminalSymbols.contains(transitionSymbol)) {
-                continue;
-            }
-
-            List<GrammarProduction> productions = grammar.getProductionMap().get(transitionSymbol);
-
-            LinkedList<Clause> nextEpsilonClauses = transitions[clauses.indexOf(clause)][inputSymbols.indexOf(epsilonSymbol)];
-            if (nextEpsilonClauses == null) {
-                nextEpsilonClauses = new LinkedList<>();
-                transitions[clauses.indexOf(clause)][inputSymbols.indexOf(epsilonSymbol)] = nextEpsilonClauses;
-            }
-
-            for (GrammarProduction grammarProduction : productions) {
-
-                List<String> rightSide = new LinkedList(grammarProduction.getRightSide());
-                if (rightSide.get(0).equals(epsilonSymbol)) {
-                    rightSide.clear();
-                    rightSide.add(dotSymbol);
-                } else {
-                    rightSide.add(0, dotSymbol);
-                }
-
-                List<String> clauseSublist;
-                if (transitionSymbolIndex + 1 < clause.getRightSide().size()) {
-                    clauseSublist = clause.getRightSide().subList(transitionSymbolIndex + 1, clause.getRightSide().size() - 1);
-                } else {
-                    clauseSublist = new LinkedList<>();
-                }
-                List<String> symbolSet = null;
-
-                symbolSet = grammar.startingWith(clauseSublist);
-
-                if (clauseSublist.isEmpty() || grammar.generatesEmpy(clauseSublist)) {
-                    symbolSet.addAll(clause.getSymbols());
-                }
-
-                nextEpsilonClauses.add(new Clause(transitionSymbol, rightSide, symbolSet));
-            }
-
-        }
-        for (int i = 0; i < numOfClauses; ++i) {
-            for (int j = 0; j < numOfInputSymbols; ++j) {
-                if (transitions[i][j] != null) {
-                    System.out.println(clauses.get(i) + " : " + inputSymbols.get(j) + " -> " + transitions[i][j]);
-                }
+            if(newClauses1.isEmpty()){
+                break;
+            }else{
+                newClauses.clear();
+                newClauses.addAll(newClauses1);
             }
         }
+        for(Map.Entry<ClauseKey,List<Clause>> entry : transitions.entrySet()){
+            System.out.println(entry.getKey()+" -> "+entry.getValue());
+        }
+        System.out.println();
+        states = clauses;
+        states.forEach(System.out::println);
 
     }
 
+    private void addDotFirst(List<String> rightSide) {
+        if (rightSide.get(0).equals(epsilonSymbol)) {
+            rightSide.clear();
+            rightSide.add(dotSymbol);
+        } else {
+            rightSide.add(0, dotSymbol);
+        }
+    }
+
     public List<Clause> getTransitionsFor(Clause nextState, String symbol) {
-        return transitions[states.indexOf(nextState)][inputSymbols.indexOf(symbol)];
+        return new LinkedList<>(transitions.get(new ClauseKey(nextState,symbol)));
     }
 
     public List<String> getSymbols() {
