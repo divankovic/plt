@@ -38,10 +38,10 @@ public class DFA implements Serializable {
 
         List<Clause> tmp = new ArrayList<>();
         tmp.add(epsilonNFA.getStates().get(0));
-        initialState = EpsilonNFA.epsilonTransitions(tmp);
+        initialState = EpsilonNFA.epsilonTranisitions(tmp);
 
         HashMap<Integer, Pair> states = new HashMap<>();
-        states.put(cnt, new Pair(initialState, EpsilonNFA.epsilonSym));
+        states.put(cnt, new Pair(initialState, EpsilonNFA.epsilonSymbol));
         ++cnt;
 
         // for every new dfa state
@@ -58,7 +58,7 @@ public class DFA implements Serializable {
                 // calc new state set for current symbol
                 for (Clause nextState : nextStates) {
 
-                    List<Clause> transitionTo = epsilonNFA.getTransitionFor(nextState, symbol);
+                    List<Clause> transitionTo = epsilonNFA.getTransitionsFor(nextState, symbol);
 
                     for (Clause state : transitionTo) {
                         if (!next.contains(state)) {
@@ -68,7 +68,7 @@ public class DFA implements Serializable {
 
                 }
 
-                EpsilonNFA.epsilonTransitions(next);
+                next = EpsilonNFA.epsilonTranisitions(next);
 
                 states.put(cnt, new Pair(nextStates, symbol));
                 ++cnt;
