@@ -1,6 +1,5 @@
 package hr.fer.ppj.lab1.helper;
 
-import com.sun.scenario.effect.impl.state.LinearConvolveKernel;
 import hr.fer.ppj.lab1.model.Regex;
 import hr.fer.ppj.lab1.model.Rule;
 import hr.fer.ppj.lab1.model.TransitionKey;
@@ -581,7 +580,28 @@ public class EpsilonNFA implements Serializable {
         return newClauses;
     }
 
+    /**
+     *
+     */
     public Clause getStartingState() {
         return states.get(0);
     }
+
+    /**
+     *
+     */
+    public List<Clause> returnAcceptableClauses() {
+
+        String startingState = GSA.startingNonTerminalSymbol;
+        List<Clause> acceptableClauses = new LinkedList<>();
+
+        for (Clause clause : states) {
+            if (clause.getLeftSide().equals(startingState) && clause.getRightSide().get(clause.getRightSide().size() - 1).equals(dotSymbol)) {
+                acceptableClauses.add(clause);
+            }
+        }
+
+        return acceptableClauses;
+    }
+
 }
