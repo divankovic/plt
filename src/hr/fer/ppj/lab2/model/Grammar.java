@@ -2,7 +2,6 @@ package hr.fer.ppj.lab2.model;
 
 import hr.fer.ppj.lab1.helper.EpsilonNFA;
 import hr.fer.ppj.lab2.GSA;
-import sun.awt.Symbol;
 
 import java.io.Serializable;
 import java.util.HashMap;

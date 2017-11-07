@@ -74,7 +74,7 @@ public class DFA implements Serializable {
 
                 next = EpsilonNFA.epsilonTranisitions(next);
 
-                states.put(cnt, new Pair(nextStates, symbol));
+                states.put(cnt, new Pair(next, symbol));
                 ++cnt;
                 added = true;
 
