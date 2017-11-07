@@ -51,11 +51,11 @@ public class GSA {
             productionsMap = inputProcessor.getProductionsMap();
 
             grammar = new Grammar();
-            epsilonNFA = new EpsilonNFA(grammar);
-            dfa = new DFA(epsilonNFA);
-
-            serializeData();
-
+//            epsilonNFA = new EpsilonNFA(grammar);
+//            dfa = new DFA(epsilonNFA);
+//
+//            serializeData();
+//
         } catch (Exception e) {
             e.printStackTrace();
         }

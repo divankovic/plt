@@ -50,6 +50,10 @@ public class DFA implements Serializable {
             boolean added = false;
             List<Clause> nextStates = entry.getValue().getStates();
 
+            if (nextStates == null) {
+                continue;
+            }
+
             // calc new state set for every symbol
             for (String symbol : symbols) {
 

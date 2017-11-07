@@ -1,6 +1,8 @@
 package hr.fer.ppj.lab2.model;
 
+import hr.fer.ppj.lab1.helper.EpsilonNFA;
 import hr.fer.ppj.lab2.GSA;
+import sun.awt.Symbol;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -8,7 +10,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-public class Grammar implements Serializable{
+public class Grammar implements Serializable {
 
     public static String dotSymbol = "*";
     private List<String> emptyNonTerminalSymbols;
@@ -21,6 +23,8 @@ public class Grammar implements Serializable{
     public Grammar() {
         this.productionMap = GSA.productionsMap;
         initialize();
+
+        printTable();
     }
 
     public HashMap<String, List<GrammarProduction>> getProductionMap() {
@@ -37,13 +41,28 @@ public class Grammar implements Serializable{
 
         clauseMap = new HashMap<>();
         for (Map.Entry<String, List<GrammarProduction>> entry : productionMap.entrySet()) {
+
             String keySymbol = entry.getKey();
             List<GrammarProduction> productions = entry.getValue();
             List<Clause> clauses = new LinkedList<>();
 
             productions.forEach(production -> {
+
+
+                if (production.rightSide.get(0).equals(EpsilonNFA.epsilonSymbol)) {
+
+                    List<String> dot = new LinkedList<>();
+                    dot.add(dotSymbol);
+
+                    Clause clause = new Clause(production.getLeftSide(), dot, new LinkedList<>());
+                    clauses.add(clause);
+
+                    return;
+                }
+
                 int position = 0;
                 int length = production.getRightSide().size();
+
                 while (position < length) {
                     List<String> dottedRightSide = new LinkedList<>();
                     dottedRightSide.addAll(production.getRightSide());
@@ -52,9 +71,12 @@ public class Grammar implements Serializable{
                     clauses.add(clause);
                     position += 1;
                 }
+
                 List<String> dottedRightSide = new LinkedList<>();
+
                 dottedRightSide.addAll(production.getRightSide());
                 dottedRightSide.add(dotSymbol);
+
                 clauses.add(new Clause(production.getLeftSide(), dottedRightSide, new LinkedList<>()));
 
                 clauseMap.put(keySymbol, clauses);
@@ -139,12 +161,17 @@ public class Grammar implements Serializable{
 
     //for testing purposes
     private void printTable() {
+
         for (int i = 0; i < n + m; i++) {
             for (int j = 0; j < n + m; j++) {
                 System.out.format(" %d ", startsWithSymbolTable[i][j]);
             }
             System.out.format("\n");
         }
+
+        System.out.format("\n");
+        emptyNonTerminalSymbols.forEach(System.out::println);
+        System.out.format("\n");
     }
 
     private void findEmptyNonTerminalSymbols() {
@@ -221,8 +248,8 @@ public class Grammar implements Serializable{
 
     }
 
-    public boolean generatesEmpy(List<String> elements){
-        for(String element : elements) {
+    public boolean generatesEmpy(List<String> elements) {
+        for (String element : elements) {
             if (GSA.terminalSymbols.contains(element)) {
                 return false;
             } else {
