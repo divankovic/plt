@@ -11,13 +11,11 @@ public class ClauseKey {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        ClauseKey clauseKey = (ClauseKey) o;
-
-        if (clause != null ? !clause.equals(clauseKey.clause) : clauseKey.clause != null) return false;
-        return key != null ? key.equals(clauseKey.key) : clauseKey.key == null;
+       if(!(o instanceof ClauseKey)){
+           return false;
+       }
+       ClauseKey clauseKey = (ClauseKey) o;
+       return this.clause.equals(clauseKey.getClause()) && this.key.equals(clauseKey.getKey());
     }
 
     @Override
@@ -47,4 +45,6 @@ public class ClauseKey {
     public String toString() {
         return clause.toString()+" : "+key;
     }
+
+
 }
