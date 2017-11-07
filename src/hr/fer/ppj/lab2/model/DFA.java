@@ -13,6 +13,8 @@ public class DFA implements Serializable {
     private EpsilonNFA epsilonNFA;
     private List<Clause> initialState;
     private List<String> symbols;
+    private HashMap<Pair, Integer> transitions;
+    private HashMap<Integer, List<Clause>> states;
 
     /**
      *
@@ -25,8 +27,19 @@ public class DFA implements Serializable {
     public DFA(EpsilonNFA epsilonNFA) {
         this.epsilonNFA = epsilonNFA;
         this.symbols = new LinkedList<>(epsilonNFA.getSymbols());
-        symbols.remove(EpsilonNFA.epsilonSymbol);
+
         convertToDFA();
+        print();
+    }
+
+    private void print() {
+        System.out.println();
+
+        for (Map.Entry<Pair, Integer> entry : transitions.entrySet()) {
+            int x = entry.getKey().getState();
+            int y = entry.getValue();
+            System.out.println(x + "     " + entry.getKey().getSign() + "     " + y);
+        }
     }
 
     /**
@@ -34,18 +47,21 @@ public class DFA implements Serializable {
      */
     private void convertToDFA() {
 
+        symbols.remove(EpsilonNFA.epsilonSymbol);
+        symbols.remove(0);
+
         List<Clause> tmp = new ArrayList<>();
         tmp.add(epsilonNFA.getStartingState());
         initialState = epsilonNFA.epsilonTranisitions(tmp);
 
-        HashMap<Pair, Integer> transitions = new HashMap<>();
-
-        HashMap<Integer, List<Clause>> states = new HashMap<>();
+        transitions = new HashMap<>();
+        states = new HashMap<>();
         states.put(cnt, initialState);
+
 
         for (String symbol : symbols) {
 
-            List<Clause> next = new ArrayList<>();
+            List<Clause> next = new LinkedList<>();
 
             // calc new state set for current symbol
             for (Clause nextState : initialState) {
@@ -56,20 +72,28 @@ public class DFA implements Serializable {
                     continue;
                 }
 
-                for (Clause state : transitionTo) {
-                    if (!next.contains(state)) {
-                        next.add(state);
+                for (Clause clause : transitionTo) {
+                    if (!next.contains(clause)) {
+                        next.add(clause);
                     }
                 }
-
             }
 
-            next = epsilonNFA.epsilonTranisitions(next);
             ++cnt;
-            states.put(cnt, next);
 
+            next = epsilonNFA.epsilonTranisitions(next);
+            states.put(cnt, new LinkedList<>(next));
             transitions.put(new Pair(0, symbol), cnt);
         }
+
+        List<Integer> newStates = new LinkedList<>();
+        for (Map.Entry<Integer, List<Clause>> entry : states.entrySet()) {
+            if (entry.getKey() != 0 && !newStates.contains(entry.getKey())) {
+                newStates.add(entry.getKey());
+            }
+        }
+
+        List<Integer> tempNewStates = new LinkedList<>();
 
         // for every new dfa state
         while (true) {
@@ -77,14 +101,14 @@ public class DFA implements Serializable {
             boolean added = false;
 
             // calc new state set for every symbol
-            for (Map.Entry<Integer, List<Clause>> entry : states.entrySet()) {
+            for (Integer newState : newStates) {
 
                 // calc new state set for current symbol
                 for (String symbol : symbols) {
 
-                    List<Clause> next = new ArrayList<>();
+                    List<Clause> next = new LinkedList<>();
 
-                    for (Clause clause : entry.getValue()) {
+                    for (Clause clause : states.get(newState)) {
 
                         List<Clause> transitionTo = epsilonNFA.getTransitionsFor(clause, symbol);
 
@@ -92,12 +116,11 @@ public class DFA implements Serializable {
                             continue;
                         }
 
-                        for (Clause state : transitionTo) {
-                            if (!next.contains(state)) {
-                                next.add(state);
+                        for (Clause nextClause : transitionTo) {
+                            if (!next.contains(nextClause)) {
+                                next.add(nextClause);
                             }
                         }
-
                     }
 
                     if (next.isEmpty()) {
@@ -106,47 +129,45 @@ public class DFA implements Serializable {
 
                     next = epsilonNFA.epsilonTranisitions(next);
 
-                    if (states.get(cnt).equals(next)) {
-                        continue;
+                    int from = newState;
+                    int to = -1;
+
+                    // && !tempNewStates.contains(cnt)
+
+                    if (!states.containsValue(next)) {
+
+                        to = ++cnt;
+                        tempNewStates.add(cnt);
+                        states.put(cnt, new LinkedList<>(next));
+
+                    } else {
+
+                        for (Map.Entry<Integer, List<Clause>> entry : states.entrySet()) {
+
+                            if (entry.getValue().equals(next)) {
+                                to = entry.getKey();
+                                break;
+                            }
+
+                        }
+
                     }
 
-                    ++cnt;
-                    states.put(cnt, next);
-                    transitions.put(new Pair(entry.getKey(), symbol), cnt);
+                    transitions.put(new Pair(from, symbol), to);
                     added = true;
                 }
 
             }
 
+            newStates.clear();
+            newStates = new LinkedList<>(tempNewStates);
+
             if (!added) {
                 break;
-            }
-
-            for (NewPair newPair : toAdd) {
-                states.put(newPair.getState(), newPair.getNext());
             }
 
         }
 
     }
 
-}
-
-class NewPair {
-
-    private Integer state;
-    private List<Clause> next;
-
-    public NewPair(Integer state, List<Clause> next) {
-        this.state = state;
-        this.next = next;
-    }
-
-    public Integer getState() {
-        return state;
-    }
-
-    public List<Clause> getNext() {
-        return next;
-    }
 }
