@@ -3,9 +3,7 @@ package hr.fer.ppj.lab2.model;
 import hr.fer.ppj.lab1.helper.EpsilonNFA;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 /**
  * http://www.cs.nuim.ie/~jpower/Courses/Previous/parsing/node9.html
@@ -26,7 +24,7 @@ public class DFA implements Serializable {
      */
     public DFA(EpsilonNFA epsilonNFA) {
         this.epsilonNFA = epsilonNFA;
-        this.symbols = epsilonNFA.getSymbols();
+        this.symbols = new LinkedList<>(epsilonNFA.getSymbols());
         symbols.remove(EpsilonNFA.epsilonSymbol);
         convertToDFA();
     }
@@ -78,34 +76,45 @@ public class DFA implements Serializable {
 
             boolean added = false;
 
-
             // calc new state set for every symbol
-            for (String symbol : symbols) {
-
-                List<Clause> next = new ArrayList<>();
+            for (Map.Entry<Integer, List<Clause>> entry : states.entrySet()) {
 
                 // calc new state set for current symbol
-                for (Clause nextState : nextStates) {
+                for (String symbol : symbols) {
 
-                    List<Clause> transitionTo = epsilonNFA.getTransitionsFor(nextState, symbol);
+                    List<Clause> next = new ArrayList<>();
 
-                    if (transitionTo == null) {
+                    for (Clause clause : entry.getValue()) {
+
+                        List<Clause> transitionTo = epsilonNFA.getTransitionsFor(clause, symbol);
+
+                        if (transitionTo == null) {
+                            continue;
+                        }
+
+                        for (Clause state : transitionTo) {
+                            if (!next.contains(state)) {
+                                next.add(state);
+                            }
+                        }
+
+                    }
+
+                    if (next.isEmpty()) {
                         continue;
                     }
 
-                    for (Clause state : transitionTo) {
-                        if (!next.contains(state)) {
-                            next.add(state);
-                        }
+                    next = epsilonNFA.epsilonTranisitions(next);
+
+                    if (states.get(cnt).equals(next)) {
+                        continue;
                     }
 
+                    ++cnt;
+                    states.put(cnt, next);
+                    transitions.put(new Pair(entry.getKey(), symbol), cnt);
+                    added = true;
                 }
-
-                next = epsilonNFA.epsilonTranisitions(next);
-
-                states.put(cnt, new Pair(next, symbol));
-                ++cnt;
-                added = true;
 
             }
 
@@ -113,8 +122,31 @@ public class DFA implements Serializable {
                 break;
             }
 
+            for (NewPair newPair : toAdd) {
+                states.put(newPair.getState(), newPair.getNext());
+            }
+
         }
 
     }
 
+}
+
+class NewPair {
+
+    private Integer state;
+    private List<Clause> next;
+
+    public NewPair(Integer state, List<Clause> next) {
+        this.state = state;
+        this.next = next;
+    }
+
+    public Integer getState() {
+        return state;
+    }
+
+    public List<Clause> getNext() {
+        return next;
+    }
 }

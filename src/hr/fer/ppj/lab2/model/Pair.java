@@ -1,7 +1,5 @@
 package hr.fer.ppj.lab2.model;
 
-import java.util.List;
-
 public class Pair {
 
     private Integer state;
@@ -12,7 +10,7 @@ public class Pair {
         this.sign = sign;
     }
 
-    public Integer getStates() {
+    public Integer getState() {
         return state;
     }
 
@@ -20,4 +18,14 @@ public class Pair {
         return sign;
     }
 
+    @Override
+    public int hashCode() {
+        return state.hashCode() + sign.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        Pair pair = (Pair) obj;
+        return state.equals(pair.getState()) && sign.equals(pair.getSign());
+    }
 }
