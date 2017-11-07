@@ -81,6 +81,7 @@ public class SA {
      * Method that starts the lexical analysis of given program
      */
     private static void runSyntaxAnalyser() {
+
     }
 
 }

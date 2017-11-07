@@ -2,9 +2,7 @@ package hr.fer.ppj.lab2;
 
 import hr.fer.ppj.lab1.helper.EpsilonNFA;
 import hr.fer.ppj.lab2.helper.InputProcessor;
-import hr.fer.ppj.lab2.model.DFA;
-import hr.fer.ppj.lab2.model.Grammar;
-import hr.fer.ppj.lab2.model.GrammarProduction;
+import hr.fer.ppj.lab2.model.*;
 
 import java.io.*;
 import java.util.HashMap;
@@ -31,6 +29,7 @@ public class GSA {
     public static List<String> terminalSymbols;
     public static List<String> syncSymbols;
     public static HashMap<String, List<GrammarProduction>> productionsMap;
+    public static HashMap<Pair,ParserAction> parserTable;
     private static Grammar grammar;
     private static EpsilonNFA epsilonNFA;
     private static DFA dfa;
@@ -54,9 +53,11 @@ public class GSA {
             grammar = new Grammar();
             epsilonNFA = new EpsilonNFA(grammar);
             dfa = new DFA(epsilonNFA);
-//
-//            serializeData();
-//
+
+            generateParserActionTable();
+
+            serializeData();
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -90,6 +91,7 @@ public class GSA {
             oos.writeObject(grammar);
             oos.writeObject(epsilonNFA);
             oos.writeObject(dfa);
+            oos.writeObject(parserTable);
 
             fos.close();
             oos.close();
@@ -97,6 +99,13 @@ public class GSA {
         } catch (IOException e) {
             throw new IOException(e.getMessage());
         }
+
+    }
+
+    /**
+     *
+     */
+    private static void generateParserActionTable() {
 
     }
 
