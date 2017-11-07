@@ -489,7 +489,9 @@ public class EpsilonNFA implements Serializable {
 
         for (int i = 0; i < numOfClauses; ++i) {
             for (int j = 0; j < numOfInputSymbols; ++j) {
-                System.out.println(transitions[i][j]);
+                if (transitions[i][j] != null) {
+                    System.out.println(transitions[i][j]);
+                }
             }
         }
 
