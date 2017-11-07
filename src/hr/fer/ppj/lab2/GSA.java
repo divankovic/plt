@@ -53,7 +53,7 @@ public class GSA {
 
             grammar = new Grammar();
             epsilonNFA = new EpsilonNFA(grammar);
-//            dfa = new DFA(epsilonNFA);
+            dfa = new DFA(epsilonNFA);
 //
 //            serializeData();
 //

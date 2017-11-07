@@ -4,16 +4,16 @@ import java.util.List;
 
 public class Pair {
 
-    private List<Clause> states;
+    private Integer state;
     private String sign;
 
-    public Pair(List<Clause> states, String sign) {
-        this.states = states;
+    public Pair(Integer state, String sign) {
+        this.state = state;
         this.sign = sign;
     }
 
-    public List<Clause> getStates() {
-        return states;
+    public Integer getStates() {
+        return state;
     }
 
     public String getSign() {

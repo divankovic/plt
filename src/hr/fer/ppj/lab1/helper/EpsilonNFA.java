@@ -409,7 +409,7 @@ public class EpsilonNFA implements Serializable {
         clauseMap = grammar.getClauseMap();
 
         states = new LinkedList<>();
-        states.add(new Clause(startingState,new LinkedList<>(), new LinkedList<>()));
+        states.add(new Clause(startingState, new LinkedList<>(), new LinkedList<>()));
         for (List<Clause> clauseList : clauseMap.values()) {
             for (Clause clause : clauseList) {
                 if (!states.contains(clause)) {
@@ -436,20 +436,20 @@ public class EpsilonNFA implements Serializable {
 
         for (Clause clause : clauses) {
 
-            if(clause.getLeftSide().equals(startingState)){
+            if (clause.getLeftSide().equals(startingState)) {
                 List<GrammarProduction> productions = grammar.getProductionMap().get(initialNonTerminalSymbol);
                 LinkedList<Clause> transition = transitions[0][inputSymbols.indexOf(epsilonSymbol)];
-                for(GrammarProduction production : productions){
+                for (GrammarProduction production : productions) {
                     List<String> rightSide = new LinkedList(production.getRightSide());
-                    if(rightSide.get(0).equals(epsilonSymbol)){
+                    if (rightSide.get(0).equals(epsilonSymbol)) {
                         rightSide.clear();
                         rightSide.add(dotSymbol);
-                    }else{
+                    } else {
                         rightSide.add(0, dotSymbol);
                     }
-                    Clause newClause = new Clause(initialNonTerminalSymbol,rightSide,new LinkedList<>());
+                    Clause newClause = new Clause(initialNonTerminalSymbol, rightSide, new LinkedList<>());
 
-                    if(transition == null){
+                    if (transition == null) {
                         transition = new LinkedList<>();
                         transitions[0][inputSymbols.indexOf(epsilonSymbol)] = transition;
                     }
@@ -487,7 +487,7 @@ public class EpsilonNFA implements Serializable {
             List<GrammarProduction> productions = grammar.getProductionMap().get(transitionSymbol);
 
             LinkedList<Clause> nextEpsilonClauses = transitions[clauses.indexOf(clause)][inputSymbols.indexOf(epsilonSymbol)];
-            if(nextEpsilonClauses == null){
+            if (nextEpsilonClauses == null) {
                 nextEpsilonClauses = new LinkedList<>();
                 transitions[clauses.indexOf(clause)][inputSymbols.indexOf(epsilonSymbol)] = nextEpsilonClauses;
             }
@@ -495,10 +495,10 @@ public class EpsilonNFA implements Serializable {
             for (GrammarProduction grammarProduction : productions) {
 
                 List<String> rightSide = new LinkedList(grammarProduction.getRightSide());
-                if(rightSide.get(0).equals(epsilonSymbol)){
+                if (rightSide.get(0).equals(epsilonSymbol)) {
                     rightSide.clear();
                     rightSide.add(dotSymbol);
-                }else{
+                } else {
                     rightSide.add(0, dotSymbol);
                 }
 
@@ -530,19 +530,43 @@ public class EpsilonNFA implements Serializable {
 
     }
 
-    public List<Clause> getTransitionsFor(Clause nextState, String symbol){
+    public List<Clause> getTransitionsFor(Clause nextState, String symbol) {
         return transitions[states.indexOf(nextState)][inputSymbols.indexOf(symbol)];
     }
 
-    public List<String> getSymbols(){
+    public List<String> getSymbols() {
         return inputSymbols;
     }
 
-    public List<Clause> getStates(){
+    public List<Clause> getStates() {
         return states;
     }
 
-    public static List<Clause> epsilonTranisitions(List<Clause> clauses){
-        return null;
+    public List<Clause> epsilonTranisitions(List<Clause> clauses) {
+
+        Stack<Clause> stack = new Stack<>();
+        clauses.forEach(stack::push);
+
+        while (!stack.empty()) {
+
+            Clause state = stack.pop();
+            List<Clause> states = this.getTransitionsFor(state, epsilonSymbol);
+
+            if (states != null) {
+                states.forEach(y -> {
+                    if (!clauses.contains(y)) {
+                        clauses.add(y);
+                        stack.push(y);
+                    }
+                });
+            }
+
+        }
+
+        return clauses;
+    }
+
+    public Clause getStartingState() {
+        return states.get(0);
     }
 }

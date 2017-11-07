@@ -6,7 +6,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * http://www.cs.nuim.ie/~jpower/Courses/Previous/parsing/node9.html
@@ -28,6 +27,7 @@ public class DFA implements Serializable {
     public DFA(EpsilonNFA epsilonNFA) {
         this.epsilonNFA = epsilonNFA;
         this.symbols = epsilonNFA.getSymbols();
+        symbols.remove(EpsilonNFA.epsilonSymbol);
         convertToDFA();
     }
 
@@ -37,22 +37,47 @@ public class DFA implements Serializable {
     private void convertToDFA() {
 
         List<Clause> tmp = new ArrayList<>();
-        tmp.add(epsilonNFA.getStates().get(0));
-        initialState = EpsilonNFA.epsilonTranisitions(tmp);
+        tmp.add(epsilonNFA.getStartingState());
+        initialState = epsilonNFA.epsilonTranisitions(tmp);
 
-        HashMap<Integer, Pair> states = new HashMap<>();
-        states.put(cnt, new Pair(initialState, EpsilonNFA.epsilonSymbol));
-        ++cnt;
+        HashMap<Pair, Integer> transitions = new HashMap<>();
+
+        HashMap<Integer, List<Clause>> states = new HashMap<>();
+        states.put(cnt, initialState);
+
+        for (String symbol : symbols) {
+
+            List<Clause> next = new ArrayList<>();
+
+            // calc new state set for current symbol
+            for (Clause nextState : initialState) {
+
+                List<Clause> transitionTo = epsilonNFA.getTransitionsFor(nextState, symbol);
+
+                if (transitionTo == null) {
+                    continue;
+                }
+
+                for (Clause state : transitionTo) {
+                    if (!next.contains(state)) {
+                        next.add(state);
+                    }
+                }
+
+            }
+
+            next = epsilonNFA.epsilonTranisitions(next);
+            ++cnt;
+            states.put(cnt, next);
+
+            transitions.put(new Pair(0, symbol), cnt);
+        }
 
         // for every new dfa state
-        for (Map.Entry<Integer, Pair> entry : states.entrySet()) {
+        while (true) {
 
             boolean added = false;
-            List<Clause> nextStates = entry.getValue().getStates();
 
-            if (nextStates == null) {
-                continue;
-            }
 
             // calc new state set for every symbol
             for (String symbol : symbols) {
@@ -64,6 +89,10 @@ public class DFA implements Serializable {
 
                     List<Clause> transitionTo = epsilonNFA.getTransitionsFor(nextState, symbol);
 
+                    if (transitionTo == null) {
+                        continue;
+                    }
+
                     for (Clause state : transitionTo) {
                         if (!next.contains(state)) {
                             next.add(state);
@@ -72,7 +101,7 @@ public class DFA implements Serializable {
 
                 }
 
-                next = EpsilonNFA.epsilonTranisitions(next);
+                next = epsilonNFA.epsilonTranisitions(next);
 
                 states.put(cnt, new Pair(next, symbol));
                 ++cnt;
