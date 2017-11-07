@@ -187,7 +187,7 @@ public class DFA implements Serializable {
      */
     public Integer getTransition(Integer state, String symbol) {
         Integer newState = transitions.get(new Pair(state, symbol));
-        return newState == null ? newState : -1;
+        return newState != null ? newState : -1;
     }
 
 }
