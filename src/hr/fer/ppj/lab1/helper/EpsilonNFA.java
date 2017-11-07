@@ -11,6 +11,8 @@ import hr.fer.ppj.lab2.model.GrammarProduction;
 import java.io.Serializable;
 import java.util.*;
 
+import static hr.fer.ppj.lab2.model.Grammar.dotSymbol;
+
 /**
  * Represents an epsilon nondeterministic finite automaton
  */
@@ -418,7 +420,7 @@ public class EpsilonNFA implements Serializable {
         inputSymbols = new LinkedList<>();
         inputSymbols.addAll(GSA.nonterminalSymbols);
         inputSymbols.addAll(GSA.terminalSymbols);
-        inputSymbols.add(String.valueOf(epsilonSign));
+        inputSymbols.add(String.valueOf(epsilonSymbol));
     }
 
     private void startBuildingTransitions() {
@@ -432,14 +434,19 @@ public class EpsilonNFA implements Serializable {
 
         transitions = (LinkedList<Clause>[][]) new LinkedList[numOfClauses][numOfInputSymbols];
 
-        for (Clause clause : states) {
+        for (Clause clause : clauses) {
 
             if(clause.getLeftSide().equals(startingState)){
                 List<GrammarProduction> productions = grammar.getProductionMap().get(initialNonTerminalSymbol);
                 List<Clause> transition = transitions[0][inputSymbols.indexOf(epsilonSymbol)];
                 for(GrammarProduction production : productions){
                     List<String> rightSide = production.getRightSide();
-                    rightSide.add(0,Grammar.dotSymbol);
+                    if(rightSide.get(0).equals(epsilonSymbol)){
+                        rightSide.clear();
+                        rightSide.add(dotSymbol);
+                    }else{
+                        rightSide.add(0, dotSymbol);
+                    }
                     Clause newClause = new Clause(initialNonTerminalSymbol,rightSide,new LinkedList<>());
 
                     if(transition == null){
@@ -450,8 +457,8 @@ public class EpsilonNFA implements Serializable {
                 continue;
             }
 
-            int transitionSymbolIndex = clause.getRightSide().indexOf(Grammar.dotSymbol) + 1;
-            if ((transitionSymbolIndex + 1) >= clause.getRightSide().size()) {
+            int transitionSymbolIndex = clause.getRightSide().indexOf(dotSymbol) + 1;
+            if (transitionSymbolIndex >= clause.getRightSide().size()) {
                 continue;
             }
 
@@ -483,7 +490,12 @@ public class EpsilonNFA implements Serializable {
             for (GrammarProduction grammarProduction : productions) {
 
                 List<String> rightSide = grammarProduction.getRightSide();
-                rightSide.add(0, Grammar.dotSymbol);
+                if(rightSide.get(0).equals(epsilonSymbol)){
+                    rightSide.clear();
+                    rightSide.add(dotSymbol);
+                }else{
+                    rightSide.add(0, dotSymbol);
+                }
 
                 List<String> clauseSublist;
                 if (transitionSymbolIndex + 1 < clause.getRightSide().size()) {

@@ -261,15 +261,16 @@ public class Grammar implements Serializable {
     }
 
     public Clause shiftDotForClause(Clause clause) {
-        List<String> symbols = clause.getSymbols();
-        int index = symbols.indexOf(dotSymbol);
-        symbols.remove(dotSymbol);
-        if (index == symbols.size() - 1) {
-            symbols.add(dotSymbol);
+        List<String> elements = new LinkedList<>();
+        elements.addAll(clause.getRightSide());
+        int index = elements.indexOf(dotSymbol);
+        elements.remove(dotSymbol);
+        if (index == elements.size() - 1) {
+            elements.add(dotSymbol);
         } else {
-            symbols.add(index + 1, dotSymbol);
+            elements.add(index + 1, dotSymbol);
         }
 
-        return new Clause(clause.getLeftSide(), clause.getRightSide(), symbols);
+        return new Clause(clause.getLeftSide(), elements, clause.getSymbols());
     }
 }
