@@ -23,7 +23,7 @@ public class Grammar implements Serializable {
         this.productionMap = GSA.productionsMap;
         initialize();
 
-        printTable();
+        //printTable();
     }
 
     public HashMap<String, List<GrammarProduction>> getProductionMap() {

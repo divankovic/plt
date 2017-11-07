@@ -1,5 +1,6 @@
 package hr.fer.ppj.lab2.helper;
 
+import hr.fer.ppj.lab2.GSA;
 import hr.fer.ppj.lab2.model.GrammarProduction;
 
 import java.util.*;
@@ -38,6 +39,7 @@ public class InputProcessor {
         line = scanner.nextLine();
         parts = line.replace("%V", "").trim().split("\\s+");
         Collections.addAll(nonterminalSymbols, parts);
+        nonterminalSymbols.add(0, GSA.startingNonTerminalSymbol);
 
         line = scanner.nextLine();
         parts = line.replace("%T", "").trim().split("\\s+");
@@ -50,6 +52,11 @@ public class InputProcessor {
         String rightSide;
         String leftSide = null;
 
+        LinkedList<String> right = new LinkedList<>();
+        right.add(nonterminalSymbols.get(1));
+        LinkedList<GrammarProduction> productions = new LinkedList<>();
+        productions.add(new GrammarProduction(nonterminalSymbols.get(0),right));
+        productionsMap.put(nonterminalSymbols.get(0),productions);
         while (scanner.hasNextLine()) {
 
             line = scanner.nextLine();

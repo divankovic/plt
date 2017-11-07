@@ -409,6 +409,7 @@ public class EpsilonNFA implements Serializable {
         clauseMap = grammar.getClauseMap();
 
         states = new LinkedList<>();
+        states.add(new Clause(startingState,new LinkedList<>(), new LinkedList<>()));
         for (List<Clause> clauseList : clauseMap.values()) {
             for (Clause clause : clauseList) {
                 if (!states.contains(clause)) {
@@ -426,7 +427,6 @@ public class EpsilonNFA implements Serializable {
     private void startBuildingTransitions() {
 
         List<Clause> clauses = new LinkedList<>();
-        clauses.add(new Clause(startingState,new LinkedList<>(), new LinkedList<>()));
         clauses.addAll(states);
 
         int numOfClauses = clauses.size();
@@ -438,7 +438,7 @@ public class EpsilonNFA implements Serializable {
 
             if(clause.getLeftSide().equals(startingState)){
                 List<GrammarProduction> productions = grammar.getProductionMap().get(initialNonTerminalSymbol);
-                List<Clause> transition = transitions[0][inputSymbols.indexOf(epsilonSymbol)];
+                LinkedList<Clause> transition = transitions[0][inputSymbols.indexOf(epsilonSymbol)];
                 for(GrammarProduction production : productions){
                     List<String> rightSide = new LinkedList(production.getRightSide());
                     if(rightSide.get(0).equals(epsilonSymbol)){
@@ -451,6 +451,7 @@ public class EpsilonNFA implements Serializable {
 
                     if(transition == null){
                         transition = new LinkedList<>();
+                        transitions[0][inputSymbols.indexOf(epsilonSymbol)] = transition;
                     }
                     transition.add(newClause);
                 }
