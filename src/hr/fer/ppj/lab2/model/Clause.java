@@ -35,4 +35,13 @@ public class Clause extends GrammarProduction implements Comparable<Clause>,Seri
         Clause clause = (Clause) obj;
         return this.leftSide.equals(clause.leftSide) && this.rightSide.equals(clause.rightSide);
     }
+
+    public void setSymbols(List<String> symbols){
+        this.symbols = symbols;
+    }
+
+    @Override
+    public String toString() {
+        return super.toString() + symbols.toString();
+    }
 }
