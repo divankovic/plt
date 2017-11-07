@@ -1,6 +1,5 @@
 package hr.fer.ppj.lab1.helper;
 
-import com.sun.scenario.effect.impl.state.LinearConvolveKernel;
 import hr.fer.ppj.lab1.model.Regex;
 import hr.fer.ppj.lab1.model.Rule;
 import hr.fer.ppj.lab1.model.TransitionKey;
@@ -23,9 +22,8 @@ public class EpsilonNFA implements Serializable {
     private LinkedList<Clause>[][] transitions;
     private HashMap<String, List<Clause>> clauseMap;
     private List<Clause> states;
-    private List<Clause> finalStates;
     private Set<String> inputSymbols;
-    private String initialState;
+    private String initialNonTerminalSymbol;
 
 
     //LA
@@ -405,7 +403,7 @@ public class EpsilonNFA implements Serializable {
     }
 
     private void prepareData() {
-        initialState = GSA.nonterminalSymbols.get(0);
+        initialNonTerminalSymbol = GSA.nonterminalSymbols.get(0);
         clauseMap = grammar.getClauseMap();
 
         states = new LinkedList<>();
@@ -416,8 +414,6 @@ public class EpsilonNFA implements Serializable {
                 }
             }
         }
-
-        finalStates = states;
 
         inputSymbols = new TreeSet<>();
         inputSymbols.addAll(GSA.nonterminalSymbols);
@@ -443,13 +439,12 @@ public class EpsilonNFA implements Serializable {
         for (Clause clause : states) {
 
             if(clause.getLeftSide().equals(startingState)){
-                String startNonTerminalSymbol = GSA.nonterminalSymbols.get(0);
-                List<GrammarProduction> productions = grammar.getProductionMap().get(startNonTerminalSymbol);
+                List<GrammarProduction> productions = grammar.getProductionMap().get(initialNonTerminalSymbol);
                 List<Clause> transition = transitions[0][symbols.indexOf(epsilonSymbol)];
                 for(GrammarProduction production : productions){
                     List<String> rightSide = production.getRightSide();
                     rightSide.add(0,Grammar.dotSymbol);
-                    Clause newClause = new Clause(startNonTerminalSymbol,rightSide,new LinkedList<>());
+                    Clause newClause = new Clause(initialNonTerminalSymbol,rightSide,new LinkedList<>());
 
                     if(transition == null){
                         transition = new LinkedList<>();
@@ -524,6 +519,17 @@ public class EpsilonNFA implements Serializable {
 
     public List<Clause>[][] getTransitions(){
         return transitions;
+    }
 
+    public List<String> getSymbols(){
+        return new LinkedList<>(inputSymbols);
+    }
+
+    public List<Clause> getStates(){
+        return states;
+    }
+
+    public static List<Clause> epsilonTranisitions(List<Clause> clauses){
+        return null;
     }
 }
