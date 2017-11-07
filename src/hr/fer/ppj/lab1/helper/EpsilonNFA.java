@@ -524,5 +524,6 @@ public class EpsilonNFA implements Serializable {
 
     public List<Clause>[][] getTransitions(){
         return transitions;
+
     }
 }
