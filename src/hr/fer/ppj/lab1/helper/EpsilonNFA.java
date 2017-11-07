@@ -1,5 +1,6 @@
 package hr.fer.ppj.lab1.helper;
 
+import com.sun.scenario.effect.impl.state.LinearConvolveKernel;
 import hr.fer.ppj.lab1.model.Regex;
 import hr.fer.ppj.lab1.model.Rule;
 import hr.fer.ppj.lab1.model.TransitionKey;
@@ -22,7 +23,7 @@ public class EpsilonNFA implements Serializable {
     //SA
     public static String epsilonSymbol = "$";
     private String startingState = "q0";
-    private HashMap<ClauseKey,List<Clause>> transitions = new HashMap<>();
+    private HashMap<ClauseKey, List<Clause>> transitions = new HashMap<>();
     //private LinkedList<Clause>[][] transitions;
     private HashMap<String, List<Clause>> clauseMap;
     private List<Clause> states;
@@ -442,18 +443,18 @@ public class EpsilonNFA implements Serializable {
             addDotFirst(rightSide);
 
             Clause newClause = new Clause(initialNonTerminalSymbol, rightSide, new LinkedList<>());
-            if(!clauses.contains(newClause)){
+            if (!clauses.contains(newClause)) {
                 clauses.add(newClause);
             }
             transition.add(newClause);
 
         }
-        transitions.put(new ClauseKey(clauses.get(0),epsilonSymbol),transition);
+        transitions.put(new ClauseKey(clauses.get(0), epsilonSymbol), transition);
         newClauses.addAll(transition);
 
-        while(true){
+        while (true) {
             LinkedList<Clause> newClauses1 = new LinkedList<>();
-            for(Clause clause : newClauses){
+            for (Clause clause : newClauses) {
 
                 int transitionSymbolIndex = clause.getRightSide().indexOf(dotSymbol) + 1;
                 if (transitionSymbolIndex >= clause.getRightSide().size()) {
@@ -466,12 +467,12 @@ public class EpsilonNFA implements Serializable {
                 //add moving dot transitions
                 LinkedList<Clause> transition1 = new LinkedList<>();
                 Clause newClause = grammar.shiftDotForClause(clause);
-                if(!clauses.contains(newClause)){
+                if (!clauses.contains(newClause)) {
                     clauses.add(newClause);
                     newClauses1.add(newClause);
                 }
                 transition1.add(newClause);
-                transitions.put(new ClauseKey(clause,transitionSymbol),transition1);
+                transitions.put(new ClauseKey(clause, transitionSymbol), transition1);
 
                 //epsilon transitions
 
@@ -495,31 +496,31 @@ public class EpsilonNFA implements Serializable {
                     }
 
                     if (clauseSublist.isEmpty() || grammar.generatesEmpy(clauseSublist)) {
-                        for(String symbol : clause.getSymbols()){
-                            if(!symbolSet.contains(symbol)){
+                        for (String symbol : clause.getSymbols()) {
+                            if (!symbolSet.contains(symbol)) {
                                 symbolSet.add(symbol);
                             }
                         }
                     }
 
                     Clause nClause = new Clause(transitionSymbol, rightSide, symbolSet);
-                    if(!clauses.contains(nClause)){
+                    if (!clauses.contains(nClause)) {
                         clauses.add(nClause);
                         newClauses1.add(nClause);
                     }
                     epsilonTransitions.add(nClause);
                 }
-                transitions.put(new ClauseKey(clause,epsilonSymbol),epsilonTransitions);
+                transitions.put(new ClauseKey(clause, epsilonSymbol), epsilonTransitions);
             }
-            if(newClauses1.isEmpty()){
+            if (newClauses1.isEmpty()) {
                 break;
-            }else{
+            } else {
                 newClauses.clear();
                 newClauses.addAll(newClauses1);
             }
         }
-        for(Map.Entry<ClauseKey,List<Clause>> entry : transitions.entrySet()){
-            System.out.println(entry.getKey()+" -> "+entry.getValue());
+        for (Map.Entry<ClauseKey, List<Clause>> entry : transitions.entrySet()) {
+            System.out.println(entry.getKey() + " -> " + entry.getValue());
         }
         System.out.println();
         states = clauses;
@@ -537,7 +538,7 @@ public class EpsilonNFA implements Serializable {
     }
 
     public List<Clause> getTransitionsFor(Clause nextState, String symbol) {
-        return new LinkedList<>(transitions.get(new ClauseKey(nextState,symbol)));
+        return new LinkedList<>(transitions.get(new ClauseKey(nextState, symbol)));
     }
 
     public List<String> getSymbols() {
@@ -550,8 +551,10 @@ public class EpsilonNFA implements Serializable {
 
     public List<Clause> epsilonTranisitions(List<Clause> clauses) {
 
+        List<Clause> newClauses = new LinkedList<>(clauses);
         Stack<Clause> stack = new Stack<>();
-        clauses.forEach(stack::push);
+
+        newClauses.forEach(stack::push);
 
         while (!stack.empty()) {
 
@@ -560,8 +563,8 @@ public class EpsilonNFA implements Serializable {
 
             if (states != null) {
                 states.forEach(y -> {
-                    if (!clauses.contains(y)) {
-                        clauses.add(y);
+                    if (!newClauses.contains(y)) {
+                        newClauses.add(y);
                         stack.push(y);
                     }
                 });
