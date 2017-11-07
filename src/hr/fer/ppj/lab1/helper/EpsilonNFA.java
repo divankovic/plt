@@ -442,7 +442,9 @@ public class EpsilonNFA implements Serializable {
             LinkedList<String> rightSide = new LinkedList<>(production.getRightSide());
             addDotFirst(rightSide);
 
-            Clause newClause = new Clause(initialNonTerminalSymbol, rightSide, new LinkedList<>());
+            LinkedList<String> symbols = new LinkedList<>();
+            symbols.add(Grammar.endOfLine);
+            Clause newClause = new Clause(initialNonTerminalSymbol, rightSide, symbols);
             if (!clauses.contains(newClause)) {
                 clauses.add(newClause);
             }
@@ -520,11 +522,11 @@ public class EpsilonNFA implements Serializable {
             }
         }
         states = clauses;
-        /*for (Map.Entry<ClauseKey, List<Clause>> entry : transitions.entrySet()) {
+        for (Map.Entry<ClauseKey, List<Clause>> entry : transitions.entrySet()) {
             System.out.println(entry.getKey() + " -> " + entry.getValue());
         }
         System.out.println();
-        states.forEach(System.out::println);*/
+        states.forEach(System.out::println);
 
     }
 

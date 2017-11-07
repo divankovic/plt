@@ -11,6 +11,7 @@ import java.util.Map;
 
 public class Grammar implements Serializable {
 
+    public static final String endOfLine = "CRLF";
     public static String dotSymbol = "*";
     private List<String> emptyNonTerminalSymbols;
     private int[][] startsWithSymbolTable;
