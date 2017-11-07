@@ -48,7 +48,6 @@ public class DFA implements Serializable {
     private void convertToDFA() {
 
         symbols.remove(EpsilonNFA.epsilonSymbol);
-        symbols.remove(0);
 
         List<Clause> tmp = new ArrayList<>();
         tmp.add(epsilonNFA.getStartingState());
