@@ -15,6 +15,7 @@ public class InputProcessor {
     private List<String> terminalSymbols;
     private List<String> syncSymbols;
     private HashMap<String, List<GrammarProduction>> productionsMap;
+    private List<GrammarProduction> productionsInOrder;
 
     /**
      *
@@ -52,11 +53,17 @@ public class InputProcessor {
         String rightSide;
         String leftSide = null;
 
+        productionsInOrder = new LinkedList<>();
+
         LinkedList<String> right = new LinkedList<>();
         right.add(nonterminalSymbols.get(1));
         LinkedList<GrammarProduction> productions = new LinkedList<>();
-        productions.add(new GrammarProduction(nonterminalSymbols.get(0),right));
+
+        GrammarProduction startProduction = new GrammarProduction(nonterminalSymbols.get(0),right);
+        productionsInOrder.add(startProduction);
+        productions.add(startProduction);
         productionsMap.put(nonterminalSymbols.get(0),productions);
+
         while (scanner.hasNextLine()) {
 
             line = scanner.nextLine();
@@ -74,7 +81,10 @@ public class InputProcessor {
 
             List<String> rightSides = new LinkedList<>();
             rightSides.addAll(Arrays.asList(rightSide.trim().split("\\s+")));
-            productionsMap.get(leftSide).add(new GrammarProduction(leftSide, rightSides));
+
+            GrammarProduction newProduction = new GrammarProduction(leftSide, rightSides);
+            productionsMap.get(leftSide).add(newProduction);
+            productionsInOrder.add(newProduction);
         }
 
     }
@@ -93,6 +103,10 @@ public class InputProcessor {
 
     public HashMap<String, List<GrammarProduction>> getProductionsMap() {
         return productionsMap;
+    }
+
+    public List<GrammarProduction> getProductionsInOrder(){
+        return productionsInOrder;
     }
 
 }

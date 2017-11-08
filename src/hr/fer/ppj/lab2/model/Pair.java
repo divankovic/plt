@@ -1,6 +1,8 @@
 package hr.fer.ppj.lab2.model;
 
-public class Pair {
+import java.io.Serializable;
+
+public class Pair implements Serializable{
 
     private Integer state;
     private String sign;
@@ -27,5 +29,10 @@ public class Pair {
     public boolean equals(Object obj) {
         Pair pair = (Pair) obj;
         return state.equals(pair.getState()) && sign.equals(pair.getSign());
+    }
+
+    @Override
+    public String toString() {
+        return "("+state+", "+sign+")";
     }
 }

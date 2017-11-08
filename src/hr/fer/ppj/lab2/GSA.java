@@ -6,10 +6,7 @@ import hr.fer.ppj.lab2.helper.InputProcessor;
 import hr.fer.ppj.lab2.model.*;
 
 import java.io.*;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 /**
  * Class for generation of syntax analyser.
@@ -31,6 +28,7 @@ public class GSA {
     public static List<String> terminalSymbols;
     public static List<String> syncSymbols;
     public static HashMap<String, List<GrammarProduction>> productionsMap;
+    public static List<GrammarProduction> productionsInOrder;
     public static HashMap<Pair, ParserAction> parserTable;
     private static Grammar grammar;
     private static EpsilonNFA epsilonNFA;
@@ -51,12 +49,13 @@ public class GSA {
             terminalSymbols = inputProcessor.getTerminalSymbols();
             syncSymbols = inputProcessor.getSyncSymbols();
             productionsMap = inputProcessor.getProductionsMap();
+            productionsInOrder = inputProcessor.getProductionsInOrder();
 
             grammar = new Grammar();
             epsilonNFA = new EpsilonNFA(grammar);
             dfa = new DFA(epsilonNFA);
 
-            generateParserActionTable();
+           generateParserActionTable();
 
             serializeData();
 
@@ -109,6 +108,10 @@ public class GSA {
      */
     private static void generateParserActionTable() {
 
+        //generating ambiguity errors messages not implemented
+
+        parserTable = new HashMap<>();
+
         int dfaStates = dfa.getStatesSize();
 
         List<Clause> accClauses = epsilonNFA.returnAcceptableClauses();
@@ -133,27 +136,60 @@ public class GSA {
 
                 if (!symbolAfterDot.equals("")) {
                     ParserActionType type;
-                    if (terminalSymbols.contains(symbolAfterDot)) {
-                        type = ParserActionType.SHIFT;
-
-                    } else {
-                        type = ParserActionType.PUT;
-                    }
                     int nextState = dfa.getTransition(i, symbolAfterDot);
-                    if (nextState != -1) {
-                        parserTable.put(new Pair(i, symbolAfterDot), new ParserAction(String.valueOf(nextState), type));
+                    Pair pair = new Pair(i, symbolAfterDot);
+                    if(nextState!=-1) {
+                        if (terminalSymbols.contains(symbolAfterDot)) {
+                            type = ParserActionType.SHIFT;
+                            //if mapped to reduce, remove mapping and map to shift
+                            //(solving shift/reduce ambiguity)
+                            if(parserTable.get(pair)!=null){
+                                if(parserTable.get(pair).getParserActionType().equals(ParserActionType.REDUCE)) {
+                                    parserTable.remove(pair);
+                                }
+                            }
+                            parserTable.put(pair, new ParserAction(String.valueOf(nextState), type));
+                        } else {
+                            type = ParserActionType.PUT;
+                            parserTable.put(pair, new ParserAction(String.valueOf(nextState), type));
+                        }
                     }
                 } else {
                     List<String> symbols = clause.getSymbols();
                     for (String symbol : symbols) {
+                        Pair pair = new Pair(i, symbol);
+
                         List<String> undottedRightSide = new LinkedList<>(clause.getRightSide());
                         undottedRightSide.remove(Grammar.dotSymbol);
+                        if(undottedRightSide.isEmpty()){
+                            undottedRightSide.add(EpsilonNFA.epsilonSymbol);
+                        }
                         StringBuilder rightSideBuilder = new StringBuilder();
-                        for (String element : undottedRightSide) {
-                            rightSideBuilder.append(element);
+                        for(int j=0,n=undottedRightSide.size();j<n;j++){
+
+                            rightSideBuilder.append(undottedRightSide.get(j));
+                            if(j!=n-1){
+                                rightSideBuilder.append(" ");
+                            }
+
                         }
                         String rightSide = rightSideBuilder.toString();
-                        parserTable.put(new Pair(i, symbol), new ParserAction(clause.getLeftSide() + "->" + rightSide, ParserActionType.REDUCE));
+
+                        ParserAction action = parserTable.get(pair);
+                        if (action != null) {
+                            //solving reduce/reduce ambiguity and shift/reduce ambiguity
+                            if(action.getParserActionType().equals(ParserActionType.REDUCE)){
+                                GrammarProduction reduction = parseProduction(action.getArgument());
+                                GrammarProduction newReduction = new GrammarProduction(clause.getLeftSide(),undottedRightSide);
+
+                                if(productionsInOrder.indexOf(newReduction)<productionsInOrder.indexOf(reduction)){
+                                    parserTable.remove(pair);
+                                    parserTable.put(pair, new ParserAction(clause.getLeftSide()+"->"+rightSide,ParserActionType.REDUCE));
+                                }
+                            }
+                        }else {
+                            parserTable.put(pair, new ParserAction(clause.getLeftSide() + "->" + rightSide, ParserActionType.REDUCE));
+                        }
                     }
                 }
 
@@ -163,6 +199,16 @@ public class GSA {
 
         }
 
+    }
+
+    private static GrammarProduction parseProduction(String argument) {
+        String[] elements = argument.split("->");
+
+        String[] symbols = elements[1].split(" ");
+        List<String> rightSide = new LinkedList<>();
+        rightSide.addAll(Arrays.asList(symbols));
+
+        return new GrammarProduction(elements[0],rightSide);
     }
 
 }

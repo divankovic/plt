@@ -1,6 +1,8 @@
 package hr.fer.ppj.lab2.model;
 
-public class ClauseKey {
+import java.io.Serializable;
+
+public class ClauseKey implements Serializable{
     private Clause clause;
     private String key;
 

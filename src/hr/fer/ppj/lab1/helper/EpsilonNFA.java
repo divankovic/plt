@@ -21,10 +21,7 @@ public class EpsilonNFA implements Serializable {
 
     //SA
     public static String epsilonSymbol = "$";
-    private String startingState = "q0";
     private HashMap<ClauseKey, List<Clause>> transitions = new HashMap<>();
-    //private LinkedList<Clause>[][] transitions;
-    private HashMap<String, List<Clause>> clauseMap;
     private List<Clause> states;
     private List<String> inputSymbols;
     private String initialNonTerminalSymbol;
@@ -408,17 +405,6 @@ public class EpsilonNFA implements Serializable {
 
     private void prepareData() {
         initialNonTerminalSymbol = GSA.nonterminalSymbols.get(0);
-        clauseMap = grammar.getClauseMap();
-
-        states = new LinkedList<>();
-        states.add(new Clause(startingState, new LinkedList<>(), new LinkedList<>()));
-        for (List<Clause> clauseList : clauseMap.values()) {
-            for (Clause clause : clauseList) {
-                if (!states.contains(clause)) {
-                    states.add(clause);
-                }
-            }
-        }
 
         inputSymbols = new LinkedList<>();
         inputSymbols.addAll(GSA.nonterminalSymbols);
@@ -430,28 +416,15 @@ public class EpsilonNFA implements Serializable {
     private void buildTransitions() {
 
         List<Clause> clauses = new LinkedList<>();
-        clauses.add(states.get(0));
+        List<String> startingRightSide = GSA.productionsInOrder.get(0).getRightSide();
+        List<String> startingSymbols = new LinkedList<>();
+        addDotFirst(startingRightSide);
+        startingSymbols.add(Grammar.endOfLine);
 
-        List<GrammarProduction> productions = grammar.getProductionMap().get(initialNonTerminalSymbol);
+        clauses.add(new Clause(initialNonTerminalSymbol,startingRightSide,startingSymbols));
 
-        //initial transition
         LinkedList<Clause> newClauses = new LinkedList<>();
-        LinkedList<Clause> transition = new LinkedList<>();
-        for (GrammarProduction production : productions) {
-            LinkedList<String> rightSide = new LinkedList<>(production.getRightSide());
-            addDotFirst(rightSide);
-
-            LinkedList<String> symbols = new LinkedList<>();
-            symbols.add(Grammar.endOfLine);
-            Clause newClause = new Clause(initialNonTerminalSymbol, rightSide, symbols);
-            if (!clauses.contains(newClause)) {
-                clauses.add(newClause);
-            }
-            transition.add(newClause);
-
-        }
-        transitions.put(new ClauseKey(clauses.get(0), epsilonSymbol), transition);
-        newClauses.addAll(transition);
+        newClauses.add(clauses.get(0));
 
         while (true) {
             LinkedList<Clause> newClauses1 = new LinkedList<>();
@@ -482,7 +455,7 @@ public class EpsilonNFA implements Serializable {
                     continue;
                 }
 
-                productions = GSA.productionsMap.get(transitionSymbol);
+                List<GrammarProduction> productions = GSA.productionsMap.get(transitionSymbol);
                 for (GrammarProduction production : productions) {
                     LinkedList<String> rightSide = new LinkedList<>(production.getRightSide());
                     addDotFirst(rightSide);
