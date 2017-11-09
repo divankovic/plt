@@ -22,4 +22,8 @@ public class State implements Serializable {
         return this.state.equals(another.state);
     }
 
+    @Override
+    public int hashCode() {
+        return state != null ? state.hashCode() : 0;
+    }
 }
