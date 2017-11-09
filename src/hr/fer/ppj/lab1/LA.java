@@ -16,7 +16,7 @@ public class LA {
     /**
      * Constants
      */
-    private final static String TEST_FILE_INPUT_PATH = "./src/hr/fer/ppj/lab1/res/in/simplePpjLang.in";
+    private final static String TEST_FILE_INPUT_PATH = "./src/hr/fer/ppj/lab1/res/in/svaki_drugi_a2.in";
     private final static String TEST_FILE_OUTPUT_PATH = "./src/hr/fer/ppj/lab1/res/out/LA_out.txt";
 
     /**
@@ -35,7 +35,7 @@ public class LA {
      */
     public static void main(String[] args) throws IOException {
 
-        setupStdIO();
+        //setupStdIO();
 
         try (Scanner scanner = new Scanner(System.in)) {
 
