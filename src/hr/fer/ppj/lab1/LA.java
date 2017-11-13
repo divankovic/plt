@@ -16,7 +16,7 @@ public class LA {
     /**
      * Constants
      */
-    private final static String TEST_FILE_INPUT_PATH = "./src/hr/fer/ppj/lab1/res/in/svaki_drugi_a2.in";
+    private final static String TEST_FILE_INPUT_PATH = "./src/hr/fer/ppj/lab1/res/in/1.lab/poredak/test.in";
     private final static String TEST_FILE_OUTPUT_PATH = "./src/hr/fer/ppj/lab1/res/out/LA_out.txt";
 
     /**
@@ -35,7 +35,7 @@ public class LA {
      */
     public static void main(String[] args) throws IOException {
 
-        //setupStdIO();
+        setupStdIO();
 
         try (Scanner scanner = new Scanner(System.in)) {
 
@@ -116,7 +116,7 @@ public class LA {
         //index of the acceptable ENFA in ENFA's list
         int acceptable = -1;
 
-        while (last <= program.length() - 2) { //char at program.lenght()-1 is \n so char at program.length()-2 is the last symbol of the program
+        while (last < program.length() - 1) {
             boolean empty = true;
             boolean accepts = false;
 
