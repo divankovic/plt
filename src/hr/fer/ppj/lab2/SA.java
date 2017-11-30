@@ -1,7 +1,15 @@
 package hr.fer.ppj.lab2;
 
+import hr.fer.ppj.lab2.model.Pair;
+import hr.fer.ppj.lab2.model.ParserAction;
+import hr.fer.ppj.lab2.model.ParserNode;
+import sun.util.resources.cldr.ebu.CurrencyNames_ebu;
+
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
+import java.util.Stack;
 
 /**
  * Class for performing syntax analysis.
@@ -13,7 +21,7 @@ public class SA {
      */
     private final static String TEST_FILE_INPUT_PATH = "./src/hr.fer.ppj.lab2.res/in/";
     private final static String TEST_FILE_OUTPUT_PATH = "./src/hr.fer.ppj.lab2.res/out/GSA_out.txt";
-    private static String program;
+    private static List<String> program;
 
     /**
      * Entry point
@@ -48,13 +56,12 @@ public class SA {
      * Method for reading program from standard input
      */
     private static void readInputProgram(Scanner scanner) {
+        program = new ArrayList<>();
 
-        StringBuilder sb = new StringBuilder();
         while (scanner.hasNextLine()) {
-            sb.append(scanner.nextLine()).append("\n");
+            program.add(scanner.nextLine());
         }
 
-        program = sb.toString();
     }
 
     /**
@@ -81,6 +88,75 @@ public class SA {
      * Method that starts the lexical analysis of given program
      */
     private static void runSyntaxAnalyser() {
+
+        // linija ulaza je oblika
+        // ime_jedinke broj_linije leksicka_jedinka
+
+        int currentState = 0;
+        boolean accepted = false;
+
+        Stack<ParserNode> stack = new Stack<>();
+        stack.push(new ParserNode(String.valueOf(currentState)));
+
+        // prolaz kroz sve jedinke
+
+        for (String line : program) {
+
+            // dohvati ime_jedinke trenutne linije
+
+            String character = line.trim().split("\\s+")[0];
+
+            // pronalazak akcije za par (stanje, ime_jedinke)
+
+            ParserAction parserAction = GSA.parserTable.get(new Pair(currentState, character));
+
+            ParserNode newNode;
+            switch (parserAction.getParserActionType()) {
+
+                case SHIFT:
+
+                    currentState = Integer.valueOf(parserAction.getArgument());
+                    newNode = new ParserNode(line);
+                    stack.push(new ParserNode(String.valueOf(currentState)));
+                    stack.push(newNode);
+                    break;
+
+                case REDUCE:
+
+                    String reducePattern = parserAction.getArgument();
+                    String leftSide = reducePattern.split("->")[0];
+                    String rightSide = reducePattern.split("->")[1];
+
+                    newNode = new ParserNode(line);
+
+                    int i = 1;
+                    while (i <= rightSide.length()) {
+                        newNode.addSubNode(stack.pop());
+                        ++i;
+                    }
+
+                    stack.push(new ParserNode(leftSide));
+
+                    break;
+
+                case REJECT:
+                    // ovdje valjda ide oporavak
+                    break;
+
+                case ACCEPT:
+                    accepted = true;
+                    break;
+
+                case PUT:
+                    break;
+
+            }
+
+            if (accepted) {
+                break;
+            }
+
+        }
 
     }
 

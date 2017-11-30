@@ -4,7 +4,7 @@ import hr.fer.ppj.lab2.enums.ParserActionType;
 
 import java.io.Serializable;
 
-public class ParserAction implements Serializable{
+public class ParserAction implements Serializable {
 
     private String argument;
     private ParserActionType parserActionType;
@@ -23,8 +23,8 @@ public class ParserAction implements Serializable{
     }
 
     @Override
-    public String toString(){
-        return parserActionType+"("+argument+")";
+    public String toString() {
+        return parserActionType + "(" + argument + ")";
     }
 
 }

@@ -55,7 +55,7 @@ public class GSA {
             epsilonNFA = new EpsilonNFA(grammar);
             dfa = new DFA(epsilonNFA);
 
-           generateParserActionTable();
+            generateParserActionTable();
 
             serializeData();
 
@@ -138,13 +138,13 @@ public class GSA {
                     ParserActionType type;
                     int nextState = dfa.getTransition(i, symbolAfterDot);
                     Pair pair = new Pair(i, symbolAfterDot);
-                    if(nextState!=-1) {
+                    if (nextState != -1) {
                         if (terminalSymbols.contains(symbolAfterDot)) {
                             type = ParserActionType.SHIFT;
                             //if mapped to reduce, remove mapping and map to shift
                             //(solving shift/reduce ambiguity)
-                            if(parserTable.get(pair)!=null){
-                                if(parserTable.get(pair).getParserActionType().equals(ParserActionType.REDUCE)) {
+                            if (parserTable.get(pair) != null) {
+                                if (parserTable.get(pair).getParserActionType().equals(ParserActionType.REDUCE)) {
                                     parserTable.remove(pair);
                                 }
                             }
@@ -161,14 +161,14 @@ public class GSA {
 
                         List<String> undottedRightSide = new LinkedList<>(clause.getRightSide());
                         undottedRightSide.remove(Grammar.dotSymbol);
-                        if(undottedRightSide.isEmpty()){
+                        if (undottedRightSide.isEmpty()) {
                             undottedRightSide.add(EpsilonNFA.epsilonSymbol);
                         }
                         StringBuilder rightSideBuilder = new StringBuilder();
-                        for(int j=0,n=undottedRightSide.size();j<n;j++){
+                        for (int j = 0, n = undottedRightSide.size(); j < n; j++) {
 
                             rightSideBuilder.append(undottedRightSide.get(j));
-                            if(j!=n-1){
+                            if (j != n - 1) {
                                 rightSideBuilder.append(" ");
                             }
 
@@ -178,16 +178,16 @@ public class GSA {
                         ParserAction action = parserTable.get(pair);
                         if (action != null) {
                             //solving reduce/reduce ambiguity and shift/reduce ambiguity
-                            if(action.getParserActionType().equals(ParserActionType.REDUCE)){
+                            if (action.getParserActionType().equals(ParserActionType.REDUCE)) {
                                 GrammarProduction reduction = parseProduction(action.getArgument());
-                                GrammarProduction newReduction = new GrammarProduction(clause.getLeftSide(),undottedRightSide);
+                                GrammarProduction newReduction = new GrammarProduction(clause.getLeftSide(), undottedRightSide);
 
-                                if(productionsInOrder.indexOf(newReduction)<productionsInOrder.indexOf(reduction)){
+                                if (productionsInOrder.indexOf(newReduction) < productionsInOrder.indexOf(reduction)) {
                                     parserTable.remove(pair);
-                                    parserTable.put(pair, new ParserAction(clause.getLeftSide()+"->"+rightSide,ParserActionType.REDUCE));
+                                    parserTable.put(pair, new ParserAction(clause.getLeftSide() + "->" + rightSide, ParserActionType.REDUCE));
                                 }
                             }
-                        }else {
+                        } else {
                             parserTable.put(pair, new ParserAction(clause.getLeftSide() + "->" + rightSide, ParserActionType.REDUCE));
                         }
                     }
@@ -208,7 +208,7 @@ public class GSA {
         List<String> rightSide = new LinkedList<>();
         rightSide.addAll(Arrays.asList(symbols));
 
-        return new GrammarProduction(elements[0],rightSide);
+        return new GrammarProduction(elements[0], rightSide);
     }
 
 }
