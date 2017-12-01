@@ -1,5 +1,6 @@
 package hr.fer.ppj.lab2;
 
+import hr.fer.ppj.lab1.helper.EpsilonNFA;
 import hr.fer.ppj.lab2.model.*;
 
 import java.io.*;
@@ -15,6 +16,7 @@ public class SA {
      */
     private final static String TEST_FILE_INPUT_PATH = "./src/hr.fer.ppj.lab2.res/in/";
     private final static String TEST_FILE_OUTPUT_PATH = "./src/hr.fer.ppj.lab2.res/out/GSA_out.txt";
+    private static Stack<ParserNode> stack = new Stack<>();
     private static List<String> program;
     private static HashMap<Pair, ParserAction> parserTable;
     private static List<String> syncSymbols;
@@ -95,8 +97,6 @@ public class SA {
         ParserNode startNode;
         int currentState = 0;
         boolean accepted = false;
-
-        Stack<ParserNode> stack = new Stack<>();
         stack.push(new ParserNode(String.valueOf(currentState)));
 
         // prolaz kroz sve ulazne linije ( znakove )
@@ -118,53 +118,62 @@ public class SA {
             // pronalazak akcije za par (stanje, ime_jedinke)
             ParserAction parserAction = parserTable.get(new Pair(currentState, character));
 
-            ParserNode newNode;
-            switch (parserAction.getParserActionType()) {
+            if(parserAction==null){
 
-                case SHIFT:
+                //j=parserError(line);
+            }else {
 
-                    currentState = Integer.valueOf(parserAction.getArgument());
-                    newNode = new ParserNode(line);
-                    stack.push(newNode);
-                    stack.push(new ParserNode(String.valueOf(currentState)));
-                    j+=1;
-                    break;
+                ParserNode newNode;
+                switch (parserAction.getParserActionType()) {
 
-                case REDUCE:
+                    case SHIFT:
 
-                    String reducePattern = parserAction.getArgument();
-                    String leftSide = reducePattern.split("->")[0];
-                    String rightSide = reducePattern.split("->")[1];
-                    newNode = new ParserNode(leftSide);
-
-                    int i = 1;
-                    while (i <= rightSide.length()) {
-                        stack.pop();
-                        newNode.addSubNode(stack.pop());
-                        ++i;
-                    }
-
-                    int bottomState = Integer.parseInt(stack.peek().getContent());
-                    ParserAction nextAction = parserTable.get(new Pair(bottomState,leftSide));
-                    if(nextAction!=null){
+                        currentState = Integer.valueOf(parserAction.getArgument());
+                        newNode = new ParserNode(line);
                         stack.push(newNode);
-                        stack.push(new ParserNode(nextAction.getArgument()));
-                    }else{
-                        //greska
-                    }
+                        stack.push(new ParserNode(String.valueOf(currentState)));
+                        j += 1;
+                        break;
 
+                    case REDUCE:
+
+                        String reducePattern = parserAction.getArgument();
+                        String leftSide = reducePattern.split("->")[0];
+                        String rightSide = reducePattern.split("->")[1];
+                        newNode = new ParserNode(leftSide);
+
+                        if (rightSide.equals(EpsilonNFA.epsilonSymbol)) {
+                            newNode.addSubNode(new ParserNode(EpsilonNFA.epsilonSymbol));
+                        } else {
+                            int i = 1;
+                            while (i <= rightSide.length()) {
+                                stack.pop();
+                                newNode.addSubNode(stack.pop());
+                                ++i;
+                            }
+                        }
+
+                        int bottomState = Integer.parseInt(stack.peek().getContent());
+                        ParserAction nextAction = parserTable.get(new Pair(bottomState, leftSide));
+                        if (nextAction != null) {
+                            stack.push(newNode);
+                            stack.push(new ParserNode(nextAction.getArgument()));
+                        } else {
+                            //parserError(line);
+                        }
+
+                        break;
+
+                    case ACCEPT:
+                        accepted = true;
+                        break;
+
+
+                }
+
+                if (accepted) {
                     break;
-
-                case ACCEPT:
-                    accepted = true;
-                    break;
-
-
-
-            }
-
-            if (accepted) {
-                break;
+                }
             }
 
         }
@@ -176,23 +185,29 @@ public class SA {
         }else{
 
         }
-
     }
 
     private static void printGeneratingTree(ParserNode startNode, int level){
+        System.out.println(getIndentation(level)+startNode);
         List<ParserNode> childrenNodes = startNode.getSubNodes();
-        if(childrenNodes.isEmpty()){
-            String indentation = "";
-            int i = 0;
-            while(i<level){
-                indentation = indentation.concat(" ");
-            }
-            System.out.println(indentation+startNode);
-        }else{
-            childrenNodes.forEach(node->{
-                printGeneratingTree(node,level+1);
-            });
+        if(!childrenNodes.isEmpty()){
+            childrenNodes.forEach(node-> printGeneratingTree(node,level+1));
         }
+    }
+
+    private static String getIndentation(int level){
+        String indentation = "";
+        int i = 0;
+        while(i<level){
+            indentation = indentation.concat(" ");
+        }
+        return indentation;
+    }
+
+    private static int parserError(String line){
+
+
+        return 0;
     }
 
 }
