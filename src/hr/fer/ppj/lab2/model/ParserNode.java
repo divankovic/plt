@@ -30,7 +30,7 @@ public class ParserNode {
             subNodes = new ArrayList<>();
         }
 
-        subNodes.add(element);
+        subNodes.add(0,element);
     }
 
     public ParserNodeType getType(){
@@ -41,6 +41,10 @@ public class ParserNode {
         return subNodes;
     }
 
+    @Override
+    public String toString(){
+        return content;
+    }
 }
 
 enum ParserNodeType {

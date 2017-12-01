@@ -1,34 +1,14 @@
-<B>->[*, b][a, b, CRLF] : b -> [<B>->[b, *][a, b, CRLF]]
-<A>->[<B>, *, <A>][CRLF] : <A> -> [<A>->[<B>, <A>, *][CRLF]]
-<A>->[*, <B>, <A>][CRLF] : $ -> [<B>->[*, a, <B>][a, b, CRLF], <B>->[*, b][a, b, CRLF]]
-<S'>->[*, <A>][CRLF] : <A> -> [<S'>->[<A>, *][CRLF]]
-<B>->[a, *, <B>][a, b, CRLF] : $ -> [<B>->[*, a, <B>][a, b, CRLF], <B>->[*, b][a, b, CRLF]]
-<B>->[a, *, <B>][a, b, CRLF] : <B> -> [<B>->[a, <B>, *][a, b, CRLF]]
-<A>->[*, <B>, <A>][CRLF] : <B> -> [<A>->[<B>, *, <A>][CRLF]]
-<B>->[*, a, <B>][a, b, CRLF] : a -> [<B>->[a, *, <B>][a, b, CRLF]]
-<A>->[<B>, *, <A>][CRLF] : $ -> [<A>->[*, <B>, <A>][CRLF], <A>->[*][CRLF]]
-<S'>->[*, <A>][CRLF] : $ -> [<A>->[*, <B>, <A>][CRLF], <A>->[*][CRLF]]
-
-<S'>->[*, <A>][CRLF]
-<S'>->[<A>, *][CRLF]
-<A>->[*, <B>, <A>][CRLF]
-<A>->[*][CRLF]
-<A>->[<B>, *, <A>][CRLF]
-<B>->[*, a, <B>][a, b, CRLF]
-<B>->[*, b][a, b, CRLF]
-<A>->[<B>, <A>, *][CRLF]
-<B>->[a, *, <B>][a, b, CRLF]
-<B>->[b, *][a, b, CRLF]
-<B>->[a, <B>, *][a, b, CRLF]
-
-0     a     3
-0     b     4
-2     a     3
-2     b     4
-3     a     3
-3     b     4
-0     <B>     2
-0     <A>     1
-2     <B>     2
-2     <A>     5
-3     <B>     6
+<A>
+ <B>
+  a 1 x x x
+  <B>
+   b 2 y y
+ <A>
+  <B>
+   a 3 xx xx
+   <B>
+    a 4 xx xx xx
+    <B>
+     b 4 y
+  <A>
+   $

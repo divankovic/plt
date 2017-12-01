@@ -14,8 +14,8 @@ public class SA {
     /**
      * Path to the output file of generator
      */
-    private final static String TEST_FILE_INPUT_PATH = "./src/hr.fer.ppj.lab2.res/in/";
-    private final static String TEST_FILE_OUTPUT_PATH = "./src/hr.fer.ppj.lab2.res/out/GSA_out.txt";
+    private final static String TEST_FILE_INPUT_PATH = "./src/hr/fer/ppj/lab2/res/in/kanon_gramatika.in";
+    private final static String TEST_FILE_OUTPUT_PATH = "./src/hr/fer/ppj/lab2/res/out/GSA_out.txt";
     private static Stack<ParserNode> stack = new Stack<>();
     private static List<String> program;
     private static HashMap<Pair, ParserAction> parserTable;
@@ -24,9 +24,9 @@ public class SA {
     /**
      * Entry point
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException{
 
-        //setupStdIO();
+        setupStdIO();
 
         try (Scanner scanner = new Scanner(System.in)) {
 
@@ -139,14 +139,14 @@ public class SA {
 
                         String reducePattern = parserAction.getArgument();
                         String leftSide = reducePattern.split("->")[0];
-                        String rightSide = reducePattern.split("->")[1];
+                        String[] rightSide = reducePattern.split("->")[1].split(" ");
                         newNode = new ParserNode(leftSide);
 
-                        if (rightSide.equals(EpsilonNFA.epsilonSymbol)) {
+                        if (rightSide[0].equals(EpsilonNFA.epsilonSymbol)) {
                             newNode.addSubNode(new ParserNode(EpsilonNFA.epsilonSymbol));
                         } else {
                             int i = 1;
-                            while (i <= rightSide.length()) {
+                            while (i <= rightSide.length) {
                                 stack.pop();
                                 newNode.addSubNode(stack.pop());
                                 ++i;
@@ -158,6 +158,7 @@ public class SA {
                         if (nextAction != null) {
                             stack.push(newNode);
                             stack.push(new ParserNode(nextAction.getArgument()));
+                            currentState = Integer.parseInt(nextAction.getArgument());
                         } else {
                             //parserError(line);
                         }
@@ -187,11 +188,14 @@ public class SA {
         }
     }
 
+
     private static void printGeneratingTree(ParserNode startNode, int level){
         System.out.println(getIndentation(level)+startNode);
         List<ParserNode> childrenNodes = startNode.getSubNodes();
-        if(!childrenNodes.isEmpty()){
-            childrenNodes.forEach(node-> printGeneratingTree(node,level+1));
+        if(childrenNodes!=null) {
+            if (!childrenNodes.isEmpty()){
+                childrenNodes.forEach(node->printGeneratingTree(node, level + 1));
+            }
         }
     }
 
@@ -200,6 +204,7 @@ public class SA {
         int i = 0;
         while(i<level){
             indentation = indentation.concat(" ");
+            ++i;
         }
         return indentation;
     }
