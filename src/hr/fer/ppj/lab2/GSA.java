@@ -85,13 +85,7 @@ public class GSA {
             FileOutputStream fos = new FileOutputStream(file);
             ObjectOutputStream oos = new ObjectOutputStream(fos);
 
-            oos.writeObject(nonterminalSymbols);
-            oos.writeObject(terminalSymbols);
             oos.writeObject(syncSymbols);
-            oos.writeObject(productionsMap);
-            oos.writeObject(grammar);
-            oos.writeObject(epsilonNFA);
-            oos.writeObject(dfa);
             oos.writeObject(parserTable);
 
             fos.close();

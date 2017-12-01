@@ -5,39 +5,44 @@ import java.util.List;
 
 public class ParserNode {
 
-    private String string;
+    private String content;
     private ParserNodeType parserNodeType;
     private List<ParserNode> subNodes;
 
-    public ParserNode(String line) {
-        this.string = line;
+    public ParserNode(String content) {
+        this.content = content;
 
-        if (line.matches("\\d+")) {
-            parserNodeType = ParserNodeType.INTEGER;
+        if (content.matches("\\d+")) {
+            parserNodeType = ParserNodeType.STATE;
         } else {
-            parserNodeType = ParserNodeType.LINE;
+            parserNodeType = ParserNodeType.ELEMENT;
         }
 
     }
 
-    public String getString() {
-        return string;
+    public String getContent() {
+        return content;
     }
 
-    public void addSubNode(ParserNode line) {
+
+    public void addSubNode(ParserNode element) {
         if (subNodes == null) {
             subNodes = new ArrayList<>();
         }
 
-        subNodes.add(line);
+        subNodes.add(element);
     }
 
-    public String getCharacter() {
-        return string.trim().split("\\s+")[0];
+    public ParserNodeType getType(){
+        return parserNodeType;
+    }
+
+    public List<ParserNode> getSubNodes(){
+        return subNodes;
     }
 
 }
 
 enum ParserNodeType {
-    INTEGER, LINE
+    STATE, ELEMENT
 }
