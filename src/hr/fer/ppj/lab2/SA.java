@@ -14,9 +14,11 @@ public class SA {
     /**
      * Path to the output file of generator
      */
-    private final static String TEST_FILE_INPUT_PATH = "./src/hr/fer/ppj/lab2/res/in/minusLang.in";
+    private final static String TEST_FILE_INPUT_PATH = "./src/hr/fer/ppj/lab2/res/in/simplePpjLang_err.in";
     private final static String TEST_FILE_OUTPUT_PATH = "./src/hr/fer/ppj/lab2/res/out/SA_out.txt";
     private final static String WHITESPACE_REGEX = "\\s+";
+    private final static String PRODUCTION_DELIMITER = "->";
+    
     private static Stack<ParserNode> stack = new Stack<>();
     private static List<String> program;
     private static HashMap<Pair, ParserAction> parserTable;
@@ -95,35 +97,31 @@ public class SA {
      */
     private static void runSyntaxAnalyser() {
 
-        // linija ulaza je oblika
-        // ime_jedinke broj_linije leksicka_jedinka
-
         ParserNode startNode;
         int currentState = 0;
         boolean accepted = false;
         stack.push(new ParserNode(String.valueOf(currentState)));
 
-        // prolaz kroz sve ulazne linije ( znakove )
         int j = 0;
-        while (j <= program.size() && j != -1) {
+        while (j < program.size() && j != -1) {
+
             String character;
             String line = "";
+
             if (j < program.size()) {
+
                 line = program.get(j);
-
-                // dohvati ime_jedinke trenutne linije
-                character = line.trim().split("\\s+")[0];
-
+                character = line.trim().split(WHITESPACE_REGEX)[0];
 
             } else {
                 character = Grammar.endOfLine;
             }
 
-            // pronalazak akcije za par (stanje, ime_jedinke)
             ParserAction parserAction = parserTable.get(new Pair(currentState, character));
 
             if (parserAction == null) {
                 j = parserError(j);
+
             } else {
 
                 ParserNode newNode;
@@ -141,27 +139,31 @@ public class SA {
                     case REDUCE:
 
                         String reducePattern = parserAction.getArgument();
-                        String leftSide = reducePattern.split("->")[0];
-                        String[] rightSide = reducePattern.split("->")[1].split(WHITESPACE_REGEX);
+                        String leftSide = reducePattern.split(PRODUCTION_DELIMITER)[0];
+                        String[] rightSide = reducePattern.split(PRODUCTION_DELIMITER)[1].split(WHITESPACE_REGEX);
                         newNode = new ParserNode(leftSide);
 
                         if (rightSide[0].equals(EpsilonNFA.epsilonSymbol)) {
                             newNode.addSubNode(new ParserNode(EpsilonNFA.epsilonSymbol));
                         } else {
+
                             int i = 1;
                             while (i <= rightSide.length) {
                                 stack.pop();
                                 newNode.addSubNode(stack.pop());
                                 ++i;
                             }
+
                         }
 
                         int bottomState = Integer.parseInt(stack.peek().getContent());
                         ParserAction nextAction = parserTable.get(new Pair(bottomState, leftSide));
+
                         if (nextAction != null) {
                             stack.push(newNode);
                             stack.push(new ParserNode(nextAction.getArgument()));
                             currentState = Integer.parseInt(nextAction.getArgument());
+
                         } else {
                             j = parserError(j);
                         }
@@ -172,12 +174,12 @@ public class SA {
                         accepted = true;
                         break;
 
-
                 }
 
                 if (accepted) {
                     break;
                 }
+
             }
 
         }
@@ -213,11 +215,10 @@ public class SA {
 
     private static int parserError(int j) {
 
-        // ispis pogreske
         String line = program.get(j);
         List<String> elements = Arrays.asList(line.split(WHITESPACE_REGEX));
 
-        System.err.println("Error occurred at line : " + elements.get(1));
+        System.err.println("Error occurred at line ->" + elements.get(1) + "<-");
 
         List<String> expectedTokens = new LinkedList<>();
         int currentState = Integer.parseInt(stack.peek().getContent());
@@ -229,46 +230,50 @@ public class SA {
             }
         });
 
-        System.err.println("Expected uniform symbols: ");
-        expectedTokens.forEach(token -> System.err.println("  " + token));
+        System.err.println("Expected uniform symbols:");
+        expectedTokens.forEach(token -> System.err.printf("  " + token));
+        System.err.println();
 
         String content = "";
         List<String> contentElements = elements.subList(2, elements.size());
         for (String elem : contentElements) {
             content += elem;
         }
+        System.err.println("Read uniform symbol with name ->" + elements.get(0) + "<- and value ->" + content + "<-");
 
-        System.err.println("Read uniform symbol : " + elements.get(0) + ",value : " + content);
-
-        // oporavak od pogreske pomocu sikronizacijskog znaka
-
-        j += 1;
+        ++j;
         while (j < program.size()) {
 
             if (syncSymbols.contains(program.get(j).split(WHITESPACE_REGEX)[0])) {
 
                 while (!stack.empty()) {
-                    
+
                     currentState = Integer.parseInt(stack.peek().getContent());
 
                     if (parserTable.get(new Pair(currentState, program.get(j).split(WHITESPACE_REGEX)[0])) != null) {
+
+                        System.err.println("Found sync sign with index ->" + j + "<- and value ->" + program.get(j).split(WHITESPACE_REGEX)[0] + "<-");
                         return j;
                     } else {
                         stack.pop();
-                        if(!stack.isEmpty()) { //nema oznake dna stoga pa treba ovo dodati ako skida do kraja da nije exception
+
+                        // nema oznake dna stoga pa treba ovo dodati ako skida do kraja da nije exception
+                        if (!stack.isEmpty()) {
                             stack.pop();
                         }
+
                     }
 
                 }
-                System.err.println("Couldn't recover from error");
 
+                System.err.println("Couldn't recover from error.");
             } else {
-                j++;
+                ++j;
             }
 
         }
 
+        System.err.println("Sync sign not found");
         return -1;
     }
 
