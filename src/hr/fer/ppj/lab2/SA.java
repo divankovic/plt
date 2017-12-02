@@ -76,7 +76,7 @@ public class SA {
 
         try {
 
-            File file = new File(SERIALIZATION_FILE_PATH);
+            File file = new File(GSA.SERIALIZATION_FILE_PATH);
             FileInputStream fis = new FileInputStream(file);
             ObjectInputStream ois = new ObjectInputStream(fis);
 
