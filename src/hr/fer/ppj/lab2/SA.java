@@ -16,11 +16,13 @@ public class SA {
      */
     private final static String TEST_FILE_INPUT_PATH = "./src/hr/fer/ppj/lab2/res/in/minusLang.in";
     private final static String TEST_FILE_OUTPUT_PATH = "./src/hr/fer/ppj/lab2/res/out/SA_out.txt";
+    private final static String WHITESPACE_REGEX = "\\s+";
     private static Stack<ParserNode> stack = new Stack<>();
     private static List<String> program;
     private static HashMap<Pair, ParserAction> parserTable;
     private static List<String> terminalSymbols;
     private static List<String> syncSymbols;
+
 
     /**
      * Entry point
@@ -140,7 +142,7 @@ public class SA {
 
                         String reducePattern = parserAction.getArgument();
                         String leftSide = reducePattern.split("->")[0];
-                        String[] rightSide = reducePattern.split("->")[1].split(" ");
+                        String[] rightSide = reducePattern.split("->")[1].split(WHITESPACE_REGEX);
                         newNode = new ParserNode(leftSide);
 
                         if (rightSide[0].equals(EpsilonNFA.epsilonSymbol)) {
@@ -184,9 +186,8 @@ public class SA {
             stack.pop();
             startNode = stack.pop();
             printGeneratingTree(startNode, 0);
-        } else {
-
         }
+
     }
 
 
@@ -214,7 +215,7 @@ public class SA {
 
         // ispis pogreske
         String line = program.get(j);
-        List<String> elements = Arrays.asList(line.split(" "));
+        List<String> elements = Arrays.asList(line.split(WHITESPACE_REGEX));
 
         System.err.println("Error occurred at line : " + elements.get(1));
 
@@ -244,13 +245,13 @@ public class SA {
         j += 1;
         while (j < program.size()) {
 
-            if (syncSymbols.contains(program.get(j).split(" ")[0])) {
+            if (syncSymbols.contains(program.get(j).split(WHITESPACE_REGEX)[0])) {
 
                 while (!stack.empty()) {
-
+                    
                     currentState = Integer.parseInt(stack.peek().getContent());
 
-                    if (parserTable.get(new Pair(currentState, program.get(j).split(" ")[0])) != null) {
+                    if (parserTable.get(new Pair(currentState, program.get(j).split(WHITESPACE_REGEX)[0])) != null) {
                         return j;
                     } else {
                         stack.pop();
@@ -258,7 +259,6 @@ public class SA {
                     }
 
                 }
-                
                 System.err.println("Couldn't recover from error");
 
             } else {
