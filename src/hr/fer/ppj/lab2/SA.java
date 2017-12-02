@@ -14,7 +14,7 @@ public class SA {
     /**
      * Path to the output file of generator
      */
-    private final static String TEST_FILE_INPUT_PATH = "./src/hr/fer/ppj/lab2/res/in/simplePpjLang_err.in";
+    private final static String TEST_FILE_INPUT_PATH = "./src/hr/fer/ppj/lab2/res/in/simplePpjLang_manji.in";
     private final static String TEST_FILE_OUTPUT_PATH = "./src/hr/fer/ppj/lab2/res/out/SA_out.txt";
     private final static String SERIALIZATION_FILE_PATH = "./definition.ser";
     private final static String WHITESPACE_REGEX = "\\s+";
@@ -104,7 +104,7 @@ public class SA {
         stack.push(new ParserNode(String.valueOf(currentState)));
 
         int j = 0;
-        while (j < program.size() && j != -1) {
+        while (j <= program.size() && j != -1) {
 
             String character;
             String line = "";

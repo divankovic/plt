@@ -28,7 +28,7 @@ public class DFA implements Serializable {
         this.symbols = new LinkedList<>(epsilonNFA.getSymbols());
 
         convertToDFA();
-        print();
+//        print();
     }
 
     /**

@@ -504,12 +504,6 @@ public class EpsilonNFA implements Serializable {
             }
         }
         states = clauses;
-        for (Map.Entry<ClauseKey, List<Clause>> entry : transitions.entrySet()) {
-            System.out.println(entry.getKey() + " -> " + entry.getValue());
-        }
-        System.out.println();
-        states.forEach(System.out::println);
-
     }
 
     private void addDotFirst(List<String> rightSide) {

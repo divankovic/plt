@@ -52,7 +52,7 @@ public class GSA {
             productionsInOrder = inputProcessor.getProductionsInOrder();
 
             grammar = new Grammar();
-            epsilonNFA = new EpsilonNFA(grammar, startingNonTerminalSymbol, nonterminalSymbols, terminalSymbols, productionsInOrder, productionsMap);
+            epsilonNFA = new EpsilonNFA(grammar, startingNonTerminalSymbol, terminalSymbols, nonterminalSymbols, productionsInOrder, productionsMap);
             dfa = new DFA(epsilonNFA);
 
             generateParserActionTable();
