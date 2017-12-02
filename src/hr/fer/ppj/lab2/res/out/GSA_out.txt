@@ -1,14 +1,132 @@
-<A>
- <B>
-  a 1 x x x
-  <B>
-   b 2 y y
- <A>
-  <B>
-   a 3 xx xx
-   <B>
-    a 4 xx xx xx
-    <B>
-     b 4 y
-  <A>
-   $
+<expr>->[<expr>, *, OP_MINUS, <atom>][CRLF] : OP_MINUS -> [<expr>->[<expr>, OP_MINUS, *, <atom>][CRLF]]
+<expr>->[<expr>, *, OP_MINUS, <atom>][OP_MINUS] : OP_MINUS -> [<expr>->[<expr>, OP_MINUS, *, <atom>][OP_MINUS]]
+<expr>->[<expr>, *, OP_MINUS, <atom>][DESNA_ZAGRADA] : OP_MINUS -> [<expr>->[<expr>, OP_MINUS, *, <atom>][DESNA_ZAGRADA]]
+<expr>->[*, <expr>, OP_MINUS, <atom>][CRLF] : $ -> [<expr>->[*, <atom>][OP_MINUS], <expr>->[*, <expr>, OP_MINUS, <atom>][OP_MINUS]]
+<expr>->[*, <expr>, OP_MINUS, <atom>][OP_MINUS] : $ -> [<expr>->[*, <atom>][OP_MINUS], <expr>->[*, <expr>, OP_MINUS, <atom>][OP_MINUS]]
+<expr>->[*, <expr>, OP_MINUS, <atom>][DESNA_ZAGRADA] : $ -> [<expr>->[*, <atom>][OP_MINUS], <expr>->[*, <expr>, OP_MINUS, <atom>][OP_MINUS]]
+<atom>->[LIJEVA_ZAGRADA, *, <expr>, DESNA_ZAGRADA][CRLF] : $ -> [<expr>->[*, <atom>][DESNA_ZAGRADA], <expr>->[*, <expr>, OP_MINUS, <atom>][DESNA_ZAGRADA]]
+<atom>->[LIJEVA_ZAGRADA, *, <expr>, DESNA_ZAGRADA][OP_MINUS] : $ -> [<expr>->[*, <atom>][DESNA_ZAGRADA], <expr>->[*, <expr>, OP_MINUS, <atom>][DESNA_ZAGRADA]]
+<atom>->[LIJEVA_ZAGRADA, *, <expr>, DESNA_ZAGRADA][DESNA_ZAGRADA] : $ -> [<expr>->[*, <atom>][DESNA_ZAGRADA], <expr>->[*, <expr>, OP_MINUS, <atom>][DESNA_ZAGRADA]]
+<atom>->[*, UMINUS, <atom>][CRLF] : UMINUS -> [<atom>->[UMINUS, *, <atom>][CRLF]]
+<atom>->[*, UMINUS, <atom>][OP_MINUS] : UMINUS -> [<atom>->[UMINUS, *, <atom>][OP_MINUS]]
+<atom>->[*, UMINUS, <atom>][DESNA_ZAGRADA] : UMINUS -> [<atom>->[UMINUS, *, <atom>][DESNA_ZAGRADA]]
+<expr>->[<expr>, OP_MINUS, *, <atom>][CRLF] : $ -> [<atom>->[*, OPERAND][CRLF], <atom>->[*, UMINUS, <atom>][CRLF], <atom>->[*, LIJEVA_ZAGRADA, <expr>, DESNA_ZAGRADA][CRLF]]
+<expr>->[<expr>, OP_MINUS, *, <atom>][OP_MINUS] : $ -> [<atom>->[*, OPERAND][OP_MINUS], <atom>->[*, UMINUS, <atom>][OP_MINUS], <atom>->[*, LIJEVA_ZAGRADA, <expr>, DESNA_ZAGRADA][OP_MINUS]]
+<expr>->[<expr>, OP_MINUS, *, <atom>][DESNA_ZAGRADA] : $ -> [<atom>->[*, OPERAND][DESNA_ZAGRADA], <atom>->[*, UMINUS, <atom>][DESNA_ZAGRADA], <atom>->[*, LIJEVA_ZAGRADA, <expr>, DESNA_ZAGRADA][DESNA_ZAGRADA]]
+<expr>->[<expr>, OP_MINUS, *, <atom>][CRLF] : <atom> -> [<expr>->[<expr>, OP_MINUS, <atom>, *][CRLF]]
+<expr>->[<expr>, OP_MINUS, *, <atom>][OP_MINUS] : <atom> -> [<expr>->[<expr>, OP_MINUS, <atom>, *][OP_MINUS]]
+<expr>->[<expr>, OP_MINUS, *, <atom>][DESNA_ZAGRADA] : <atom> -> [<expr>->[<expr>, OP_MINUS, <atom>, *][DESNA_ZAGRADA]]
+<S'>->[*, <expr>][CRLF] : <expr> -> [<S'>->[<expr>, *][CRLF]]
+<atom>->[*, OPERAND][CRLF] : OPERAND -> [<atom>->[OPERAND, *][CRLF]]
+<atom>->[*, OPERAND][OP_MINUS] : OPERAND -> [<atom>->[OPERAND, *][OP_MINUS]]
+<atom>->[*, OPERAND][DESNA_ZAGRADA] : OPERAND -> [<atom>->[OPERAND, *][DESNA_ZAGRADA]]
+<atom>->[UMINUS, *, <atom>][CRLF] : <atom> -> [<atom>->[UMINUS, <atom>, *][CRLF]]
+<atom>->[UMINUS, *, <atom>][OP_MINUS] : <atom> -> [<atom>->[UMINUS, <atom>, *][OP_MINUS]]
+<atom>->[UMINUS, *, <atom>][DESNA_ZAGRADA] : <atom> -> [<atom>->[UMINUS, <atom>, *][DESNA_ZAGRADA]]
+<expr>->[*, <expr>, OP_MINUS, <atom>][CRLF] : <expr> -> [<expr>->[<expr>, *, OP_MINUS, <atom>][CRLF]]
+<expr>->[*, <expr>, OP_MINUS, <atom>][OP_MINUS] : <expr> -> [<expr>->[<expr>, *, OP_MINUS, <atom>][OP_MINUS]]
+<expr>->[*, <expr>, OP_MINUS, <atom>][DESNA_ZAGRADA] : <expr> -> [<expr>->[<expr>, *, OP_MINUS, <atom>][DESNA_ZAGRADA]]
+<expr>->[*, <atom>][CRLF] : $ -> [<atom>->[*, OPERAND][CRLF], <atom>->[*, UMINUS, <atom>][CRLF], <atom>->[*, LIJEVA_ZAGRADA, <expr>, DESNA_ZAGRADA][CRLF]]
+<expr>->[*, <atom>][OP_MINUS] : $ -> [<atom>->[*, OPERAND][OP_MINUS], <atom>->[*, UMINUS, <atom>][OP_MINUS], <atom>->[*, LIJEVA_ZAGRADA, <expr>, DESNA_ZAGRADA][OP_MINUS]]
+<expr>->[*, <atom>][DESNA_ZAGRADA] : $ -> [<atom>->[*, OPERAND][DESNA_ZAGRADA], <atom>->[*, UMINUS, <atom>][DESNA_ZAGRADA], <atom>->[*, LIJEVA_ZAGRADA, <expr>, DESNA_ZAGRADA][DESNA_ZAGRADA]]
+<atom>->[LIJEVA_ZAGRADA, *, <expr>, DESNA_ZAGRADA][CRLF] : <expr> -> [<atom>->[LIJEVA_ZAGRADA, <expr>, *, DESNA_ZAGRADA][CRLF]]
+<atom>->[LIJEVA_ZAGRADA, *, <expr>, DESNA_ZAGRADA][OP_MINUS] : <expr> -> [<atom>->[LIJEVA_ZAGRADA, <expr>, *, DESNA_ZAGRADA][OP_MINUS]]
+<atom>->[LIJEVA_ZAGRADA, *, <expr>, DESNA_ZAGRADA][DESNA_ZAGRADA] : <expr> -> [<atom>->[LIJEVA_ZAGRADA, <expr>, *, DESNA_ZAGRADA][DESNA_ZAGRADA]]
+<atom>->[LIJEVA_ZAGRADA, <expr>, *, DESNA_ZAGRADA][CRLF] : DESNA_ZAGRADA -> [<atom>->[LIJEVA_ZAGRADA, <expr>, DESNA_ZAGRADA, *][CRLF]]
+<atom>->[LIJEVA_ZAGRADA, <expr>, *, DESNA_ZAGRADA][OP_MINUS] : DESNA_ZAGRADA -> [<atom>->[LIJEVA_ZAGRADA, <expr>, DESNA_ZAGRADA, *][OP_MINUS]]
+<atom>->[LIJEVA_ZAGRADA, <expr>, *, DESNA_ZAGRADA][DESNA_ZAGRADA] : DESNA_ZAGRADA -> [<atom>->[LIJEVA_ZAGRADA, <expr>, DESNA_ZAGRADA, *][DESNA_ZAGRADA]]
+<expr>->[*, <atom>][CRLF] : <atom> -> [<expr>->[<atom>, *][CRLF]]
+<expr>->[*, <atom>][OP_MINUS] : <atom> -> [<expr>->[<atom>, *][OP_MINUS]]
+<expr>->[*, <atom>][DESNA_ZAGRADA] : <atom> -> [<expr>->[<atom>, *][DESNA_ZAGRADA]]
+<S'>->[*, <expr>][CRLF] : $ -> [<expr>->[*, <atom>][CRLF], <expr>->[*, <expr>, OP_MINUS, <atom>][CRLF]]
+<atom>->[*, LIJEVA_ZAGRADA, <expr>, DESNA_ZAGRADA][CRLF] : LIJEVA_ZAGRADA -> [<atom>->[LIJEVA_ZAGRADA, *, <expr>, DESNA_ZAGRADA][CRLF]]
+<atom>->[*, LIJEVA_ZAGRADA, <expr>, DESNA_ZAGRADA][OP_MINUS] : LIJEVA_ZAGRADA -> [<atom>->[LIJEVA_ZAGRADA, *, <expr>, DESNA_ZAGRADA][OP_MINUS]]
+<atom>->[*, LIJEVA_ZAGRADA, <expr>, DESNA_ZAGRADA][DESNA_ZAGRADA] : LIJEVA_ZAGRADA -> [<atom>->[LIJEVA_ZAGRADA, *, <expr>, DESNA_ZAGRADA][DESNA_ZAGRADA]]
+<atom>->[UMINUS, *, <atom>][CRLF] : $ -> [<atom>->[*, OPERAND][CRLF], <atom>->[*, UMINUS, <atom>][CRLF], <atom>->[*, LIJEVA_ZAGRADA, <expr>, DESNA_ZAGRADA][CRLF]]
+<atom>->[UMINUS, *, <atom>][OP_MINUS] : $ -> [<atom>->[*, OPERAND][OP_MINUS], <atom>->[*, UMINUS, <atom>][OP_MINUS], <atom>->[*, LIJEVA_ZAGRADA, <expr>, DESNA_ZAGRADA][OP_MINUS]]
+<atom>->[UMINUS, *, <atom>][DESNA_ZAGRADA] : $ -> [<atom>->[*, OPERAND][DESNA_ZAGRADA], <atom>->[*, UMINUS, <atom>][DESNA_ZAGRADA], <atom>->[*, LIJEVA_ZAGRADA, <expr>, DESNA_ZAGRADA][DESNA_ZAGRADA]]
+
+<S'>->[*, <expr>][CRLF]
+<S'>->[<expr>, *][CRLF]
+<expr>->[*, <atom>][CRLF]
+<expr>->[*, <expr>, OP_MINUS, <atom>][CRLF]
+<expr>->[<atom>, *][CRLF]
+<atom>->[*, OPERAND][CRLF]
+<atom>->[*, UMINUS, <atom>][CRLF]
+<atom>->[*, LIJEVA_ZAGRADA, <expr>, DESNA_ZAGRADA][CRLF]
+<expr>->[<expr>, *, OP_MINUS, <atom>][CRLF]
+<expr>->[*, <atom>][OP_MINUS]
+<expr>->[*, <expr>, OP_MINUS, <atom>][OP_MINUS]
+<atom>->[OPERAND, *][CRLF]
+<atom>->[UMINUS, *, <atom>][CRLF]
+<atom>->[LIJEVA_ZAGRADA, *, <expr>, DESNA_ZAGRADA][CRLF]
+<expr>->[<expr>, OP_MINUS, *, <atom>][CRLF]
+<expr>->[<atom>, *][OP_MINUS]
+<atom>->[*, OPERAND][OP_MINUS]
+<atom>->[*, UMINUS, <atom>][OP_MINUS]
+<atom>->[*, LIJEVA_ZAGRADA, <expr>, DESNA_ZAGRADA][OP_MINUS]
+<expr>->[<expr>, *, OP_MINUS, <atom>][OP_MINUS]
+<atom>->[UMINUS, <atom>, *][CRLF]
+<atom>->[LIJEVA_ZAGRADA, <expr>, *, DESNA_ZAGRADA][CRLF]
+<expr>->[*, <atom>][DESNA_ZAGRADA]
+<expr>->[*, <expr>, OP_MINUS, <atom>][DESNA_ZAGRADA]
+<expr>->[<expr>, OP_MINUS, <atom>, *][CRLF]
+<atom>->[OPERAND, *][OP_MINUS]
+<atom>->[UMINUS, *, <atom>][OP_MINUS]
+<atom>->[LIJEVA_ZAGRADA, *, <expr>, DESNA_ZAGRADA][OP_MINUS]
+<expr>->[<expr>, OP_MINUS, *, <atom>][OP_MINUS]
+<atom>->[LIJEVA_ZAGRADA, <expr>, DESNA_ZAGRADA, *][CRLF]
+<expr>->[<atom>, *][DESNA_ZAGRADA]
+<atom>->[*, OPERAND][DESNA_ZAGRADA]
+<atom>->[*, UMINUS, <atom>][DESNA_ZAGRADA]
+<atom>->[*, LIJEVA_ZAGRADA, <expr>, DESNA_ZAGRADA][DESNA_ZAGRADA]
+<expr>->[<expr>, *, OP_MINUS, <atom>][DESNA_ZAGRADA]
+<atom>->[UMINUS, <atom>, *][OP_MINUS]
+<atom>->[LIJEVA_ZAGRADA, <expr>, *, DESNA_ZAGRADA][OP_MINUS]
+<expr>->[<expr>, OP_MINUS, <atom>, *][OP_MINUS]
+<atom>->[OPERAND, *][DESNA_ZAGRADA]
+<atom>->[UMINUS, *, <atom>][DESNA_ZAGRADA]
+<atom>->[LIJEVA_ZAGRADA, *, <expr>, DESNA_ZAGRADA][DESNA_ZAGRADA]
+<expr>->[<expr>, OP_MINUS, *, <atom>][DESNA_ZAGRADA]
+<atom>->[LIJEVA_ZAGRADA, <expr>, DESNA_ZAGRADA, *][OP_MINUS]
+<atom>->[UMINUS, <atom>, *][DESNA_ZAGRADA]
+<atom>->[LIJEVA_ZAGRADA, <expr>, *, DESNA_ZAGRADA][DESNA_ZAGRADA]
+<expr>->[<expr>, OP_MINUS, <atom>, *][DESNA_ZAGRADA]
+<atom>->[LIJEVA_ZAGRADA, <expr>, DESNA_ZAGRADA, *][DESNA_ZAGRADA]
+
+14     UMINUS     11
+0     <expr>     1
+6     UMINUS     4
+8     DESNA_ZAGRADA     15
+5     UMINUS     11
+12     UMINUS     11
+11     UMINUS     11
+8     OP_MINUS     14
+12     <expr>     17
+1     OP_MINUS     6
+5     <expr>     8
+0     <atom>     2
+11     LIJEVA_ZAGRADA     12
+4     <atom>     7
+12     LIJEVA_ZAGRADA     12
+5     <atom>     9
+6     <atom>     13
+14     LIJEVA_ZAGRADA     12
+17     OP_MINUS     14
+0     LIJEVA_ZAGRADA     5
+0     OPERAND     3
+5     OPERAND     10
+5     LIJEVA_ZAGRADA     12
+11     <atom>     16
+4     LIJEVA_ZAGRADA     5
+6     OPERAND     3
+12     <atom>     9
+4     OPERAND     3
+6     LIJEVA_ZAGRADA     5
+14     <atom>     18
+0     UMINUS     4
+17     DESNA_ZAGRADA     19
+4     UMINUS     4
+14     OPERAND     10
+11     OPERAND     10
+12     OPERAND     10

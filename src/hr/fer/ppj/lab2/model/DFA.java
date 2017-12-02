@@ -85,7 +85,7 @@ public class DFA implements Serializable {
                     //provjera jel vec postoji stanje sa tim stavkama
                     int newState=-1;
                     for(int j = 0; j<=stateIdx; j++){
-                        if(states.get(j).equals(nextStateClauses)){
+                        if(checkListequality(states.get(j),nextStateClauses)){
                             newState = j;
                         }
                     }
@@ -102,6 +102,19 @@ public class DFA implements Serializable {
             newStates.clear();
             newStates.addAll(tempNewStates);
         }
+    }
+
+    private boolean checkListequality(List<Clause> clauses, List<Clause> nextStateClauses) {
+        if(clauses.size()!=nextStateClauses.size()){
+            return false;
+        }
+        for(Clause clause:clauses){
+            if(!nextStateClauses.contains(clause)){
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
