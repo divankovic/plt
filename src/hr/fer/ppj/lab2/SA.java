@@ -255,7 +255,9 @@ public class SA {
                         return j;
                     } else {
                         stack.pop();
-                        stack.pop();
+                        if(!stack.isEmpty()) { //nema oznake dna stoga pa treba ovo dodati ako skida do kraja da nije exception
+                            stack.pop();
+                        }
                     }
 
                 }
