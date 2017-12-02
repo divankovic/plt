@@ -14,7 +14,7 @@ public class SA {
     /**
      * Path to the output file of generator
      */
-    private final static String TEST_FILE_INPUT_PATH = "./src/hr/fer/ppj/lab2/res/in/simplePpjLang_manji.in";
+    private final static String TEST_FILE_INPUT_PATH = "./src/hr/fer/ppj/lab2/res/in/simplePpjLang_err.in";
     private final static String TEST_FILE_OUTPUT_PATH = "./src/hr/fer/ppj/lab2/res/out/SA_out.txt";
     private final static String SERIALIZATION_FILE_PATH = "./definition.ser";
     private final static String WHITESPACE_REGEX = "\\s+";
@@ -122,6 +122,7 @@ public class SA {
 
             if (parserAction == null) {
                 j = parserError(j);
+                currentState = Integer.parseInt(stack.peek().getContent());
 
             } else {
 
@@ -167,6 +168,7 @@ public class SA {
 
                         } else {
                             j = parserError(j);
+                            currentState = Integer.parseInt(stack.peek().getContent());
                         }
 
                         break;
@@ -242,7 +244,6 @@ public class SA {
         }
         System.err.println("Read uniform symbol with name ->" + elements.get(0) + "<- and value ->" + content + "<-");
 
-        ++j;
         while (j < program.size()) {
 
             if (syncSymbols.contains(program.get(j).split(WHITESPACE_REGEX)[0])) {
