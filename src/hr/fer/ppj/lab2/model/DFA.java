@@ -11,7 +11,6 @@ import java.util.*;
 public class DFA implements Serializable {
 
     private EpsilonNFA epsilonNFA;
-    private List<Clause> initialState;
     private List<String> symbols;
     private HashMap<Pair, Integer> transitions;
     private HashMap<Integer, List<Clause>> states;
@@ -19,7 +18,7 @@ public class DFA implements Serializable {
     /**
      *
      */
-    private int cnt = 0;
+    private int stateIdx = 0;
 
     /**
      *
@@ -50,122 +49,59 @@ public class DFA implements Serializable {
      */
     private void convertToDFA() {
 
+        transitions = new HashMap<>();
+        states = new HashMap<>();
+
         symbols.remove(EpsilonNFA.epsilonSymbol);
 
         List<Clause> tmp = new ArrayList<>();
         tmp.add(epsilonNFA.getStartingState());
-        initialState = epsilonNFA.epsilonTranisitions(tmp);
-
-        transitions = new HashMap<>();
-        states = new HashMap<>();
-        states.put(cnt, initialState);
-
-
-        for (String symbol : symbols) {
-
-            List<Clause> next = new LinkedList<>();
-
-            for (Clause nextState : initialState) {
-
-                List<Clause> transitionTo = epsilonNFA.getTransitionsFor(nextState, symbol);
-
-                if (transitionTo == null) {
-                    continue;
-                }
-
-                for (Clause clause : transitionTo) {
-                    if (!next.contains(clause)) {
-                        next.add(clause);
-                    }
-                }
-            }
-
-            ++cnt;
-
-            next = epsilonNFA.epsilonTranisitions(next);
-            states.put(cnt, new LinkedList<>(next));
-            transitions.put(new Pair(0, symbol), cnt);
-        }
+        List<Clause> stateClauses = epsilonNFA.epsilonTranisitions(tmp);
+        states.put(stateIdx, stateClauses);
 
         List<Integer> newStates = new LinkedList<>();
-        for (Map.Entry<Integer, List<Clause>> entry : states.entrySet()) {
-            if (entry.getKey() != 0 && !newStates.contains(entry.getKey())) {
-                newStates.add(entry.getKey());
-            }
-        }
+        newStates.add(stateIdx);
 
-        List<Integer> tempNewStates = new LinkedList<>();
-
-        while (true) {
-
-            boolean added = false;
-
-            for (Integer newState : newStates) {
-
+        while (!newStates.isEmpty()) {
+            List<Integer> tempNewStates = new LinkedList<>();
+            for (Integer state : newStates) {
+                stateClauses = states.get(state);
                 for (String symbol : symbols) {
-
-                    List<Clause> next = new LinkedList<>();
-
-                    for (Clause clause : states.get(newState)) {
-
-                        List<Clause> transitionTo = epsilonNFA.getTransitionsFor(clause, symbol);
-
-                        if (transitionTo == null) {
-                            continue;
-                        }
-
-                        for (Clause nextClause : transitionTo) {
-                            if (!next.contains(nextClause)) {
-                                next.add(nextClause);
+                    List<Clause> nextStateClauses = new LinkedList<>();
+                    for (Clause clause : stateClauses) {
+                        List<Clause> transitionClauses = epsilonNFA.getTransitionsFor(clause, symbol);
+                        if (transitionClauses != null) {
+                            for(Clause transitionClause:transitionClauses){
+                                if(!nextStateClauses.contains(transitionClause)){
+                                    nextStateClauses.add(transitionClause);
+                                }
                             }
                         }
                     }
-
-                    if (next.isEmpty()) {
+                    if(nextStateClauses.isEmpty()){
                         continue;
                     }
-
-                    next = epsilonNFA.epsilonTranisitions(next);
-
-                    int from = newState;
-                    int to = -1;
-
-                    // && !tempNewStates.contains(cnt)
-
-                    if (!states.containsValue(next)) {
-
-                        to = ++cnt;
-                        tempNewStates.add(cnt);
-                        states.put(cnt, new LinkedList<>(next));
-
-                    } else {
-
-                        for (Map.Entry<Integer, List<Clause>> entry : states.entrySet()) {
-
-                            if (entry.getValue().equals(next)) {
-                                to = entry.getKey();
-                                break;
-                            }
-
+                    nextStateClauses = epsilonNFA.epsilonTranisitions(nextStateClauses);
+                    //provjera jel vec postoji stanje sa tim stavkama
+                    int newState=-1;
+                    for(int j = 0; j<=stateIdx; j++){
+                        if(states.get(j).equals(nextStateClauses)){
+                            newState = j;
                         }
-
                     }
+                    if(newState==-1){
+                        stateIdx+=1;
+                        newState = stateIdx;
+                        states.put(newState,nextStateClauses);
+                        tempNewStates.add(newState);
+                    }
+                    transitions.put(new Pair(state,symbol),newState);
 
-                    transitions.put(new Pair(from, symbol), to);
-                    added = true;
                 }
-
             }
-
             newStates.clear();
-            newStates = new LinkedList<>(tempNewStates);
-
-            if (!added) {
-                break;
-            }
-
+            newStates.addAll(tempNewStates);
         }
-
     }
 
     /**

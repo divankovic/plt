@@ -14,11 +14,12 @@ public class SA {
     /**
      * Path to the output file of generator
      */
-    private final static String TEST_FILE_INPUT_PATH = "./src/hr/fer/ppj/lab2/res/in/kanon_gramatika.in";
-    private final static String TEST_FILE_OUTPUT_PATH = "./src/hr/fer/ppj/lab2/res/out/GSA_out.txt";
+    private final static String TEST_FILE_INPUT_PATH = "./src/hr/fer/ppj/lab2/res/in/minusLang.in";
+    private final static String TEST_FILE_OUTPUT_PATH = "./src/hr/fer/ppj/lab2/res/out/SA_out.txt";
     private static Stack<ParserNode> stack = new Stack<>();
     private static List<String> program;
     private static HashMap<Pair, ParserAction> parserTable;
+    private static List<String> terminalSymbols;
     private static List<String> syncSymbols;
 
     /**
@@ -74,6 +75,7 @@ public class SA {
             FileInputStream fis = new FileInputStream(file);
             ObjectInputStream ois = new ObjectInputStream(fis);
 
+            terminalSymbols = (List<String>)ois.readObject();
             syncSymbols = (List<String>)ois.readObject();
             parserTable = (HashMap<Pair, ParserAction>) ois.readObject();
 
@@ -101,7 +103,7 @@ public class SA {
 
         // prolaz kroz sve ulazne linije ( znakove )
         int j = 0;
-        while(j<=program.size()){
+        while(j<=program.size() && j!=-1){
             String character;
             String line="";
             if(j<program.size()){
@@ -119,8 +121,7 @@ public class SA {
             ParserAction parserAction = parserTable.get(new Pair(currentState, character));
 
             if(parserAction==null){
-
-                //j=parserError(line);
+                j=parserError(j);
             }else {
 
                 ParserNode newNode;
@@ -160,7 +161,7 @@ public class SA {
                             stack.push(new ParserNode(nextAction.getArgument()));
                             currentState = Integer.parseInt(nextAction.getArgument());
                         } else {
-                            //parserError(line);
+                            j = parserError(j);
                         }
 
                         break;
@@ -183,7 +184,7 @@ public class SA {
             stack.pop();
             startNode = stack.pop();
             printGeneratingTree(startNode,0);
-        }else{
+        }else {
 
         }
     }
@@ -209,10 +210,51 @@ public class SA {
         return indentation;
     }
 
-    private static int parserError(String line){
+    private static int parserError(int j){
 
+        //ispis pogreske
+        String line = program.get(j);
+        List<String> elements = Arrays.asList(line.split(" "));
+        System.err.println("Error occurred at line : "+elements.get(1));
 
-        return 0;
+        List<String> expectedTokens = new LinkedList<>();
+        int currentState = Integer.parseInt(stack.peek().getContent());
+        int finalCurrentState = currentState;
+        terminalSymbols.forEach(token->{
+            if(parserTable.get(new Pair(finalCurrentState,token))!=null){
+                expectedTokens.add(token);
+            }
+        });
+
+        System.err.println("Expected uniform symbols: ");
+        expectedTokens.forEach(token->System.err.println("  "+token));
+
+        String content = "";
+        List<String> contentElements = elements.subList(2,elements.size());
+        contentElements.forEach(content::concat);
+        System.err.println("Read uniform symbol : "+elements.get(0)+",value : "+ content);
+
+        //oporavak od pogreske pomocu sikronizacijskog znaka
+
+        j+=1;
+        while(j<program.size()){
+            if(syncSymbols.contains(program.get(j).split(" ")[0])){
+                while(!stack.empty()){
+                    currentState = Integer.parseInt(stack.peek().getContent());
+                    if(parserTable.get(new Pair(currentState,program.get(j).split("")[0]))!=null){
+                        return j;
+                    }else{
+                        stack.pop();
+                        stack.pop();
+                    }
+                }
+                System.err.println("Couldn't recover from error");
+            }else{
+                j++;
+            }
+        }
+
+        return -1;
     }
 
 }

@@ -18,7 +18,7 @@ public class GSA {
      */
     public final static String startingNonTerminalSymbol = "<S'>";
     final static String SERIALIZATION_FILE_PATH = "./src/hr/fer/ppj/lab2/analizator/definition.ser";
-    private final static String TEST_FILE_INPUT_PATH = "./src/hr/fer/ppj/lab2/res/in/kanon_gramatika.san";
+    private final static String TEST_FILE_INPUT_PATH = "./src/hr/fer/ppj/lab2/res/in/minusLang.san";
     private final static String TEST_FILE_OUTPUT_PATH = "./src/hr/fer/ppj/lab2/res/out/GSA_out.txt";
 
     /**
@@ -85,6 +85,7 @@ public class GSA {
             FileOutputStream fos = new FileOutputStream(file);
             ObjectOutputStream oos = new ObjectOutputStream(fos);
 
+            oos.writeObject(terminalSymbols);
             oos.writeObject(syncSymbols);
             oos.writeObject(parserTable);
 
