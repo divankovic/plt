@@ -16,9 +16,10 @@ public class SA {
      */
     private final static String TEST_FILE_INPUT_PATH = "./src/hr/fer/ppj/lab2/res/in/simplePpjLang_err.in";
     private final static String TEST_FILE_OUTPUT_PATH = "./src/hr/fer/ppj/lab2/res/out/SA_out.txt";
+    private final static String SERIALIZATION_FILE_PATH = "./definition.ser";
     private final static String WHITESPACE_REGEX = "\\s+";
     private final static String PRODUCTION_DELIMITER = "->";
-    
+
     private static Stack<ParserNode> stack = new Stack<>();
     private static List<String> program;
     private static HashMap<Pair, ParserAction> parserTable;
@@ -75,7 +76,7 @@ public class SA {
 
         try {
 
-            File file = new File(GSA.SERIALIZATION_FILE_PATH);
+            File file = new File(SERIALIZATION_FILE_PATH);
             FileInputStream fis = new FileInputStream(file);
             ObjectInputStream ois = new ObjectInputStream(fis);
 
