@@ -25,7 +25,7 @@ public class SA {
     /**
      * Entry point
      */
-    public static void main(String[] args) throws IOException{
+    public static void main(String[] args) throws IOException {
 
         setupStdIO();
 
@@ -75,8 +75,8 @@ public class SA {
             FileInputStream fis = new FileInputStream(file);
             ObjectInputStream ois = new ObjectInputStream(fis);
 
-            terminalSymbols = (List<String>)ois.readObject();
-            syncSymbols = (List<String>)ois.readObject();
+            terminalSymbols = (List<String>) ois.readObject();
+            syncSymbols = (List<String>) ois.readObject();
             parserTable = (HashMap<Pair, ParserAction>) ois.readObject();
 
             fis.close();
@@ -103,26 +103,26 @@ public class SA {
 
         // prolaz kroz sve ulazne linije ( znakove )
         int j = 0;
-        while(j<=program.size() && j!=-1){
+        while (j <= program.size() && j != -1) {
             String character;
-            String line="";
-            if(j<program.size()){
+            String line = "";
+            if (j < program.size()) {
                 line = program.get(j);
 
                 // dohvati ime_jedinke trenutne linije
                 character = line.trim().split("\\s+")[0];
 
 
-            }else{
+            } else {
                 character = Grammar.endOfLine;
             }
 
             // pronalazak akcije za par (stanje, ime_jedinke)
             ParserAction parserAction = parserTable.get(new Pair(currentState, character));
 
-            if(parserAction==null){
-                j=parserError(j);
-            }else {
+            if (parserAction == null) {
+                j = parserError(j);
+            } else {
 
                 ParserNode newNode;
                 switch (parserAction.getParserActionType()) {
@@ -180,78 +180,91 @@ public class SA {
 
         }
 
-        if(accepted){
+        if (accepted) {
             stack.pop();
             startNode = stack.pop();
-            printGeneratingTree(startNode,0);
-        }else {
+            printGeneratingTree(startNode, 0);
+        } else {
 
         }
     }
 
 
-    private static void printGeneratingTree(ParserNode startNode, int level){
-        System.out.println(getIndentation(level)+startNode);
+    private static void printGeneratingTree(ParserNode startNode, int level) {
+        System.out.println(getIndentation(level) + startNode);
         List<ParserNode> childrenNodes = startNode.getSubNodes();
-        if(childrenNodes!=null) {
-            if (!childrenNodes.isEmpty()){
-                childrenNodes.forEach(node->printGeneratingTree(node, level + 1));
+        if (childrenNodes != null) {
+            if (!childrenNodes.isEmpty()) {
+                childrenNodes.forEach(node -> printGeneratingTree(node, level + 1));
             }
         }
     }
 
-    private static String getIndentation(int level){
+    private static String getIndentation(int level) {
         String indentation = "";
         int i = 0;
-        while(i<level){
+        while (i < level) {
             indentation = indentation.concat(" ");
             ++i;
         }
         return indentation;
     }
 
-    private static int parserError(int j){
+    private static int parserError(int j) {
 
-        //ispis pogreske
+        // ispis pogreske
         String line = program.get(j);
         List<String> elements = Arrays.asList(line.split(" "));
-        System.err.println("Error occurred at line : "+elements.get(1));
+
+        System.err.println("Error occurred at line : " + elements.get(1));
 
         List<String> expectedTokens = new LinkedList<>();
         int currentState = Integer.parseInt(stack.peek().getContent());
         int finalCurrentState = currentState;
-        terminalSymbols.forEach(token->{
-            if(parserTable.get(new Pair(finalCurrentState,token))!=null){
+
+        terminalSymbols.forEach(token -> {
+            if (parserTable.get(new Pair(finalCurrentState, token)) != null) {
                 expectedTokens.add(token);
             }
         });
 
         System.err.println("Expected uniform symbols: ");
-        expectedTokens.forEach(token->System.err.println("  "+token));
+        expectedTokens.forEach(token -> System.err.println("  " + token));
 
         String content = "";
-        List<String> contentElements = elements.subList(2,elements.size());
-        contentElements.forEach(content::concat);
-        System.err.println("Read uniform symbol : "+elements.get(0)+",value : "+ content);
+        List<String> contentElements = elements.subList(2, elements.size());
+        for (String elem : contentElements) {
+            content += elem;
+        }
 
-        //oporavak od pogreske pomocu sikronizacijskog znaka
+        System.err.println("Read uniform symbol : " + elements.get(0) + ",value : " + content);
 
-        j+=1;
-        while(j<program.size()){
-            if(syncSymbols.contains(program.get(j).split(" ")[0])){
-                while(!stack.empty()){
+        // oporavak od pogreske pomocu sikronizacijskog znaka
+
+        j += 1;
+        while (j < program.size()) {
+
+            if (syncSymbols.contains(program.get(j).split(" ")[0])) {
+
+                while (!stack.empty()) {
+
                     currentState = Integer.parseInt(stack.peek().getContent());
-                    if(parserTable.get(new Pair(currentState,program.get(j).split("")[0]))!=null){
+
+                    if (parserTable.get(new Pair(currentState, program.get(j).split(" ")[0])) != null) {
                         return j;
-                    }else{
+                    } else {
                         stack.pop();
                         stack.pop();
                     }
+
                 }
+                
                 System.err.println("Couldn't recover from error");
-            }else{
+
+            } else {
                 j++;
             }
+
         }
 
         return -1;
