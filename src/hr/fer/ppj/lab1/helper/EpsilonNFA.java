@@ -35,6 +35,11 @@ public class EpsilonNFA implements Serializable {
 
     private Rule rule;
     private Grammar grammar;
+    private String startingNonTerminalSymbol;
+    private List<String> terminalSymbols;
+    private List<String> nonTerminalSymbols;
+    private HashMap<String, List<GrammarProduction>> productionsMap;
+    private List<GrammarProduction> productionsInOrder;
     private LinkedHashMap<TransitionKey, List<Integer>> transitionStateHashMap = new LinkedHashMap<>();
     private List<Integer> currentStates = new LinkedList<>();
 
@@ -59,8 +64,13 @@ public class EpsilonNFA implements Serializable {
     /**
      *
      */
-    public EpsilonNFA(Grammar grammar) {
+    public EpsilonNFA(Grammar grammar, String startingNonTerminalSymbol, List<String> terminalSymbols, List<String> nonTerminalSymbols, List<GrammarProduction> productionsInOrder, HashMap<String, List<GrammarProduction>> productionsMap) {
         this.grammar = grammar;
+        this.startingNonTerminalSymbol = startingNonTerminalSymbol;
+        this.terminalSymbols = terminalSymbols;
+        this.nonTerminalSymbols = nonTerminalSymbols;
+        this.productionsInOrder = productionsInOrder;
+        this.productionsMap = productionsMap;
         convertGrammarToENFA();
     }
 
@@ -404,24 +414,24 @@ public class EpsilonNFA implements Serializable {
     }
 
     private void prepareData() {
-        initialNonTerminalSymbol = GSA.nonterminalSymbols.get(0);
+        initialNonTerminalSymbol = nonTerminalSymbols.get(0);
 
         inputSymbols = new LinkedList<>();
-        inputSymbols.addAll(GSA.nonterminalSymbols);
-        inputSymbols.remove(GSA.nonterminalSymbols.get(0));
-        inputSymbols.addAll(GSA.terminalSymbols);
+        inputSymbols.addAll(nonTerminalSymbols);
+        inputSymbols.remove(nonTerminalSymbols.get(0));
+        inputSymbols.addAll(terminalSymbols);
         inputSymbols.add(String.valueOf(epsilonSymbol));
     }
 
     private void buildTransitions() {
 
         List<Clause> clauses = new LinkedList<>();
-        List<String> startingRightSide = GSA.productionsInOrder.get(0).getRightSide();
+        List<String> startingRightSide = productionsInOrder.get(0).getRightSide();
         List<String> startingSymbols = new LinkedList<>();
         addDotFirst(startingRightSide);
         startingSymbols.add(Grammar.endOfLine);
 
-        clauses.add(new Clause(initialNonTerminalSymbol,startingRightSide,startingSymbols));
+        clauses.add(new Clause(initialNonTerminalSymbol, startingRightSide, startingSymbols));
 
         LinkedList<Clause> newClauses = new LinkedList<>();
         newClauses.add(clauses.get(0));
@@ -451,11 +461,11 @@ public class EpsilonNFA implements Serializable {
                 //epsilon transitions
 
                 LinkedList<Clause> epsilonTransitions = new LinkedList<>();
-                if (GSA.terminalSymbols.contains(transitionSymbol)) {
+                if (terminalSymbols.contains(transitionSymbol)) {
                     continue;
                 }
 
-                List<GrammarProduction> productions = GSA.productionsMap.get(transitionSymbol);
+                List<GrammarProduction> productions = productionsMap.get(transitionSymbol);
                 for (GrammarProduction production : productions) {
                     LinkedList<String> rightSide = new LinkedList<>(production.getRightSide());
                     addDotFirst(rightSide);
@@ -565,7 +575,7 @@ public class EpsilonNFA implements Serializable {
      */
     public List<Clause> returnAcceptableClauses() {
 
-        String startingState = GSA.startingNonTerminalSymbol;
+        String startingState = startingNonTerminalSymbol;
         List<Clause> acceptableClauses = new LinkedList<>();
 
         for (Clause clause : states) {
