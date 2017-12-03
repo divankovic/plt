@@ -26,7 +26,7 @@ public class Grammar implements Serializable {
         this.productionMap = GSA.productionsMap;
 
         initialize();
-        //printTable();
+        printTable();
     }
 
     public HashMap<String, List<GrammarProduction>> getProductionMap() {
@@ -136,33 +136,40 @@ public class Grammar implements Serializable {
 
         }
 
-        for (int i = 0; i < n + m; i++) {
+        boolean added = true;
+        while(added) {
+            added = false;
+            for (int i = 0; i < n + m; i++) {
 
-            startsWithSymbolTable[i][i] = 1;
+                startsWithSymbolTable[i][i] = 1;
 
-            for (int j = 0; j < n + m; j++) {
+                for (int j = 0; j < n + m; j++) {
 
-                if (i == j) {
-                    continue;
-                }
+                    if (i == j) {
+                        continue;
+                    }
 
-                if (startsWithSymbolTable[i][j] == 1) {
+                    if (startsWithSymbolTable[i][j] == 1) {
 
-                    for (int z = 0; z < n + m; z++) {
+                        for (int z = 0; z < n + m; z++) {
 
-                        if (z == j) {
-                            continue;
+                            if (z == j) {
+                                continue;
+                            }
+
+                            if (startsWithSymbolTable[j][z] == 1) {
+                                if(startsWithSymbolTable[i][z]!=1) {
+                                    startsWithSymbolTable[i][z] = 1;
+                                    added = true;
+                                }
+                            }
                         }
 
-                        if (startsWithSymbolTable[j][z] == 1) {
-                            startsWithSymbolTable[i][z] = 1;
-                        }
                     }
 
                 }
 
             }
-
         }
 
     }
@@ -172,9 +179,12 @@ public class Grammar implements Serializable {
      */
     private void printTable() {
 
-        for (int i = 0; i < n + m; i++) {
-            for (int j = 0; j < n + m; j++) {
-                System.out.format(" %d ", startsWithSymbolTable[i][j]);
+        for (int i = 0; i < n; i++) {
+            System.out.format(GSA.nonterminalSymbols.get(i)+": ");
+            for (int j = n; j < n +m; j++) {
+                if(startsWithSymbolTable[i][j]==1) {
+                    System.out.format(GSA.terminalSymbols.get(j - n)+", ");
+                }
             }
             System.out.println();
         }

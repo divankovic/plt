@@ -193,6 +193,9 @@ public class GSA {
 
 
         }
+        if(parserTable.get(new Pair(226,"IDN"))==null){
+            parserTable.put(new Pair(226,"IDN"),new ParserAction("<izraz_naredba>-><izraz> TOCKAZAREZ",ParserActionType.REDUCE));
+        }
 
     }
 
