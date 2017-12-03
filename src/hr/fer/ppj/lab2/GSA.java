@@ -18,7 +18,7 @@ public class GSA {
      */
     public final static String startingNonTerminalSymbol = "<S'>";
     final static String SERIALIZATION_FILE_PATH = "./src/hr/fer/ppj/lab2/analizator/definition.ser";
-    private final static String TEST_FILE_INPUT_PATH = "./src/hr/fer/ppj/lab2/res/in/simplePpjLang.san";
+    private final static String TEST_FILE_INPUT_PATH = "./src/hr/fer/ppj/lab2/res/in/14simplePpjLang/test.san";
     private final static String TEST_FILE_OUTPUT_PATH = "./src/hr/fer/ppj/lab2/res/out/GSA_out.txt";
 
     /**
@@ -26,10 +26,10 @@ public class GSA {
      */
     public static List<String> nonterminalSymbols;
     public static List<String> terminalSymbols;
-    public static List<String> syncSymbols;
+    private static List<String> syncSymbols;
     public static HashMap<String, List<GrammarProduction>> productionsMap;
-    public static List<GrammarProduction> productionsInOrder;
-    public static HashMap<Pair, ParserAction> parserTable;
+    private static List<GrammarProduction> productionsInOrder;
+    private static HashMap<Pair, ParserAction> parserTable;
     private static Grammar grammar;
     private static EpsilonNFA epsilonNFA;
     private static DFA dfa;

@@ -14,7 +14,7 @@ public class SA {
     /**
      * Path to the output file of generator
      */
-    private final static String TEST_FILE_INPUT_PATH = "./src/hr/fer/ppj/lab2/res/in/simplePpjLang_veci.in";
+    private final static String TEST_FILE_INPUT_PATH = "./src/hr/fer/ppj/lab2/res/in/14simplePpjLang/test.in";
     private final static String TEST_FILE_OUTPUT_PATH = "./src/hr/fer/ppj/lab2/res/out/SA_out.txt";
     private final static String SERIALIZATION_FILE_PATH = "./definition.ser";
     private final static String WHITESPACE_REGEX = "\\s+";
@@ -237,12 +237,12 @@ public class SA {
         expectedTokens.forEach(token -> System.err.printf("  " + token));
         System.err.println();
 
-        String content = "";
+        StringBuilder content = new StringBuilder();
         List<String> contentElements = elements.subList(2, elements.size());
         for (String elem : contentElements) {
-            content += elem;
+            content.append(elem);
         }
-        System.err.println("Read uniform symbol with name ->" + elements.get(0) + "<- and value ->" + content + "<-");
+        System.err.println("Read uniform symbol with name ->" + elements.get(0) + "<- and value ->" + content.toString() + "<-");
 
         while (j < program.size()) {
 
