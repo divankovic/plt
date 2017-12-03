@@ -309,7 +309,6 @@ public class Grammar implements Serializable {
                     return false;
                 }
             }
-
         }
 
         return true;
