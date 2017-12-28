@@ -34,6 +34,7 @@ public class SemantickiAnalizator {
     private static void readFromInput() {
 
         try (Scanner scanner = new Scanner(System.in)) {
+            input = new LinkedList<>();
 
             while (scanner.hasNextLine()) {
                 input.add(scanner.nextLine());
@@ -63,6 +64,7 @@ public class SemantickiAnalizator {
             newElements.addAll(newElementsTemp);
         }
 
+        //printGeneratingTree(startingElement,0);
 
     }
 
@@ -95,6 +97,26 @@ public class SemantickiAnalizator {
             ++i;
         }
         return i;
+    }
+
+    private static void printGeneratingTree(Element element, int level) {
+        System.out.println(getIndentation(level) + element.getSymbol().getName());
+        List<Element> childrenElements = element.getChildrenElements();
+        if (childrenElements != null) {
+            if (!childrenElements.isEmpty()) {
+                childrenElements.forEach(node -> printGeneratingTree(node, level + 1));
+            }
+        }
+    }
+
+    private static String getIndentation(int level) {
+        String indentation = "";
+        int i = 0;
+        while (i < level) {
+            indentation = indentation.concat(" ");
+            ++i;
+        }
+        return indentation;
     }
 
     private static void fillProductions() {
