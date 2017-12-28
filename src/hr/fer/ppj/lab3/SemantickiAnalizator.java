@@ -324,14 +324,14 @@ public class SemantickiAnalizator {
             System.exit(0);
         }
 
-        performActions(productionIndex);
+        performActions(productionIndex, element);
 
     }
 
     /**
      *
      */
-    private static void performActions(Integer productionIndex) {
+    private static void performActions(Integer productionIndex, Element element) {
 
         switch (productionIndex) {
             case 0:
