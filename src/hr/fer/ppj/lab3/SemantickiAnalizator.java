@@ -333,6 +333,11 @@ public class SemantickiAnalizator {
      */
     private static void performActions(Integer productionIndex) {
 
+        switch (productionIndex) {
+            case 0:
+
+        }
+
     }
 
 }
