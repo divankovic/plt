@@ -34,6 +34,7 @@ public class SemantickiAnalizator {
         buildGeneratingTree();
 
         check(startingElement);
+        System.out.println("OK");
     }
 
     /**
@@ -315,7 +316,13 @@ public class SemantickiAnalizator {
             rightSide.add(next.getSymbol());
         }
 
-        Integer productionIndex = productions.indexOf(new Production(leftSide, rightSide));
+        Production nextProduction = new Production(leftSide, rightSide);
+        Integer productionIndex = productions.indexOf(nextProduction);
+
+        if (productionIndex == -1) {
+            System.out.println(nextProduction);
+            System.exit(0);
+        }
 
         performActions(productionIndex);
 
