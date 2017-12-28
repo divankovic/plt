@@ -332,10 +332,11 @@ public class SemantickiAnalizator {
      *
      */
     private static void performActions(Integer productionIndex, Element element) {
+        NonterminalSymbol leftSide = (NonterminalSymbol)element.getSymbol();
+        List<Element> rightSide = element.getChildrenElements();
 
         switch (productionIndex) {
-            case 0:
-
+        
         }
 
     }
