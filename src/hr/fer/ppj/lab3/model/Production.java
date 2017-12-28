@@ -46,4 +46,8 @@ public class Production {
         return result;
     }
 
+    @Override
+    public String toString() {
+        return leftSide + "->" + rightSide;
+    }
 }

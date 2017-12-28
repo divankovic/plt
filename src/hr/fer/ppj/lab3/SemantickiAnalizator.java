@@ -24,10 +24,17 @@ public class SemantickiAnalizator {
      *
      */
     public static void main(String[] args) throws IOException {
+
         setupStdIO();
         readFromInput();
         fillProductions();
+
         //build tree ( startingSymbol )
+
+        for (Production production : productions) {
+            System.out.println(production);
+        }
+
     }
 
     /**
@@ -187,7 +194,8 @@ public class SemantickiAnalizator {
         addNewProduction("<multiplikativni_izraz>", "<multiplikativni_izraz> OP_MOD <cast_izraz>");
 
         addNewProduction("<aditivni_izraz>", "<multiplikativni_izraz>");
-        addNewProduction("<aditivni_izraz>", "<aditivni_izraz> (PLUS | MINUS) <multiplikativni_izraz>");
+        addNewProduction("<aditivni_izraz>", "<aditivni_izraz> PLUS <multiplikativni_izraz>");
+        addNewProduction("<aditivni_izraz>", "<aditivni_izraz> MINUS <multiplikativni_izraz>");
 
         addNewProduction("<odnosni_izraz>", "<aditivni_izraz>");
         addNewProduction("<odnosni_izraz>", "<odnosni_izraz> OP_LT <aditivni_izraz>");
