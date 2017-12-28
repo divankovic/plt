@@ -3,6 +3,7 @@ package hr.fer.ppj.lab3.model;
 import java.util.List;
 
 public class Element {
+
     private Symbol symbol;
     private int lineIdx;
     private List<Element> childrenElements;
@@ -35,4 +36,5 @@ public class Element {
     public void setChildrenElements(List<Element> childrenElements) {
         this.childrenElements = childrenElements;
     }
+
 }

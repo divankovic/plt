@@ -11,6 +11,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Scanner;
 
+/**
+ *
+ */
 public class SemantickiAnalizator {
 
     private static final String TEST_FILE_INPUT_PATH = "./src/hr/fer/ppj/lab3/res/in/in.txt";
@@ -28,13 +31,9 @@ public class SemantickiAnalizator {
         setupStdIO();
         readFromInput();
         fillProductions();
+        buildGeneratingTree();
 
-        //build tree ( startingSymbol )
-
-        for (Production production : productions) {
-            System.out.println(production);
-        }
-
+        check(startingElement);
     }
 
     /**
@@ -61,7 +60,6 @@ public class SemantickiAnalizator {
             e.printStackTrace();
         }
 
-        buildGeneratingTree();
     }
 
     /**
@@ -285,6 +283,9 @@ public class SemantickiAnalizator {
         addNewProduction("<lista izraza pridruzivanja>", "<lista_izraza_pridruzivanja> ZAREZ <izraz_pridruzivanja>");
     }
 
+    /**
+     *
+     */
     private static void addNewProduction(String leftSide, String rightSides) {
 
         NonterminalSymbol leftSideOfProd = new NonterminalSymbol(leftSide);
@@ -301,6 +302,30 @@ public class SemantickiAnalizator {
         }
 
         productions.add(new Production(leftSideOfProd, rightSideOfProd));
+    }
+
+    /**
+     *
+     */
+    private static void check(Element element) {
+
+        NonterminalSymbol leftSide = new NonterminalSymbol(element.getSymbol().getName());
+        List<Symbol> rightSide = new ArrayList<>();
+        for (Element next : element.getChildrenElements()) {
+            rightSide.add(next.getSymbol());
+        }
+
+        Integer productionIndex = productions.indexOf(new Production(leftSide, rightSide));
+
+        performActions(productionIndex);
+
+    }
+
+    /**
+     *
+     */
+    private static void performActions(Integer productionIndex) {
+
     }
 
 }
