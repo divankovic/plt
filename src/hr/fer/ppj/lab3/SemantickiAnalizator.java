@@ -332,13 +332,41 @@ public class SemantickiAnalizator {
      *
      */
     private static void performActions(Integer productionIndex, Element element) {
-        NonterminalSymbol leftSide = (NonterminalSymbol)element.getSymbol();
+        NonterminalSymbol leftSide = (NonterminalSymbol) element.getSymbol();
         List<Element> rightSide = element.getChildrenElements();
 
-        switch (productionIndex) {
-        
-        }
 
+        switch (productionIndex) {
+            case 0:
+                setTypeAndL(leftSide, rightSide.get(0));
+            case 1:
+                setTypeAndL(leftSide, Const.INT, Const.ZERO);
+            case 2:
+                setTypeAndL(leftSide, Const.CHAR, Const.ZERO);
+            case 3:
+                setTypeAndL(leftSide, Const.NIZ_CONST_CHAR, Const.ZERO);
+            case 4:
+                setTypeAndL(leftSide, rightSide.get(0));
+
+        }
     }
+
+
+    /**
+     *
+     */
+    private static void setTypeAndL(NonterminalSymbol leftSide, Element rightSide) {
+        leftSide.setTypes(((NonterminalSymbol) rightSide.getSymbol()).getTypes());
+        leftSide.setL_expression(((NonterminalSymbol) rightSide.getSymbol()).getL_expression());
+    }
+
+    /**
+     *
+     */
+    private static void setTypeAndL(NonterminalSymbol leftSide, String type, int l_expr) {
+        leftSide.getTypes().add(type);
+        leftSide.setL_expression(l_expr);
+    }
+
 
 }
