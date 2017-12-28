@@ -8,6 +8,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.List;
+import java.util.Scanner;
 
 public class SemantickiAnalizator {
 
@@ -31,6 +32,17 @@ public class SemantickiAnalizator {
     }
 
     private static void readFromInput() {
+
+        try (Scanner scanner = new Scanner(System.in)) {
+
+            while (scanner.hasNextLine()) {
+                generatingTree.add(scanner.nextLine());
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 
     private static void fillProductions() {
