@@ -646,8 +646,82 @@ public class SemantickiAnalizator {
 
             case 69:
                 break;
+
+            //<izravni_deklarator>
+            case 84:
+                break;
+            case 85:
+                break;
+            case 86:
+                break;
+            case 87:
+                break;
+
+            //<inicijalizator>
+            case 88:
+                check(rightSide.get(0));
+                String content = generates(rightSide.get(0));
+                if(!content.equals("")){
+                    leftSide.setNumOfElements(content.length()+1);
+                    List<String> types = leftSide.getTypes();
+                    for(int i =0;i<leftSide.getNumOfElements();i++){
+                        types.add(Const.CHAR);
+                    }
+                }else{
+                    leftSide.getTypes().addAll(((NonterminalSymbol)rightSide.get(0).getSymbol()).getTypes());
+                }
+                break;
+
+            case 89:
+                check(rightSide.get(1));
+                leftSide.setNumOfElements(getNonTerminalSymbol(rightSide.get(1)).getNumOfElements());
+                leftSide.getTypes().addAll(getNonTerminalSymbol(rightSide.get(1)).getTypes());
+                break;
+
+            //<lista_izraza_pridruzivanja>
+            case 90:
+                check(rightSide.get(0));
+                List<String> types90 = leftSide.getTypes();
+                types90.addAll(getNonTerminalSymbol(rightSide.get(0)).getTypes());
+                leftSide.setNumOfElements(1);
+                break;
+
+            case 91:
+                check(rightSide.get(0));
+                check(rightSide.get(2));
+
+                NonterminalSymbol first = getNonTerminalSymbol(rightSide.get(0));
+                NonterminalSymbol second = getNonTerminalSymbol(rightSide.get(2));
+
+                List<String> types91 = leftSide.getTypes();
+                types91.addAll(first.getTypes());
+                types91.addAll(second.getTypes());
+
+                leftSide.setNumOfElements(first.getNumOfElements()+1);
+                break;
         }
 
+    }
+
+    private static NonterminalSymbol getNonTerminalSymbol(Element element){
+        return (NonterminalSymbol)element.getSymbol();
+    }
+
+    private static String generates(Element element) {
+        String uniform_symbol = "NIZ_ZNAKOVA";
+        Element temp = element;
+        while(true){
+            List<Element> childrenElements = temp.getChildrenElements();
+            if(childrenElements.size()!=1){
+                break;
+            }
+            if(((TerminalSymbol)childrenElements.get(0).getSymbol()).getValue().equals(uniform_symbol)){
+                return childrenElements.get(0).getSymbol().getName().split(" ")[2];
+            }else{
+                temp = childrenElements.get(0);
+            }
+        }
+        return "";
     }
 
     /**
