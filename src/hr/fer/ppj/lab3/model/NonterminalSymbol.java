@@ -1,16 +1,20 @@
 package hr.fer.ppj.lab3.model;
 
+import java.util.LinkedList;
 import java.util.List;
 
 public class NonterminalSymbol extends Symbol {
 
     private List<String> types;
     private List<String> names;
-    private String l_expression;
-    private String numOfElements;
+    private int l_expression;
+    private int numOfElements;
 
     public NonterminalSymbol(String name) {
         super(name);
+        types = new LinkedList<>();
+        names = new LinkedList<>();
+
     }
 
     public List<String> getTypes() {
@@ -29,19 +33,19 @@ public class NonterminalSymbol extends Symbol {
         this.names = names;
     }
 
-    public String getL_expression() {
+    public int getL_expression() {
         return l_expression;
     }
 
-    public void setL_expression(String l_expression) {
+    public void setL_expression(int l_expression) {
         this.l_expression = l_expression;
     }
 
-    public String getNumOfElements() {
+    public int getNumOfElements() {
         return numOfElements;
     }
 
-    public void setNumOfElements(String numOfElements) {
+    public void setNumOfElements(int numOfElements) {
         this.numOfElements = numOfElements;
     }
 
