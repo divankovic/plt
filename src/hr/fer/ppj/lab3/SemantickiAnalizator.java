@@ -342,9 +342,10 @@ public class SemantickiAnalizator {
 
         switch (productionIndex) {
 
+            //<primarni_izraz>
             case 0:
-                setTypeAndL(leftSide, rightSide.get(0));
                 // provjerit je li ime deklarirano
+                setTypeAndL(leftSide, rightSide.get(0));
                 break;
 
             case 1:
