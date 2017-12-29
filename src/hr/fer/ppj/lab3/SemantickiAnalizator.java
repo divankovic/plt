@@ -1,13 +1,14 @@
 package hr.fer.ppj.lab3;
 
 import hr.fer.ppj.lab3.model.*;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static hr.fer.ppj.lab3.model.Const.*;
 
 /**
  *
@@ -22,12 +23,12 @@ public class SemantickiAnalizator {
     private static List<TerminalSymbol> terminalSymbols;
     private static Element startingElement;
     private static CodeBlock startingCodeBlock;
+    private static List<String> declarationIdentifiers = Arrays.asList(VOID,INT,CHAR,CONST);
 
     /**
      *
      */
     public static void main(String[] args) throws IOException {
-
         setupStdIO();
         readFromInput();
         fillProductions();
@@ -47,9 +48,50 @@ public class SemantickiAnalizator {
         startingCodeBlock = new CodeBlock(1,lastLine);
 
         int line = 1;
-        List<TerminalSymbol> currentLine = terminalSymbols.stream().filter(symbol->symbol.getLine()==line).collect(Collectors.toList());
-        
+        List<String> currentLine = terminalSymbols.stream().filter(symbol->symbol.getLine()==line).map(terminalSymbol -> terminalSymbol.getValue()).collect(Collectors.toList());
+        if(declarationIdentifiers.contains(currentLine.get(0))){
+            if(currentLine.get(0).equals(VOID)){
+                //funkcija
+                Function function = analyzeFunction(currentLine,line);
+                //pogledati je li funkcija vec deklararirana
 
+                if(currentLine.get(currentLine.size()-1).equals(L_VIT_ZAGRADA)){
+                    function.setDefinedAt(line);
+                }
+                
+            }else{
+                
+            }
+        }
+
+    }
+
+    private static Function analyzeFunction(List<String> currentLine, int line) {
+        String returnType = currentLine.get(0);
+        String name = currentLine.get(1);
+        List<String> inputParameters = new LinkedList<>();
+        List<String> inputParametersContent = currentLine.subList(3,currentLine.indexOf(D_ZAGRADA));
+
+        int i=0;
+        while(true){
+            String parameter;
+            if(inputParametersContent.contains(ZAREZ)) {
+                parameter = parseType(inputParametersContent.subList(i, inputParametersContent.indexOf(ZAREZ)));
+                inputParameters.add(parameter);
+                i = inputParametersContent.indexOf(ZAREZ)+1;
+                inputParametersContent = inputParametersContent.subList(i,inputParametersContent.size());
+            }else{
+                parameter = parseType(inputParametersContent);
+                inputParameters.add(parameter);
+                break;
+            }
+        }
+
+        return new Function(name,inputParameters,returnType);
+    }
+
+    private static String parseType(List<String> content) {
+        return "";
     }
 
     /**
@@ -367,7 +409,7 @@ public class SemantickiAnalizator {
                 break;
 
             case 1:
-                setTypeAndL(leftSide, Const.INT, Const.ZERO);
+                setTypeAndL(leftSide, INT, ZERO);
                 Integer intValue = Integer.valueOf(((TerminalSymbol) rightSide.get(0).getSymbol()).getName().split("\\s+")[2]);
                 if (intValue <= -2147483648 || intValue <= 2147483647) {
                     semanticAnalysisFailure(null);
@@ -375,7 +417,7 @@ public class SemantickiAnalizator {
                 break;
 
             case 2:
-                setTypeAndL(leftSide, Const.CHAR, Const.ZERO);
+                setTypeAndL(leftSide, CHAR, ZERO);
                 // provjera ZNAK dovrsit
                 char strValue = ((TerminalSymbol) rightSide.get(0).getSymbol()).getName().split("\\s+")[2].charAt(0);
                 if (strValue == '\"' || strValue == '"' || strValue == '\t' || strValue == '\n' || strValue == '\0' || strValue == '\\' || ((int) strValue >= 0 && (int) strValue <= 127)) {
@@ -383,7 +425,7 @@ public class SemantickiAnalizator {
                 break;
 
             case 3:
-                setTypeAndL(leftSide, Const.NIZ_CONST_CHAR, Const.ZERO);
+                setTypeAndL(leftSide, NIZ_CONST_CHAR, ZERO);
                 break;
 
             case 4:
@@ -408,23 +450,23 @@ public class SemantickiAnalizator {
             case 7:
                 check(rightSide.get(0));
                 // <postfiks_izraz>.tip = funkcija(void → pov)
-                leftSide.setL_expression(Const.ZERO);
+                leftSide.setL_expression(ZERO);
                 break;
 
             case 8:
                 check(rightSide.get(0));
                 check(rightSide.get(0));
                 // <postfiks_izraz>.tip = funkcija(params → pov) i redom po elementima arg-tip iz <lista_argumenata>.tipovi i param-tip iz params vrijedi arg-tip ∼ param-tip
-                leftSide.setL_expression(Const.ZERO);
+                leftSide.setL_expression(ZERO);
                 break;
 
             case 9:
                 check(rightSide.get(0));
-                ((NonterminalSymbol) rightSide.get(0).getSymbol()).setL_expression(Const.ONE);
-                if (!((NonterminalSymbol) rightSide.get(0).getSymbol()).getTypes().get(0).equals(Const.CHAR) && !((NonterminalSymbol) rightSide.get(0).getSymbol()).getTypes().get(0).equals(Const.INT)) {
+                ((NonterminalSymbol) rightSide.get(0).getSymbol()).setL_expression(ONE);
+                if (!((NonterminalSymbol) rightSide.get(0).getSymbol()).getTypes().get(0).equals(CHAR) && !((NonterminalSymbol) rightSide.get(0).getSymbol()).getTypes().get(0).equals(INT)) {
                     semanticAnalysisFailure(null);
                 }
-                setTypeAndL(leftSide, Const.INT, Const.ZERO);
+                setTypeAndL(leftSide, INT, ZERO);
                 break;
 
             case 10:
@@ -448,18 +490,18 @@ public class SemantickiAnalizator {
             case 14:
                 check(rightSide.get(1));
                 ((NonterminalSymbol) rightSide.get(1).getSymbol()).setL_expression(1);
-                if (!((NonterminalSymbol) rightSide.get(1).getSymbol()).getTypes().get(0).equals(Const.CHAR) && !((NonterminalSymbol) rightSide.get(1).getSymbol()).getTypes().get(0).equals(Const.INT)) {
+                if (!((NonterminalSymbol) rightSide.get(1).getSymbol()).getTypes().get(0).equals(CHAR) && !((NonterminalSymbol) rightSide.get(1).getSymbol()).getTypes().get(0).equals(INT)) {
                     semanticAnalysisFailure(null);
                 }
-                setTypeAndL(leftSide, Const.INT, Const.ZERO);
+                setTypeAndL(leftSide, INT, ZERO);
                 break;
 
             case 15:
                 check(rightSide.get(1));
-                if (!((NonterminalSymbol) rightSide.get(1).getSymbol()).getTypes().get(0).equals(Const.CHAR) && !((NonterminalSymbol) rightSide.get(1).getSymbol()).getTypes().get(0).equals(Const.INT)) {
+                if (!((NonterminalSymbol) rightSide.get(1).getSymbol()).getTypes().get(0).equals(CHAR) && !((NonterminalSymbol) rightSide.get(1).getSymbol()).getTypes().get(0).equals(INT)) {
                     semanticAnalysisFailure(null);
                 }
-                setTypeAndL(leftSide, Const.INT, Const.ZERO);
+                setTypeAndL(leftSide, INT, ZERO);
                 break;
 
             case 16:
@@ -482,21 +524,21 @@ public class SemantickiAnalizator {
 
             case 19:
                 check(rightSide.get(1));
-                if (((NonterminalSymbol) rightSide.get(1).getSymbol()).getTypes().equals(Const.VOID)) {
+                if (((NonterminalSymbol) rightSide.get(1).getSymbol()).getTypes().equals(VOID)) {
                     semanticAnalysisFailure(null);
                 }
                 break;
 
             case 20:
-                leftSide.getTypes().add(Const.VOID);
+                leftSide.getTypes().add(VOID);
                 break;
 
             case 21:
-                leftSide.getTypes().add(Const.CHAR);
+                leftSide.getTypes().add(CHAR);
                 break;
 
             case 22:
-                leftSide.getTypes().add(Const.INT);
+                leftSide.getTypes().add(INT);
                 break;
 
             case 23:
@@ -519,14 +561,14 @@ public class SemantickiAnalizator {
             case 25:
             case 26:
                 check(rightSide.get(0));
-                if (!((NonterminalSymbol) rightSide.get(0).getSymbol()).getTypes().get(0).equals(Const.CHAR) && !((NonterminalSymbol) rightSide.get(0).getSymbol()).getTypes().get(0).equals(Const.INT)) {
+                if (!((NonterminalSymbol) rightSide.get(0).getSymbol()).getTypes().get(0).equals(CHAR) && !((NonterminalSymbol) rightSide.get(0).getSymbol()).getTypes().get(0).equals(INT)) {
                     semanticAnalysisFailure(null);
                 }
                 check(rightSide.get(2));
-                if (!((NonterminalSymbol) rightSide.get(3).getSymbol()).getTypes().get(0).equals(Const.CHAR) && !((NonterminalSymbol) rightSide.get(2).getSymbol()).getTypes().get(0).equals(Const.INT)) {
+                if (!((NonterminalSymbol) rightSide.get(3).getSymbol()).getTypes().get(0).equals(CHAR) && !((NonterminalSymbol) rightSide.get(2).getSymbol()).getTypes().get(0).equals(INT)) {
                     semanticAnalysisFailure(null);
                 }
-                setTypeAndL(leftSide, Const.INT, Const.ZERO);
+                setTypeAndL(leftSide, INT, ZERO);
                 break;
 
             case 28:
@@ -543,14 +585,14 @@ public class SemantickiAnalizator {
             case 46:
             case 48:
                 check(rightSide.get(0));
-                if (!((NonterminalSymbol) rightSide.get(0).getSymbol()).getTypes().get(0).equals(Const.CHAR) && !((NonterminalSymbol) rightSide.get(0).getSymbol()).getTypes().get(0).equals(Const.INT)) {
+                if (!((NonterminalSymbol) rightSide.get(0).getSymbol()).getTypes().get(0).equals(CHAR) && !((NonterminalSymbol) rightSide.get(0).getSymbol()).getTypes().get(0).equals(INT)) {
                     semanticAnalysisFailure(null);
                 }
                 check(rightSide.get(2));
-                if (!((NonterminalSymbol) rightSide.get(2).getSymbol()).getTypes().get(0).equals(Const.CHAR) && !((NonterminalSymbol) rightSide.get(2).getSymbol()).getTypes().get(0).equals(Const.INT)) {
+                if (!((NonterminalSymbol) rightSide.get(2).getSymbol()).getTypes().get(0).equals(CHAR) && !((NonterminalSymbol) rightSide.get(2).getSymbol()).getTypes().get(0).equals(INT)) {
                     semanticAnalysisFailure(null);
                 }
-                setTypeAndL(leftSide, Const.INT, Const.ZERO);
+                setTypeAndL(leftSide, INT, ZERO);
                 break;
 
             case 50:
@@ -588,7 +630,7 @@ public class SemantickiAnalizator {
                 break;
 
             case 57:
-                leftSide.getTypes().add(Const.INT);
+                leftSide.getTypes().add(INT);
                 break;
 
             case 58:
@@ -598,7 +640,7 @@ public class SemantickiAnalizator {
 
             case 59:
                 check(rightSide.get(1));
-                if (!((NonterminalSymbol) rightSide.get(1).getSymbol()).getTypes().get(0).equals(Const.CHAR) && !((NonterminalSymbol) rightSide.get(1).getSymbol()).getTypes().get(0).equals(Const.INT)) {
+                if (!((NonterminalSymbol) rightSide.get(1).getSymbol()).getTypes().get(0).equals(CHAR) && !((NonterminalSymbol) rightSide.get(1).getSymbol()).getTypes().get(0).equals(INT)) {
                     semanticAnalysisFailure(null);
                 }
                 check(rightSide.get(3));
@@ -606,7 +648,7 @@ public class SemantickiAnalizator {
 
             case 60:
                 check(rightSide.get(1));
-                if (!((NonterminalSymbol) rightSide.get(1).getSymbol()).getTypes().get(0).equals(Const.CHAR) && !((NonterminalSymbol) rightSide.get(1).getSymbol()).getTypes().get(0).equals(Const.INT)) {
+                if (!((NonterminalSymbol) rightSide.get(1).getSymbol()).getTypes().get(0).equals(CHAR) && !((NonterminalSymbol) rightSide.get(1).getSymbol()).getTypes().get(0).equals(INT)) {
                     semanticAnalysisFailure(null);
                 }
                 check(rightSide.get(3));
@@ -616,7 +658,7 @@ public class SemantickiAnalizator {
 
             case 61:
                 check(rightSide.get(2));
-                if (!((NonterminalSymbol) rightSide.get(1).getSymbol()).getTypes().get(0).equals(Const.CHAR) && !((NonterminalSymbol) rightSide.get(1).getSymbol()).getTypes().get(0).equals(Const.INT)) {
+                if (!((NonterminalSymbol) rightSide.get(1).getSymbol()).getTypes().get(0).equals(CHAR) && !((NonterminalSymbol) rightSide.get(1).getSymbol()).getTypes().get(0).equals(INT)) {
                     semanticAnalysisFailure(null);
                 }
                 check(rightSide.get(4));
@@ -625,7 +667,7 @@ public class SemantickiAnalizator {
             case 62:
                 check(rightSide.get(2));
                 check(rightSide.get(3));
-                if (!((NonterminalSymbol) rightSide.get(3).getSymbol()).getTypes().get(0).equals(Const.CHAR) && !((NonterminalSymbol) rightSide.get(3).getSymbol()).getTypes().get(0).equals(Const.INT)) {
+                if (!((NonterminalSymbol) rightSide.get(3).getSymbol()).getTypes().get(0).equals(CHAR) && !((NonterminalSymbol) rightSide.get(3).getSymbol()).getTypes().get(0).equals(INT)) {
                     semanticAnalysisFailure(null);
                 }
                 check(rightSide.get(5));
@@ -634,7 +676,7 @@ public class SemantickiAnalizator {
             case 63:
                 check(rightSide.get(2));
                 check(rightSide.get(3));
-                if (!((NonterminalSymbol) rightSide.get(3).getSymbol()).getTypes().get(0).equals(Const.CHAR) && !((NonterminalSymbol) rightSide.get(3).getSymbol()).getTypes().get(0).equals(Const.INT)) {
+                if (!((NonterminalSymbol) rightSide.get(3).getSymbol()).getTypes().get(0).equals(CHAR) && !((NonterminalSymbol) rightSide.get(3).getSymbol()).getTypes().get(0).equals(INT)) {
                     semanticAnalysisFailure(null);
                 }
                 check(rightSide.get(4));
@@ -684,7 +726,7 @@ public class SemantickiAnalizator {
                     leftSide.setNumOfElements(content.length()+1);
                     List<String> types = leftSide.getTypes();
                     for(int i =0;i<leftSide.getNumOfElements();i++){
-                        types.add(Const.CHAR);
+                        types.add(CHAR);
                     }
                 }else{
                     leftSide.getTypes().addAll(((NonterminalSymbol)rightSide.get(0).getSymbol()).getTypes());

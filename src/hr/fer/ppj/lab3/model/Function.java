@@ -5,15 +5,17 @@ import java.util.List;
 public class Function {
 
     private String name;
-    private List<Const> inputParameters;
-    private Const returnValue;
+    private List<String> inputParameters;
+    private String returnType;
     private int firstTimeDeclaredAt;
     private int definedAt;
 
-    public Function(String name, List<Const> inputParameters, Const returnValue) {
+    public Function(String name, List<String> inputParameters, String returnType) {
         this.name = name;
         this.inputParameters = inputParameters;
-        this.returnValue = returnValue;
+        this.returnType = returnType;
+        firstTimeDeclaredAt = 0;
+        definedAt = 0;
     }
 
     public String getName() {
@@ -24,20 +26,20 @@ public class Function {
         this.name = name;
     }
 
-    public List<Const> getInputParameters() {
+    public List<String> getInputParameters() {
         return inputParameters;
     }
 
-    public void setInputParameters(List<Const> inputParameters) {
+    public void setInputParameters(List<String> inputParameters) {
         this.inputParameters = inputParameters;
     }
 
-    public Const getReturnValue() {
-        return returnValue;
+    public String getReturnType() {
+        return returnType;
     }
 
-    public void setReturnValue(Const returnValue) {
-        this.returnValue = returnValue;
+    public void setReturnType(String returnType) {
+        this.returnType = returnType;
     }
 
     public int getFirstTimeDeclaredAt() {
@@ -66,14 +68,14 @@ public class Function {
         if (name != null ? !name.equals(function.name) : function.name != null) return false;
         if (inputParameters != null ? !inputParameters.equals(function.inputParameters) : function.inputParameters != null)
             return false;
-        return returnValue != null ? returnValue.equals(function.returnValue) : function.returnValue == null;
+        return returnType != null ? returnType.equals(function.returnType) : function.returnType == null;
     }
 
     @Override
     public int hashCode() {
         int result = name != null ? name.hashCode() : 0;
         result = 31 * result + (inputParameters != null ? inputParameters.hashCode() : 0);
-        result = 31 * result + (returnValue != null ? returnValue.hashCode() : 0);
+        result = 31 * result + (returnType != null ? returnType.hashCode() : 0);
         return result;
     }
 }

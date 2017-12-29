@@ -1,21 +1,21 @@
 package hr.fer.ppj.lab3.model;
 
 public class Variable {
-    private Const type;
+    private String type;
     private String name;
     private int declaredAt;
 
-    public Variable(Const type, String name, int firstTimeDeclaredAt) {
+    public Variable(String type, String name, int firstTimeDeclaredAt) {
         this.type = type;
         this.name = name;
         this.declaredAt = firstTimeDeclaredAt;
     }
 
-    public Const getType() {
+    public String getType() {
         return type;
     }
 
-    public void setType(Const type) {
+    public void setType(String type) {
         this.type = type;
     }
 
