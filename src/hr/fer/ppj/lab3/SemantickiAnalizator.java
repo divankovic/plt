@@ -23,7 +23,9 @@ public class SemantickiAnalizator {
     private static List<TerminalSymbol> terminalSymbols;
     private static Element startingElement;
     private static CodeBlock startingCodeBlock;
-    private static List<String> declarationIdentifiers = Arrays.asList(VOID,INT,CHAR,CONST);
+    private static List<String> declarationIdentifiers = Arrays.asList(VOID, INT, CHAR, CONST);
+    private static List<Function> functions;
+    private static int lastLine;
 
     /**
      *
@@ -38,7 +40,11 @@ public class SemantickiAnalizator {
         }*/
 
         buildGeneratingTree();
-        buildCodeBlocks();
+
+        functions = new LinkedList<>();
+        lastLine = terminalSymbols.get(terminalSymbols.size() - 1).getLine();
+        startingCodeBlock = buildCodeBlocks(1, lastLine);
+
         check(startingElement);
         //System.out.println("OK");
     }
@@ -46,27 +52,116 @@ public class SemantickiAnalizator {
     /**
      *
      */
-    private static void buildCodeBlocks() {
-        int lastLine = terminalSymbols.get(terminalSymbols.size()-1).getLine();
-        startingCodeBlock = new CodeBlock(1,lastLine);
+    private static CodeBlock buildCodeBlocks(int startLine, int finishLine) {
 
-        int line = 1;
-        List<String> currentLine = terminalSymbols.stream().filter(symbol->symbol.getLine()==line).map(terminalSymbol -> terminalSymbol.getValue()).collect(Collectors.toList());
-        if(declarationIdentifiers.contains(currentLine.get(0))){
-            if(currentLine.get(0).equals(VOID)){
-                //funkcija
-                Function function = analyzeFunction(currentLine,line);
-                //pogledati je li funkcija vec deklararirana
+        CodeBlock codeBlock = new CodeBlock(startLine, finishLine);
+        List<TerminalSymbol> blockSymbols = terminalSymbols.subList(startLine,finishLine+1);
 
-                if(currentLine.get(currentLine.size()-1).equals(L_VIT_ZAGRADA)){
-                    function.setDefinedAt(line);
+        int line = startLine;
+        while (line <= lastLine) {
+            int lamLine = line;
+            List<String> currentLine = blockSymbols.stream().filter(symbol -> symbol.getLine() == lamLine).map(TerminalSymbol::getValue).collect(Collectors.toList());
+            if(currentLine.isEmpty()){
+                line+=1;
+                continue;
+            }
+            if (declarationIdentifiers.contains(currentLine.get(0))) {
+                if (currentLine.contains(L_ZAGRADA)) {
+                    //funkcija
+                    Function function = analyzeFunction(currentLine, line);
+                    //deklarirana funkcija
+                    if (currentLine.get(currentLine.size() - 1).equals(TOCKA_ZAREZ)) {
+                        function.setFirstTimeDeclaredAt(line);
+                        if (!functions.contains(function)) {
+                            functions.add(function);
+                        }
+                        line += 1;
+                    }
+                    //funkcija definirana ( i deklarirana )
+                    else {
+                        function.setFirstTimeDeclaredAt(line);
+                        function.setDefined(true);
+
+                        if (!functions.contains(function)) {
+                            functions.add(function);
+                        } else {
+                            int functionIndex = functions.indexOf(function);
+                            Function listFunction = functions.get(functionIndex);
+                            //funkcija je deklarirana ali nije bila definirana
+                            if (!listFunction.getDefined()) {
+                                functions.remove(functionIndex);
+                                listFunction.setDefined(true);
+                                functions.add(functionIndex, listFunction);
+                            }
+                        }
+                        //fline je linija prve sljedece zatvorene viticaste zagrade
+                        //pokrece se analiza koda izmedju sljedece dvije zatvorene zagrade
+                        //dodaje se childBlock , a analiza se nastavlja od sljedece linije iza bloka
+                        List<TerminalSymbol> searchContent = blockSymbols.stream().filter(terminalSymbol -> terminalSymbol.getLine()>lamLine).collect(Collectors.toList());
+                        int fLine = findNextRightParenthesis(searchContent);
+                        CodeBlock childBlock = buildCodeBlocks(line + 1,  fLine- 1);
+                        childBlock.setParentBlock(codeBlock);
+                        codeBlock.getChildrenBlocks().add(childBlock);
+                        line = fLine + 1;
+                    }
+                } else {
+                    //varijabla
+                    List<TerminalSymbol> lineSymbols = blockSymbols.stream().filter(symbol->symbol.getLine()== lamLine).collect(Collectors.toList());
+                    //ako ima jednako u deklaraciji, odreži
+                    if(lineSymbols.contains(JEDNAKOST)){
+                        int idx=lineSymbols.size();
+                        for(TerminalSymbol symbol : lineSymbols){
+                            if(symbol.getValue().equals(JEDNAKOST)){
+                                idx = lineSymbols.indexOf(symbol);
+                                break;
+                            }
+                        }
+                        lineSymbols = lineSymbols.subList(0,idx);
+                    }
+
+                    String type = parseType(currentLine);
+
+                    List<String> names = lineSymbols.stream().filter(symbol -> symbol.getName().equals(IDN)).map(Symbol::getName).collect(Collectors.toList());
+
+                    names.forEach(name->{
+                        Variable variable = new Variable(type,name);
+                        variable.setDeclaredAt(lamLine);
+                        codeBlock.getVariables().add(variable);
+                    });
+
                 }
-                
-            }else{
-                
+            }else if(currentLine.contains(L_VIT_ZAGRADA)){
+                //novi blok ili petlja
+                List<TerminalSymbol> searchContent = blockSymbols.stream().filter(terminalSymbol -> terminalSymbol.getLine()>lamLine).collect(Collectors.toList());
+                int fLine = findNextRightParenthesis(searchContent);
+                CodeBlock childBlock = buildCodeBlocks(line + 1,  fLine- 1);
+                childBlock.setParentBlock(codeBlock);
+                codeBlock.getChildrenBlocks().add(childBlock);
+                line = fLine + 1;
             }
         }
 
+        return codeBlock;
+
+    }
+
+    private static int findNextRightParenthesis(List<TerminalSymbol> content){
+        int position=0;
+        int cnt = 0;
+        for (TerminalSymbol symbol: content) {
+            if (symbol.getValue().equals(D_VIT_ZAGRADA)) {
+                if(cnt == 0) {
+                    position = symbol.getLine();
+                    break;
+                }else{
+                    cnt-=1;
+                }
+            }
+            if(symbol.getValue().equals(L_VIT_ZAGRADA)){
+                cnt++;
+            }
+        }
+        return position;
     }
 
     /**
@@ -76,31 +171,67 @@ public class SemantickiAnalizator {
         String returnType = currentLine.get(0);
         String name = currentLine.get(1);
         List<String> inputParameters = new LinkedList<>();
-        List<String> inputParametersContent = currentLine.subList(3,currentLine.indexOf(D_ZAGRADA));
+        List<String> inputParametersContent = currentLine.subList(3, currentLine.indexOf(D_ZAGRADA));
 
-        int i=0;
-        while(true){
+        int i = 0;
+        while (true) {
             String parameter;
-            if(inputParametersContent.contains(ZAREZ)) {
+            if (inputParametersContent.contains(ZAREZ)) {
                 parameter = parseType(inputParametersContent.subList(i, inputParametersContent.indexOf(ZAREZ)));
                 inputParameters.add(parameter);
-                i = inputParametersContent.indexOf(ZAREZ)+1;
-                inputParametersContent = inputParametersContent.subList(i,inputParametersContent.size());
-            }else{
+                i = inputParametersContent.indexOf(ZAREZ) + 1;
+                inputParametersContent = inputParametersContent.subList(i, inputParametersContent.size());
+            } else {
                 parameter = parseType(inputParametersContent);
                 inputParameters.add(parameter);
                 break;
             }
         }
 
-        return new Function(name,inputParameters,returnType);
+        return new Function(name, inputParameters, returnType);
     }
 
     /**
      *
      */
     private static String parseType(List<String> content) {
-        return "";
+        if(content.contains(L_UGL_ZAGRADA)){
+            //NIZ
+            if(content.get(0).equals(CONST)){
+                switch(content.get(1)){
+                    case CHAR:
+                        return NIZ_CONST_CHAR;
+                    default:
+                        return NIZ_CONST_INT;
+                }
+            }else{
+                switch(content.get(0)){
+                    case CHAR:
+                        return  NIZ_CHAR;
+                    default:
+                        return NIZ_INT;
+                }
+            }
+
+        }else{
+            if(content.get(0).equals(CONST)){
+                switch(content.get(1)){
+                    case CHAR:
+                        return CONST_CHAR;
+                    default:
+                        return CONST_INT;
+                }
+            }else{
+                switch(content.get(0)){
+                    case CHAR:
+                        return  CHAR;
+                    case INT:
+                        return INT;
+                    default:
+                        return VOID;
+                }
+            }
+        }
     }
 
     /**
@@ -128,9 +259,9 @@ public class SemantickiAnalizator {
         }
 
         terminalSymbols = new LinkedList<>();
-        for(String line : input){
+        for (String line : input) {
             line = line.trim();
-            if(!line.startsWith("<")){
+            if (!line.startsWith("<")) {
                 terminalSymbols.add(new TerminalSymbol(line.trim().split(" ")));
             }
         }
@@ -731,14 +862,14 @@ public class SemantickiAnalizator {
             case 88:
                 check(rightSide.get(0));
                 String content = generates(rightSide.get(0));
-                if(!content.equals("")){
-                    leftSide.setNumOfElements(content.length()+1);
+                if (!content.equals("")) {
+                    leftSide.setNumOfElements(content.length() + 1);
                     List<String> types = leftSide.getTypes();
-                    for(int i =0;i<leftSide.getNumOfElements();i++){
+                    for (int i = 0; i < leftSide.getNumOfElements(); i++) {
                         types.add(CHAR);
                     }
-                }else{
-                    leftSide.getTypes().addAll(((NonterminalSymbol)rightSide.get(0).getSymbol()).getTypes());
+                } else {
+                    leftSide.getTypes().addAll(((NonterminalSymbol) rightSide.get(0).getSymbol()).getTypes());
                 }
                 break;
 
@@ -767,27 +898,27 @@ public class SemantickiAnalizator {
                 types91.addAll(first.getTypes());
                 types91.addAll(second.getTypes());
 
-                leftSide.setNumOfElements(first.getNumOfElements()+1);
+                leftSide.setNumOfElements(first.getNumOfElements() + 1);
                 break;
         }
 
     }
 
-    private static NonterminalSymbol getNonTerminalSymbol(Element element){
-        return (NonterminalSymbol)element.getSymbol();
+    private static NonterminalSymbol getNonTerminalSymbol(Element element) {
+        return (NonterminalSymbol) element.getSymbol();
     }
 
     private static String generates(Element element) {
         String uniform_symbol = "NIZ_ZNAKOVA";
         Element temp = element;
-        while(true){
+        while (true) {
             List<Element> childrenElements = temp.getChildrenElements();
-            if(childrenElements.size()!=1){
+            if (childrenElements.size() != 1) {
                 break;
             }
-            if(((TerminalSymbol)childrenElements.get(0).getSymbol()).getValue().equals(uniform_symbol)){
+            if (((TerminalSymbol) childrenElements.get(0).getSymbol()).getValue().equals(uniform_symbol)) {
                 return childrenElements.get(0).getSymbol().getName().split(" ")[2];
-            }else{
+            } else {
                 temp = childrenElements.get(0);
             }
         }

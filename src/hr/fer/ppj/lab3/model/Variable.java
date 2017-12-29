@@ -5,10 +5,9 @@ public class Variable {
     private String name;
     private int declaredAt;
 
-    public Variable(String type, String name, int firstTimeDeclaredAt) {
+    public Variable(String type, String name) {
         this.type = type;
         this.name = name;
-        this.declaredAt = firstTimeDeclaredAt;
     }
 
     public String getType() {
@@ -42,7 +41,6 @@ public class Variable {
 
         Variable variable = (Variable) o;
 
-        if (declaredAt != variable.declaredAt) return false;
         if (type != null ? !type.equals(variable.type) : variable.type != null) return false;
         return name != null ? name.equals(variable.name) : variable.name == null;
     }
@@ -51,7 +49,6 @@ public class Variable {
     public int hashCode() {
         int result = type != null ? type.hashCode() : 0;
         result = 31 * result + (name != null ? name.hashCode() : 0);
-        result = 31 * result + declaredAt;
         return result;
     }
 }

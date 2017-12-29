@@ -8,14 +8,14 @@ public class Function {
     private List<String> inputParameters;
     private String returnType;
     private int firstTimeDeclaredAt;
-    private int definedAt;
+    private boolean defined;
 
     public Function(String name, List<String> inputParameters, String returnType) {
         this.name = name;
         this.inputParameters = inputParameters;
         this.returnType = returnType;
         firstTimeDeclaredAt = 0;
-        definedAt = 0;
+        defined = false;
     }
 
     public String getName() {
@@ -50,12 +50,12 @@ public class Function {
         this.firstTimeDeclaredAt = firstTimeDeclaredAt;
     }
 
-    public int getDefinedAt() {
-        return definedAt;
+    public boolean getDefined() {
+        return defined;
     }
 
-    public void setDefinedAt(int definedAt) {
-        this.definedAt = definedAt;
+    public void setDefined(boolean defined) {
+        this.defined = defined;
     }
 
     @Override

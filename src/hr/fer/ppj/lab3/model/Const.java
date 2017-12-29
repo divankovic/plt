@@ -22,6 +22,8 @@ public class Const {
     public static final String D_UGL_ZAGRADA = "]";
     public static final String ZAREZ = ",";
     public static final String TOCKA_ZAREZ = ";";
+    public static final String IDN = "IDN";
+    public static final String JEDNAKOST ="=";
     
 
 }
