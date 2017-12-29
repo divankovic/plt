@@ -8,6 +8,7 @@ public class CodeBlock {
     private int startLine;
     private int finishLine;
     private CodeBlock parentBlock;
+    private List<CodeBlock> childrenBlocks;
 
     public CodeBlock(int startLine, int finishLine){
         this.startLine = startLine;
@@ -44,5 +45,13 @@ public class CodeBlock {
 
     public void setParentBlock(CodeBlock parentBlock) {
         this.parentBlock = parentBlock;
+    }
+
+    public List<CodeBlock> getChildrenBlocks() {
+        return childrenBlocks;
+    }
+
+    public void setChildrenBlocks(List<CodeBlock> childrenBlocks) {
+        this.childrenBlocks = childrenBlocks;
     }
 }
