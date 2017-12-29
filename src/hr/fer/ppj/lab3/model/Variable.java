@@ -3,14 +3,12 @@ package hr.fer.ppj.lab3.model;
 public class Variable {
     private Const type;
     private String name;
-    private int value;
-    private int firstTimeDeclaredAt;
+    private int declaredAt;
 
-    public Variable(Const type, String name, int value, int firstTimeDeclaredAt) {
+    public Variable(Const type, String name, int firstTimeDeclaredAt) {
         this.type = type;
         this.name = name;
-        this.value = value;
-        this.firstTimeDeclaredAt = firstTimeDeclaredAt;
+        this.declaredAt = firstTimeDeclaredAt;
     }
 
     public Const getType() {
@@ -29,20 +27,12 @@ public class Variable {
         this.name = name;
     }
 
-    public int getValue() {
-        return value;
+    public int getDeclaredAt() {
+        return declaredAt;
     }
 
-    public void setValue(int value) {
-        this.value = value;
-    }
-
-    public int getFirstTimeDeclaredAt() {
-        return firstTimeDeclaredAt;
-    }
-
-    public void setFirstTimeDeclaredAt(int firstTimeDeclaredAt) {
-        this.firstTimeDeclaredAt = firstTimeDeclaredAt;
+    public void setDeclaredAt(int declaredAt) {
+        this.declaredAt = declaredAt;
     }
 
     @Override
@@ -52,8 +42,7 @@ public class Variable {
 
         Variable variable = (Variable) o;
 
-        if (value != variable.value) return false;
-        if (firstTimeDeclaredAt != variable.firstTimeDeclaredAt) return false;
+        if (declaredAt != variable.declaredAt) return false;
         if (type != null ? !type.equals(variable.type) : variable.type != null) return false;
         return name != null ? name.equals(variable.name) : variable.name == null;
     }
@@ -62,8 +51,7 @@ public class Variable {
     public int hashCode() {
         int result = type != null ? type.hashCode() : 0;
         result = 31 * result + (name != null ? name.hashCode() : 0);
-        result = 31 * result + value;
-        result = 31 * result + firstTimeDeclaredAt;
+        result = 31 * result + declaredAt;
         return result;
     }
 }
