@@ -47,7 +47,7 @@ public class Production {
     }
 
     @Override
-    public Const toString() {
+    public String toString() {
         return leftSide + "->" + rightSide;
     }
 }

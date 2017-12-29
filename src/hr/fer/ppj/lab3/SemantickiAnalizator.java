@@ -43,6 +43,9 @@ public class SemantickiAnalizator {
         //System.out.println("OK");
     }
 
+    /**
+     *
+     */
     private static void buildCodeBlocks() {
         int lastLine = terminalSymbols.get(terminalSymbols.size()-1).getLine();
         startingCodeBlock = new CodeBlock(1,lastLine);
@@ -66,6 +69,9 @@ public class SemantickiAnalizator {
 
     }
 
+    /**
+     *
+     */
     private static Function analyzeFunction(List<String> currentLine, int line) {
         String returnType = currentLine.get(0);
         String name = currentLine.get(1);
@@ -90,6 +96,9 @@ public class SemantickiAnalizator {
         return new Function(name,inputParameters,returnType);
     }
 
+    /**
+     *
+     */
     private static String parseType(List<String> content) {
         return "";
     }
