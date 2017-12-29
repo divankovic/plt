@@ -6,22 +6,22 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  *
  */
 public class SemantickiAnalizator {
 
-    private static final String TEST_FILE_INPUT_PATH = "./src/hr/fer/ppj/lab3/res/in/in.txt";
+    private static final String TEST_FILE_INPUT_PATH = "./src/hr/fer/ppj/lab2/res/out/SA_out.txt";
     private static final String TEST_FILE_OUTPUT_PATH = "./src/hr/fer/ppj/lab3/res/out/out.txt";
 
     private static List<Production> productions;
     private static List<String> input;
+    private static List<TerminalSymbol> terminalSymbols;
     private static Element startingElement;
+    private static CodeBlock startingCodeBlock;
 
     /**
      *
@@ -32,14 +32,24 @@ public class SemantickiAnalizator {
         readFromInput();
         fillProductions();
 
-        for (Production production : productions) {
+        /*for (Production production : productions) {
             System.out.println(production);
-        }
+        }*/
 
-        //buildGeneratingTree();
-
-        //check(startingElement);
+        buildGeneratingTree();
+        buildCodeBlocks();
+        check(startingElement);
         //System.out.println("OK");
+    }
+
+    private static void buildCodeBlocks() {
+        int lastLine = terminalSymbols.get(terminalSymbols.size()-1).getLine();
+        startingCodeBlock = new CodeBlock(1,lastLine);
+
+        int line = 1;
+        List<TerminalSymbol> currentLine = terminalSymbols.stream().filter(symbol->symbol.getLine()==line).collect(Collectors.toList());
+        
+
     }
 
     /**
@@ -64,6 +74,14 @@ public class SemantickiAnalizator {
 
         } catch (Exception e) {
             e.printStackTrace();
+        }
+
+        terminalSymbols = new LinkedList<>();
+        for(String line : input){
+            line = line.trim();
+            if(!line.startsWith("<")){
+                terminalSymbols.add(new TerminalSymbol(line.trim().split(" ")));
+            }
         }
 
     }
@@ -110,7 +128,7 @@ public class SemantickiAnalizator {
                 if (content.startsWith("<")) {
                     childrenElements.add(new Element(new NonterminalSymbol(content), i));
                 } else {
-                    childrenElements.add(new Element(new TerminalSymbol(content), i));
+                    childrenElements.add(new Element(new TerminalSymbol(content.split(" ")), i));
                 }
             }
         }

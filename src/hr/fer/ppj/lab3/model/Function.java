@@ -7,6 +7,8 @@ public class Function {
     private String name;
     private List<Const> inputParameters;
     private Const returnValue;
+    private int firstTimeDeclaredAt;
+    private int definedAt;
 
     public Function(String name, List<Const> inputParameters, Const returnValue) {
         this.name = name;
@@ -36,6 +38,22 @@ public class Function {
 
     public void setReturnValue(Const returnValue) {
         this.returnValue = returnValue;
+    }
+
+    public int getFirstTimeDeclaredAt() {
+        return firstTimeDeclaredAt;
+    }
+
+    public void setFirstTimeDeclaredAt(int firstTimeDeclaredAt) {
+        this.firstTimeDeclaredAt = firstTimeDeclaredAt;
+    }
+
+    public int getDefinedAt() {
+        return definedAt;
+    }
+
+    public void setDefinedAt(int definedAt) {
+        this.definedAt = definedAt;
     }
 
     @Override

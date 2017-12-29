@@ -11,7 +11,7 @@ public class NonterminalSymbol extends Symbol {
     private int numOfElements;
 
     public NonterminalSymbol(String name) {
-        super(name);
+        this.name=name;
         types = new LinkedList<>();
         names = new LinkedList<>();
 
