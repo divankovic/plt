@@ -24,6 +24,7 @@ public class Const {
     public static final String TOCKA_ZAREZ = ";";
     public static final String IDN = "IDN";
     public static final String JEDNAKOST ="=";
+    public static final String NIZ_ZNAKOVA = "NIZ_ZNAKOVA";
     
 
 }

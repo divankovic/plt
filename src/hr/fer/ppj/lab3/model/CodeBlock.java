@@ -14,6 +14,7 @@ public class CodeBlock {
         this.startLine = startLine;
         this.finishLine = finishLine;
         childrenBlocks = new LinkedList<>();
+        variables = new LinkedList<>();
     }
 
     public List<Variable> getVariables() {

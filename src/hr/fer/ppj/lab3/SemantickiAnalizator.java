@@ -45,7 +45,7 @@ public class SemantickiAnalizator {
         lastLine = terminalSymbols.get(terminalSymbols.size() - 1).getLine();
         startingCodeBlock = buildCodeBlocks(1, lastLine);
 
-        check(startingElement);
+        //check(startingElement);
         //System.out.println("OK");
     }
 
@@ -55,12 +55,13 @@ public class SemantickiAnalizator {
     private static CodeBlock buildCodeBlocks(int startLine, int finishLine) {
 
         CodeBlock codeBlock = new CodeBlock(startLine, finishLine);
-        List<TerminalSymbol> blockSymbols = terminalSymbols.subList(startLine,finishLine+1);
+        List<TerminalSymbol> blockSymbols = terminalSymbols.stream().filter(terminalSymbol -> terminalSymbol.getLine()>=startLine && terminalSymbol.getLine()<=finishLine).collect(Collectors.toList());
 
         int line = startLine;
-        while (line <= lastLine) {
+        while (line <= finishLine) {
             int lamLine = line;
             List<String> currentLine = blockSymbols.stream().filter(symbol -> symbol.getLine() == lamLine).map(TerminalSymbol::getValue).collect(Collectors.toList());
+            List<TerminalSymbol> lineSymbols = blockSymbols.stream().filter(symbol->symbol.getLine()== lamLine).collect(Collectors.toList());
             if(currentLine.isEmpty()){
                 line+=1;
                 continue;
@@ -69,6 +70,7 @@ public class SemantickiAnalizator {
                 if (currentLine.contains(L_ZAGRADA)) {
                     //funkcija
                     Function function = analyzeFunction(currentLine, line);
+
                     //deklarirana funkcija
                     if (currentLine.get(currentLine.size() - 1).equals(TOCKA_ZAREZ)) {
                         function.setFirstTimeDeclaredAt(line);
@@ -77,6 +79,7 @@ public class SemantickiAnalizator {
                         }
                         line += 1;
                     }
+
                     //funkcija definirana ( i deklarirana )
                     else {
                         function.setFirstTimeDeclaredAt(line);
@@ -94,21 +97,33 @@ public class SemantickiAnalizator {
                                 functions.add(functionIndex, listFunction);
                             }
                         }
+                        List<Variable> functionVariables = new LinkedList<>(); // varijable od funkcije pripadaju bloku u kojem je definirana funkcija
+                        List<String> variableTypes = function.getInputParameters();
+                        if(!variableTypes.contains(VOID)){
+                            List<String> identifiers = lineSymbols.stream().filter(terminalSymbol -> terminalSymbol.getName().equals(IDN)).map(TerminalSymbol::getValue).collect(Collectors.toList());
+                            identifiers.remove(0); // prvi identifikator je identifikator funkcije
+                            for(int i = 0;i<variableTypes.size();i++) {
+                                Variable variable = new Variable(variableTypes.get(i),identifiers.get(i));
+                                variable.setDeclaredAt(line);
+                                functionVariables.add(variable);
+                            }
+                        }
                         //fline je linija prve sljedece zatvorene viticaste zagrade
                         //pokrece se analiza koda izmedju sljedece dvije zatvorene zagrade
                         //dodaje se childBlock , a analiza se nastavlja od sljedece linije iza bloka
                         List<TerminalSymbol> searchContent = blockSymbols.stream().filter(terminalSymbol -> terminalSymbol.getLine()>lamLine).collect(Collectors.toList());
                         int fLine = findNextRightParenthesis(searchContent);
                         CodeBlock childBlock = buildCodeBlocks(line + 1,  fLine- 1);
+                        childBlock.getVariables().addAll(functionVariables);
                         childBlock.setParentBlock(codeBlock);
                         codeBlock.getChildrenBlocks().add(childBlock);
                         line = fLine + 1;
                     }
                 } else {
                     //varijabla
-                    List<TerminalSymbol> lineSymbols = blockSymbols.stream().filter(symbol->symbol.getLine()== lamLine).collect(Collectors.toList());
+
                     //ako ima jednako u deklaraciji, odreži
-                    if(lineSymbols.contains(JEDNAKOST)){
+                    if(lineSymbols.stream().map(TerminalSymbol::getValue).anyMatch(s -> s.equals(JEDNAKOST))){
                         int idx=lineSymbols.size();
                         for(TerminalSymbol symbol : lineSymbols){
                             if(symbol.getValue().equals(JEDNAKOST)){
@@ -121,23 +136,25 @@ public class SemantickiAnalizator {
 
                     String type = parseType(currentLine);
 
-                    List<String> names = lineSymbols.stream().filter(symbol -> symbol.getName().equals(IDN)).map(Symbol::getName).collect(Collectors.toList());
+                    List<String> names = lineSymbols.stream().filter(symbol -> symbol.getName().equals(IDN)).map(TerminalSymbol::getValue).collect(Collectors.toList());
 
                     names.forEach(name->{
                         Variable variable = new Variable(type,name);
                         variable.setDeclaredAt(lamLine);
                         codeBlock.getVariables().add(variable);
                     });
-
+                    line+=1;
                 }
-            }else if(currentLine.contains(L_VIT_ZAGRADA)){
-                //novi blok ili petlja
+            }else if(currentLine.get(0).equals(L_VIT_ZAGRADA)){
+                //novi blok
                 List<TerminalSymbol> searchContent = blockSymbols.stream().filter(terminalSymbol -> terminalSymbol.getLine()>lamLine).collect(Collectors.toList());
                 int fLine = findNextRightParenthesis(searchContent);
                 CodeBlock childBlock = buildCodeBlocks(line + 1,  fLine- 1);
                 childBlock.setParentBlock(codeBlock);
                 codeBlock.getChildrenBlocks().add(childBlock);
                 line = fLine + 1;
+            }else{
+                line+=1;
             }
         }
 
@@ -262,7 +279,17 @@ public class SemantickiAnalizator {
         for (String line : input) {
             line = line.trim();
             if (!line.startsWith("<")) {
-                terminalSymbols.add(new TerminalSymbol(line.trim().split(" ")));
+                String[] contents = new String[3];
+                if (line.contains(NIZ_ZNAKOVA)) {
+                    String content = line.substring(line.indexOf("\""),line.length());
+                    line = line.substring(0,line.indexOf("\""));
+                    contents[0] = line.split(" ")[0];
+                    contents[1] = line.split(" ")[1];
+                    contents[2] = content;
+                } else {
+                    contents = line.split(" ");
+                }
+                terminalSymbols.add(new TerminalSymbol(contents));
             }
         }
 
