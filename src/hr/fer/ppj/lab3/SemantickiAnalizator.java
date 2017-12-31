@@ -1,5 +1,6 @@
 package hr.fer.ppj.lab3;
 
+import hr.fer.ppj.lab3.helper.Checker;
 import hr.fer.ppj.lab3.model.*;
 import java.io.File;
 import java.io.FileInputStream;
@@ -162,6 +163,9 @@ public class SemantickiAnalizator {
 
     }
 
+    /**
+     *
+     */
     private static int findNextRightParenthesis(List<TerminalSymbol> content){
         int position=0;
         int cnt = 0;
@@ -571,28 +575,34 @@ public class SemantickiAnalizator {
 
             //<primarni_izraz>
             case 0:
-                // provjerit je li ime deklarirano
+                if (!isNameDeclared(rightSide.get(0).getSymbol().getName())) {
+                    semanticAnalysisFailure(null);
+                }
                 setTypeAndL(leftSide, rightSide.get(0));
                 break;
 
             case 1:
                 setTypeAndL(leftSide, INT, ZERO);
-                Integer intValue = Integer.valueOf(((TerminalSymbol) rightSide.get(0).getSymbol()).getName().split("\\s+")[2]);
-                if (intValue <= -2147483648 || intValue <= 2147483647) {
+                Integer intValue = Integer.valueOf(rightSide.get(0).getSymbol().getName().split("\\s+")[2]);
+                if (checkIntRange(intValue)) {
                     semanticAnalysisFailure(null);
                 }
                 break;
 
             case 2:
                 setTypeAndL(leftSide, CHAR, ZERO);
-                // provjera ZNAK dovrsit
-                char strValue = ((TerminalSymbol) rightSide.get(0).getSymbol()).getName().split("\\s+")[2].charAt(0);
-                if (strValue == '\"' || strValue == '"' || strValue == '\t' || strValue == '\n' || strValue == '\0' || strValue == '\\' || ((int) strValue >= 0 && (int) strValue <= 127)) {
+                char charValue = (rightSide.get(0).getSymbol()).getName().split("\\s+")[2].charAt(0);
+                if (checkCharSyntax(charValue)) {
+                    semanticAnalysisFailure(null);
                 }
                 break;
 
             case 3:
                 setTypeAndL(leftSide, NIZ_CONST_CHAR, ZERO);
+                String strValue = (rightSide.get(0).getSymbol()).getName().split("\\s+")[2];
+                if (checkStringSyntax(strValue)) {
+                    semanticAnalysisFailure(null);
+                }
                 break;
 
             case 4:
@@ -601,36 +611,59 @@ public class SemantickiAnalizator {
                 break;
 
             case 5:
+            case 12:
+            case 16:
+            case 23:
+            case 27:
+            case 30:
+            case 32:
+            case 36:
+            case 39:
+            case 41:
+            case 43:
+            case 45:
+            case 47:
+            case 49:
+            case 51:
                 check(rightSide.get(0));
                 setTypeAndL(leftSide, rightSide.get(0));
                 break;
 
             case 6:
                 check(rightSide.get(0));
+
                 // <postfiks_izraz>.tip = niz(X)
+
                 check(rightSide.get(2));
-                // <izraz>.tip ∼ int
+
+                if (!Checker.checkCast(getNonTerminalSymbol(rightSide.get(2)).getTypes(), Collections.singletonList(INT))) {
+                    semanticAnalysisFailure(null);
+                }
+
                 // tip ← X
                 // l-izraz ← X = const(T)
+
                 break;
 
             case 7:
                 check(rightSide.get(0));
-                // <postfiks_izraz>.tip = funkcija(void → pov)
+                // tip = ????????
+                // <postfiks_izraz>.tip = tip
+                // getNonTerminalSymbol(rightSide.get(0)).getTypes().add(tip);
                 leftSide.setL_expression(ZERO);
                 break;
 
             case 8:
                 check(rightSide.get(0));
-                check(rightSide.get(0));
-                // <postfiks_izraz>.tip = funkcija(params → pov) i redom po elementima arg-tip iz <lista_argumenata>.tipovi i param-tip iz params vrijedi arg-tip ∼ param-tip
+                check(rightSide.get(2));
                 leftSide.setL_expression(ZERO);
+                // <postfiks_izraz>.tip = funkcija(params → pov) i redom po elementima arg-tip iz <lista_argumenata>.tipovi i param-tip iz params vrijedi arg-tip ∼ param-tip
                 break;
 
             case 9:
                 check(rightSide.get(0));
                 ((NonterminalSymbol) rightSide.get(0).getSymbol()).setL_expression(ONE);
-                if (!((NonterminalSymbol) rightSide.get(0).getSymbol()).getTypes().get(0).equals(CHAR) && !((NonterminalSymbol) rightSide.get(0).getSymbol()).getTypes().get(0).equals(INT)) {
+                if (!Checker.checkCast(getNonTerminalSymbol(rightSide.get(0)).getTypes(), Collections.singletonList(INT))) {
                     semanticAnalysisFailure(null);
                 }
                 setTypeAndL(leftSide, INT, ZERO);
@@ -648,16 +681,11 @@ public class SemantickiAnalizator {
                 leftSide.getTypes().addAll(((NonterminalSymbol) rightSide.get(2).getSymbol()).getTypes());
                 break;
 
-            case 12:
-                check(rightSide.get(0));
-                setTypeAndL(leftSide, rightSide.get(0));
-                break;
-
             case 13:
             case 14:
                 check(rightSide.get(1));
                 ((NonterminalSymbol) rightSide.get(1).getSymbol()).setL_expression(1);
-                if (!((NonterminalSymbol) rightSide.get(1).getSymbol()).getTypes().get(0).equals(CHAR) && !((NonterminalSymbol) rightSide.get(1).getSymbol()).getTypes().get(0).equals(INT)) {
+                if (!Checker.checkCast(getNonTerminalSymbol(rightSide.get(1)).getTypes(), Collections.singletonList(INT))) {
                     semanticAnalysisFailure(null);
                 }
                 setTypeAndL(leftSide, INT, ZERO);
@@ -665,33 +693,30 @@ public class SemantickiAnalizator {
 
             case 15:
                 check(rightSide.get(1));
-                if (!((NonterminalSymbol) rightSide.get(1).getSymbol()).getTypes().get(0).equals(CHAR) && !((NonterminalSymbol) rightSide.get(1).getSymbol()).getTypes().get(0).equals(INT)) {
+                if (!Checker.checkCast(getNonTerminalSymbol(rightSide.get(1)).getTypes(), Collections.singletonList(INT))) {
                     semanticAnalysisFailure(null);
                 }
                 setTypeAndL(leftSide, INT, ZERO);
                 break;
 
-            case 16:
-                check(rightSide.get(0));
-                setTypeAndL(leftSide, rightSide.get(0));
-                break;
-
             case 17:
                 check(rightSide.get(1));
                 check(rightSide.get(3));
+                if (!Checker.checkCast(getNonTerminalSymbol(rightSide.get(1)).getTypes(), getNonTerminalSymbol(rightSide.get(3)).getTypes())) {
+                    semanticAnalysisFailure(null);
+                }
                 leftSide.getTypes().addAll(((NonterminalSymbol) rightSide.get(1).getSymbol()).getTypes());
                 leftSide.setL_expression(0);
-                // <cast_izraz>.tip se moˇ ze pretvoriti u <ime_tipa>.tip po poglavlju 4.3.1
                 break;
 
             case 18:
                 check(rightSide.get(0));
-                leftSide.getTypes().addAll(((NonterminalSymbol) rightSide.get(0).getSymbol()).getTypes());
+                leftSide.getTypes().addAll(getNonTerminalSymbol(rightSide.get(0)).getTypes());
                 break;
 
             case 19:
                 check(rightSide.get(1));
-                if (((NonterminalSymbol) rightSide.get(1).getSymbol()).getTypes().equals(VOID)) {
+                if (Checker.checkIfEqualTypes(getNonTerminalSymbol(rightSide.get(1)).getTypes(), Collections.singletonList(VOID))) {
                     semanticAnalysisFailure(null);
                 }
                 break;
@@ -708,36 +733,9 @@ public class SemantickiAnalizator {
                 leftSide.getTypes().add(INT);
                 break;
 
-            case 23:
-            case 27:
-            case 30:
-            case 32:
-            case 36:
-            case 39:
-            case 41:
-            case 43:
-            case 45:
-            case 47:
-            case 49:
-            case 51:
-                check(rightSide.get(0));
-                setTypeAndL(leftSide, rightSide.get(0));
-                break;
-
             case 24:
             case 25:
             case 26:
-                check(rightSide.get(0));
-                if (!((NonterminalSymbol) rightSide.get(0).getSymbol()).getTypes().get(0).equals(CHAR) && !((NonterminalSymbol) rightSide.get(0).getSymbol()).getTypes().get(0).equals(INT)) {
-                    semanticAnalysisFailure(null);
-                }
-                check(rightSide.get(2));
-                if (!((NonterminalSymbol) rightSide.get(3).getSymbol()).getTypes().get(0).equals(CHAR) && !((NonterminalSymbol) rightSide.get(2).getSymbol()).getTypes().get(0).equals(INT)) {
-                    semanticAnalysisFailure(null);
-                }
-                setTypeAndL(leftSide, INT, ZERO);
-                break;
-
             case 28:
             case 29:
             case 31:
@@ -752,11 +750,11 @@ public class SemantickiAnalizator {
             case 46:
             case 48:
                 check(rightSide.get(0));
-                if (!((NonterminalSymbol) rightSide.get(0).getSymbol()).getTypes().get(0).equals(CHAR) && !((NonterminalSymbol) rightSide.get(0).getSymbol()).getTypes().get(0).equals(INT)) {
+                if (Checker.checkCast(getNonTerminalSymbol(rightSide.get(0)).getTypes(), Collections.singletonList(INT))) {
                     semanticAnalysisFailure(null);
                 }
                 check(rightSide.get(2));
-                if (!((NonterminalSymbol) rightSide.get(2).getSymbol()).getTypes().get(0).equals(CHAR) && !((NonterminalSymbol) rightSide.get(2).getSymbol()).getTypes().get(0).equals(INT)) {
+                if (Checker.checkCast(getNonTerminalSymbol(rightSide.get(2)).getTypes(), Collections.singletonList(INT))) {
                     semanticAnalysisFailure(null);
                 }
                 setTypeAndL(leftSide, INT, ZERO);
@@ -766,8 +764,10 @@ public class SemantickiAnalizator {
                 check(rightSide.get(0));
                 ((NonterminalSymbol) rightSide.get(0).getSymbol()).setL_expression(1);
                 check(rightSide.get(2));
-                // <izraz_pridruzivanja>.tip ∼ <postfiks_izraz>.tip
-                leftSide.getTypes().addAll(((NonterminalSymbol) rightSide.get(0).getSymbol()).getTypes());
+                if (!Checker.checkCast(getNonTerminalSymbol(rightSide.get(0)).getTypes(), getNonTerminalSymbol(rightSide.get(2)).getTypes())) {
+                    semanticAnalysisFailure(null);
+                }
+                leftSide.getTypes().addAll(getNonTerminalSymbol(rightSide.get(0)).getTypes());
                 leftSide.setL_expression(0);
                 break;
 
@@ -806,26 +806,26 @@ public class SemantickiAnalizator {
                 break;
 
             case 59:
-                check(rightSide.get(1));
-                if (!((NonterminalSymbol) rightSide.get(1).getSymbol()).getTypes().get(0).equals(CHAR) && !((NonterminalSymbol) rightSide.get(1).getSymbol()).getTypes().get(0).equals(INT)) {
+                check(rightSide.get(2));
+                if (!Checker.checkCast(getNonTerminalSymbol(rightSide.get(2)).getTypes(), Collections.singletonList(INT))) {
                     semanticAnalysisFailure(null);
                 }
-                check(rightSide.get(3));
+                check(rightSide.get(4));
                 break;
 
             case 60:
-                check(rightSide.get(1));
-                if (!((NonterminalSymbol) rightSide.get(1).getSymbol()).getTypes().get(0).equals(CHAR) && !((NonterminalSymbol) rightSide.get(1).getSymbol()).getTypes().get(0).equals(INT)) {
+                check(rightSide.get(2));
+                if (!Checker.checkCast(getNonTerminalSymbol(rightSide.get(2)).getTypes(), Collections.singletonList(INT))) {
                     semanticAnalysisFailure(null);
                 }
-                check(rightSide.get(3));
+                check(rightSide.get(4));
                 check(rightSide.get(5));
                 break;
 
 
             case 61:
                 check(rightSide.get(2));
-                if (!((NonterminalSymbol) rightSide.get(1).getSymbol()).getTypes().get(0).equals(CHAR) && !((NonterminalSymbol) rightSide.get(1).getSymbol()).getTypes().get(0).equals(INT)) {
+                if (!Checker.checkCast(getNonTerminalSymbol(rightSide.get(2)).getTypes(), Collections.singletonList(INT))) {
                     semanticAnalysisFailure(null);
                 }
                 check(rightSide.get(4));
@@ -834,7 +834,7 @@ public class SemantickiAnalizator {
             case 62:
                 check(rightSide.get(2));
                 check(rightSide.get(3));
-                if (!((NonterminalSymbol) rightSide.get(3).getSymbol()).getTypes().get(0).equals(CHAR) && !((NonterminalSymbol) rightSide.get(3).getSymbol()).getTypes().get(0).equals(INT)) {
+                if (!Checker.checkCast(getNonTerminalSymbol(rightSide.get(3)).getTypes(), Collections.singletonList(INT))) {
                     semanticAnalysisFailure(null);
                 }
                 check(rightSide.get(5));
@@ -843,7 +843,7 @@ public class SemantickiAnalizator {
             case 63:
                 check(rightSide.get(2));
                 check(rightSide.get(3));
-                if (!((NonterminalSymbol) rightSide.get(3).getSymbol()).getTypes().get(0).equals(CHAR) && !((NonterminalSymbol) rightSide.get(3).getSymbol()).getTypes().get(0).equals(INT)) {
+                if (!Checker.checkCast(getNonTerminalSymbol(rightSide.get(3)).getTypes(), Collections.singletonList(INT))) {
                     semanticAnalysisFailure(null);
                 }
                 check(rightSide.get(4));
@@ -873,16 +873,206 @@ public class SemantickiAnalizator {
                 break;
 
             case 69:
+                check(rightSide.get(0));
+                // if(Checker.checkIfEqualTypes()) {}
+                if (isNameDeclared(rightSide.get(1).getSymbol().getName())) {
+                    semanticAnalysisFailure(null);
+                }
+                // ako postoji deklaracija imena IDN.ime u globalnom djelokrugu onda je pripadni tip te deklaracije funkcija(void → <ime_tipa>.tip)
+                // zabiljezi definiciju i deklaraciju funkcije
+                check(rightSide.get(5));
                 break;
 
-            //<izravni_deklarator>
+            case 70:
+                check(rightSide.get(0));
+                // if(Checker.checkIfEqualTypes()) {}
+                if (isNameDeclared(rightSide.get(1).getSymbol().getName())) {
+                    semanticAnalysisFailure(null);
+                }
+                check(rightSide.get(3));
+                // ako postoji deklaracija imena IDN.ime u globalnom djelokrugu onda je pripadni tip te deklaracije funkcija(void → <ime_tipa>.tip)
+                // zabiljezi definiciju i deklaraciju funkcije
+                check(rightSide.get(5));
+                break;
+
+            case 71:
+                check(rightSide.get(0));
+                leftSide.getTypes().addAll(getNonTerminalSymbol(rightSide.get(0)).getTypes());
+                leftSide.getNames().addAll(getNonTerminalSymbol(rightSide.get(0)).getNames());
+                break;
+
+            case 72:
+                check(rightSide.get(0));
+                check(rightSide.get(2));
+                if (getNonTerminalSymbol(rightSide.get(0)).getNames().contains(getNonTerminalSymbol(rightSide.get(2)).getNames().get(0))) {
+                    semanticAnalysisFailure(null);
+                }
+                leftSide.getTypes().addAll(getNonTerminalSymbol(rightSide.get(0)).getTypes());
+                leftSide.getTypes().addAll(getNonTerminalSymbol(rightSide.get(2)).getTypes());
+                leftSide.getNames().addAll(getNonTerminalSymbol(rightSide.get(0)).getNames());
+                leftSide.getNames().addAll(getNonTerminalSymbol(rightSide.get(2)).getNames());
+                break;
+
+            case 73:
+                check(rightSide.get(0));
+                if (Checker.checkIfEqualTypes(getNonTerminalSymbol(rightSide.get(0)).getTypes(), Collections.singletonList(VOID))) {
+                    semanticAnalysisFailure(null);
+                }
+                leftSide.getTypes().addAll(getNonTerminalSymbol(rightSide.get(0)).getTypes());
+                leftSide.getTypes().add(rightSide.get(1).getSymbol().getName());
+                break;
+
+            case 74:
+                check(rightSide.get(0));
+                if (Checker.checkIfEqualTypes(getNonTerminalSymbol(rightSide.get(0)).getTypes(), Collections.singletonList(VOID))) {
+                    semanticAnalysisFailure(null);
+                }
+                if (getNonTerminalSymbol(rightSide.get(0)).getTypes().get(0).equals(INT)) {
+                    leftSide.getTypes().add(NIZ_INT);
+                } else if (getNonTerminalSymbol(rightSide.get(0)).getTypes().get(0).equals(CHAR)) {
+                    leftSide.getTypes().add(NIZ_CHAR);
+                } else if (getNonTerminalSymbol(rightSide.get(0)).getTypes().get(0).equals(NIZ_CONST_INT)) {
+                    leftSide.getTypes().add(NIZ_CONST_INT);
+                } else {
+                    leftSide.getTypes().add(NIZ_CONST_CHAR);
+                }
+                leftSide.getTypes().add(rightSide.get(1).getSymbol().getName());
+                break;
+
+            case 75:
+                check(rightSide.get(0));
+                break;
+
+            case 76:
+                check(rightSide.get(0));
+                check(rightSide.get(1));
+                break;
+
+            // ntip
+            case 77:
+                check(rightSide.get(0));
+                getNonTerminalSymbol(rightSide.get(1)).getTypes().add(getNonTerminalSymbol(rightSide.get(0)).getTypes().get(0));
+                check(rightSide.get(1));
+                break;
+
+            // ntip
+            case 78:
+                getNonTerminalSymbol(rightSide.get(0)).getTypes().add(leftSide.getTypes().get(0));
+                check(rightSide.get(0));
+                break;
+
+            // ntip
+            case 79:
+                getNonTerminalSymbol(rightSide.get(0)).getTypes().add(leftSide.getTypes().get(0));
+                check(rightSide.get(0));
+                getNonTerminalSymbol(rightSide.get(1)).getTypes().add(leftSide.getTypes().get(0));
+                check(rightSide.get(1));
+                break;
+
+            // ntip
+            case 80:
+                getNonTerminalSymbol(rightSide.get(0)).getTypes().add(leftSide.getTypes().get(0));
+                check(rightSide.get(0));
+                switch (getNonTerminalSymbol(rightSide.get(0)).getTypes().get(0)) {
+                    case CONST_INT:
+                    case CONST_CHAR:
+                    case NIZ_CONST_CHAR:
+                    case NIZ_CONST_INT:
+                        semanticAnalysisFailure(null);
+                }
+                break;
+
+            // provjerit
+            // ntip
+            case 81:
+                getNonTerminalSymbol(rightSide.get(0)).getTypes().add(leftSide.getTypes().get(0));
+                check(rightSide.get(0));
+                check(rightSide.get(2));
+                String type81 = getNonTerminalSymbol(rightSide.get(0)).getTypes().get(0);
+                switch (type81) {
+                    case INT:
+                    case CHAR:
+                    case CONST_INT:
+                    case CONST_CHAR:
+                        if (!Checker.checkCast(getNonTerminalSymbol(rightSide.get(2)).getTypes(), Collections.singletonList(INT)) || !Checker.checkCast(getNonTerminalSymbol(rightSide.get(2)).getTypes(), Collections.singletonList(CHAR))) {
+                            semanticAnalysisFailure(null);
+                        }
+                        break;
+                    case NIZ_INT:
+                    case NIZ_CHAR:
+                    case NIZ_CONST_INT:
+                    case NIZ_CONST_CHAR:
+                        if (!(getNonTerminalSymbol(rightSide.get(2)).getNumOfElements() <= getNonTerminalSymbol(rightSide.get(0)).getNumOfElements())) {
+                            semanticAnalysisFailure(null);
+                        }
+                        for (String string : getNonTerminalSymbol(rightSide.get(2)).getTypes()) {
+                            if (!Checker.checkCast(Arrays.asList(string), Arrays.asList(INT)) && !Checker.checkCast(Arrays.asList(string), Arrays.asList(CHAR))) {
+                                semanticAnalysisFailure(null);
+                            }
+                        }
+                        break;
+
+                    default:
+                        semanticAnalysisFailure(null);
+                        break;
+                }
+                break;
+
+            // provjera
+            // ntip
+            case 82:
+                if (leftSide.getTypes().get(0).equals(VOID)) {
+                    semanticAnalysisFailure(null);
+                }
+                if (isNameDeclared(rightSide.get(0).getSymbol().getName())) {
+                    semanticAnalysisFailure(null);
+                }
+                // zabiljezi deklaraciju IDN.ime s odgovarajucim tipom
+                break;
+
+            // ntip
+            case 83:
+                if (isNameDeclared(rightSide.get(0).getSymbol().getName())) {
+                    semanticAnalysisFailure(null);
+                }
+                if (Integer.parseInt(rightSide.get(2).getSymbol().getName().split("\\s+")[2]) < 0 || (Integer.parseInt(rightSide.get(2).getSymbol().getName().split("\\s+")[2]) > 1024)) {
+                    semanticAnalysisFailure(null);
+                }
+                // zabiljeˇzi deklaraciju IDN.ime s odgovaraju´cim tipom
+                break;
+
+            //ntip
             case 84:
+                if (isNameDeclared(rightSide.get(0).getSymbol().getName())) {
+                    // tip prethodne deklaracije je jednak funkcija(void → ntip)
+                }
+                //zabiljezi deklaraciju IDN.ime s odgovarajucim tipom ako ista funkcija vec nije deklarirana u lokalnom djelokrugu
                 break;
+
+            // provjera
             case 85:
+                check(rightSide.get(2));
+                if (isNameDeclared(rightSide.get(0).getSymbol().getName())) {
+                    // tip prethodne deklaracije je jednak funkcija(<lista_parametara>.tipovi → ntip)
+                }
+                // zabiljezi deklaraciju IDN.ime s odgovarajucim tipom ako ista funkcija vec nijedeklarirana u lokalnom djelokrugu
                 break;
+
+            // provjera
             case 86:
+                check(rightSide.get(0));
+                if (generates(rightSide.get(0)).equals("")) {
+                    // br-elem ← duljina niza znakova + 1
+                    // tipovi ← lista duljine br-elem, svi elementi su char
+                } else {
+                    leftSide.getTypes().add(getNonTerminalSymbol(rightSide.get(0)).getTypes().get(0));
+                }
                 break;
+
             case 87:
+                check(rightSide.get(1));
+                leftSide.setNumOfElements(getNonTerminalSymbol(rightSide.get(1)).getNumOfElements());
+                leftSide.getTypes().addAll(getNonTerminalSymbol(rightSide.get(1)).getTypes());
                 break;
 
             //<inicijalizator>
@@ -931,10 +1121,55 @@ public class SemantickiAnalizator {
 
     }
 
+    /**
+     *
+     */
+    private static boolean checkStringSyntax(String strValue) {
+        if (!strValue.endsWith("\0")) {
+            return false;
+        }
+
+        char[] chars = strValue.toCharArray();
+        for (char oneChar : chars) {
+            if (!checkCharSyntax(oneChar)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     *
+     */
+    private static boolean checkCharSyntax(char strValue) {
+        return strValue == '\"' || strValue == '"' || strValue == '\t' || strValue == '\n' || strValue == '\0' || strValue == '\\' || ((int) strValue >= 0 && (int) strValue <= 127);
+    }
+
+    /**
+     *
+     */
+    private static boolean checkIntRange(Integer intValue) {
+        return intValue <= -2147483648 || intValue <= 2147483647;
+    }
+
+    /**
+     *
+     */
+    private static boolean isNameDeclared(String name) {
+        return false;
+    }
+
+    /**
+     *
+     */
     private static NonterminalSymbol getNonTerminalSymbol(Element element) {
         return (NonterminalSymbol) element.getSymbol();
     }
 
+    /**
+     *
+     */
     private static String generates(Element element) {
         String uniform_symbol = "NIZ_ZNAKOVA";
         Element temp = element;
