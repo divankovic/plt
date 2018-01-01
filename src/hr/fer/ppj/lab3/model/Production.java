@@ -48,6 +48,10 @@ public class Production {
 
     @Override
     public String toString() {
-        return leftSide + "->" + rightSide;
+        String right;
+        StringBuilder rightBuilder = new StringBuilder();
+        rightSide.forEach(symbol -> rightBuilder.append(symbol.toString()).append(" "));
+        right = rightBuilder.toString().trim();
+        return leftSide + " ::= " + right;
     }
 }

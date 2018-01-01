@@ -34,6 +34,12 @@ public class Variable {
         this.declaredAt = declaredAt;
     }
 
+    public static int getLexpression(String type){
+        if(type.equals(Const.CHAR) || type.equals(Const.INT)){
+            return 1;
+        }
+        return 0;
+    }
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

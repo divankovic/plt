@@ -1,5 +1,7 @@
 package hr.fer.ppj.lab3.model;
 
+import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 public class Function {
@@ -56,6 +58,25 @@ public class Function {
 
     public void setDefined(boolean defined) {
         this.defined = defined;
+    }
+
+    public static String getType(List<String> inputParameters,String returnType){
+        String parameters;
+        StringBuilder parameterBuilder = new StringBuilder();
+        inputParameters.forEach(s -> parameterBuilder.append(s).append(","));
+        parameters = parameterBuilder.substring(0, parameterBuilder.length() - 1);
+        return "funkcija("+parameters+" -> "+returnType;
+    }
+
+    public static String getReturnValue(String type){
+        return type.split("->")[1].trim().replace(")","");
+    }
+
+    public static List<String> getInputParameters(String type){
+        List<String> parameters = new LinkedList<>();
+        String[] par = type.split("->")[0].trim().replace("(","").split(",");
+        parameters.addAll(Arrays.asList(par));
+        return parameters;
     }
 
     @Override

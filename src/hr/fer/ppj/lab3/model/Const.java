@@ -1,5 +1,9 @@
 package hr.fer.ppj.lab3.model;
 
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+
 public class Const {
 
     public static final int ZERO = 0;
@@ -25,6 +29,42 @@ public class Const {
     public static final String IDN = "IDN";
     public static final String JEDNAKOST ="=";
     public static final String NIZ_ZNAKOVA = "NIZ_ZNAKOVA";
-    
+    public static final String ZNAK = "ZNAK";
 
+
+    public static List<String> turnToNiz(String type) {
+        if(type.equals(INT)){
+            return Collections.singletonList(NIZ_INT);
+        }else if(type.equals(CHAR)){
+            return Collections.singletonList(NIZ_CHAR);
+        }else if(type.equals(CONST_INT)){
+            return Collections.singletonList(NIZ_CONST_INT);
+        }else if(type.equals(CONST_CHAR)){
+            return Collections.singletonList(NIZ_CONST_CHAR);
+        }else{
+            return new LinkedList<>();
+        }
+    }
+
+    public static String extractFromNiz(String niz){
+        if(niz.equals(NIZ_INT)){
+            return INT;
+        }else if(niz.equals(NIZ_CHAR)){
+            return CHAR;
+        }else if(niz.equals(NIZ_CONST_INT)){
+            return CONST_INT;
+        }else if(niz.equals(NIZ_CONST_CHAR)){
+            return CONST_CHAR;
+        }else{
+            return "";
+        }
+    }
+
+    public static String convertToConst(String type){
+        if(type.equals(INT)){
+            return CONST_INT;
+        }else{
+            return CONST_CHAR;
+        }
+    }
 }

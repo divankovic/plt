@@ -49,4 +49,8 @@ public class NonterminalSymbol extends Symbol {
         this.numOfElements = numOfElements;
     }
 
+    @Override
+    public String toString(){
+        return name;
+    }
 }

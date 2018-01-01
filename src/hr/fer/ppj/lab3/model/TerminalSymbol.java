@@ -42,4 +42,9 @@ public class TerminalSymbol extends Symbol {
         result = 31 * result + line;
         return result;
     }
+
+    @Override
+    public String toString(){
+        return name+"("+line+", "+value+")";
+    }
 }
