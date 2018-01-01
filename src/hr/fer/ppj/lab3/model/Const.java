@@ -30,7 +30,8 @@ public class Const {
     public static final String JEDNAKOST ="=";
     public static final String NIZ_ZNAKOVA = "NIZ_ZNAKOVA";
     public static final String ZNAK = "ZNAK";
-
+    public static final String FOR = "for";
+    public static final String WHILE = "while";
 
     public static List<String> turnToNiz(String type) {
         if(type.equals(INT)){

@@ -9,6 +9,8 @@ public class CodeBlock {
     private int finishLine;
     private CodeBlock parentBlock;
     private List<CodeBlock> childrenBlocks;
+    private boolean loop;
+    private Function function;
 
     public CodeBlock(int startLine, int finishLine){
         this.startLine = startLine;
@@ -48,6 +50,22 @@ public class CodeBlock {
 
     public void setChildrenBlocks(List<CodeBlock> childrenBlocks) {
         this.childrenBlocks = childrenBlocks;
+    }
+
+    public boolean isLoop() {
+        return loop;
+    }
+
+    public void setLoop(boolean loop) {
+        this.loop = loop;
+    }
+
+    public Function getFunction() {
+        return function;
+    }
+
+    public void setFunction(Function function) {
+        this.function = function;
     }
 
     @Override

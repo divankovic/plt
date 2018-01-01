@@ -11,6 +11,7 @@ public class Function {
     private String returnType;
     private int firstTimeDeclaredAt;
     private boolean defined;
+    private CodeBlock codeblock;
 
     public Function(String name, List<String> inputParameters, String returnType) {
         this.name = name;
@@ -60,7 +61,15 @@ public class Function {
         this.defined = defined;
     }
 
-    public static String getType(List<String> inputParameters,String returnType){
+    public CodeBlock getCodeblock() {
+        return codeblock;
+    }
+
+    public void setCodeblock(CodeBlock codeblock) {
+        this.codeblock = codeblock;
+    }
+
+    public static String getType(List<String> inputParameters, String returnType){
         String parameters;
         StringBuilder parameterBuilder = new StringBuilder();
         inputParameters.forEach(s -> parameterBuilder.append(s).append(","));

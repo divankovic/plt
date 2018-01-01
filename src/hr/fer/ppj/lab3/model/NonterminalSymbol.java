@@ -5,6 +5,8 @@ import java.util.List;
 
 public class NonterminalSymbol extends Symbol {
 
+    private String type;
+    private String nameProperty;
     private List<String> types;
     private List<String> names;
     private int l_expression;
@@ -15,6 +17,22 @@ public class NonterminalSymbol extends Symbol {
         types = new LinkedList<>();
         names = new LinkedList<>();
 
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getNameProperty() {
+        return nameProperty;
+    }
+
+    public void setNameProperty(String nameProperty) {
+        this.nameProperty = nameProperty;
     }
 
     public List<String> getTypes() {
@@ -52,5 +70,20 @@ public class NonterminalSymbol extends Symbol {
     @Override
     public String toString(){
         return name;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        NonterminalSymbol that = (NonterminalSymbol) o;
+
+        return name != null ? name.equals(that.name) : that.name == null;
+    }
+
+    @Override
+    public int hashCode() {
+        return name != null ? name.hashCode() : 0;
     }
 }

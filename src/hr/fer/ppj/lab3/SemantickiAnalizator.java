@@ -109,7 +109,7 @@ public class SemantickiAnalizator {
      *
      */
     private static void fillProductions() {
-        productions = new ArrayList<>();
+        productions = new LinkedList<>();
 
         addNewProduction("<primarni_izraz>", "IDN");
         addNewProduction("<primarni_izraz>", "BROJ");
@@ -131,6 +131,11 @@ public class SemantickiAnalizator {
         addNewProduction("<unarni_izraz>", "OP_INC <unarni_izraz>");
         addNewProduction("<unarni_izraz>", "OP_DEC <unarni_izraz>");
         addNewProduction("<unarni_izraz>", "<unarni_operator> <cast_izraz>");
+
+        addNewProduction("<unarni_operator>","PLUS");
+        addNewProduction("<unarni_operator>","MINUS");
+        addNewProduction("<unarni_operator>","OP_TILDA");
+        addNewProduction("<unarni_operator>","OP_NEG");
 
         addNewProduction("<cast_izraz>", "<unarni_izraz>");
         addNewProduction("<cast_izraz>", "L_ZAGRADA <ime_tipa> D_ZAGRADA <cast_izraz>");
@@ -164,17 +169,17 @@ public class SemantickiAnalizator {
         addNewProduction("<bin_i_izraz>", "<jednakosni_izraz>");
         addNewProduction("<bin_i_izraz>", "<bin_i_izraz> OP_BIN_I <jednakosni_izraz>");
 
-        addNewProduction("<bin xili izraz>", "<bin_i_izraz>");
-        addNewProduction("<bin xili izraz>", "<bin_xili_izraz> OP_BIN_XILI <bin_i_izraz>");
+        addNewProduction("<bin_xili_izraz>", "<bin_i_izraz>");
+        addNewProduction("<bin_xili_izraz>", "<bin_xili_izraz> OP_BIN_XILI <bin_i_izraz>");
 
-        addNewProduction("<bin ili izraz>", "<bin_xili_izraz>");
-        addNewProduction("<bin ili izraz>", "<bin_ili_izraz> OP_BIN_ILI <bin_xili_izraz>");
+        addNewProduction("<bin_ili_izraz>", "<bin_xili_izraz>");
+        addNewProduction("<bin_ili_izraz>", "<bin_ili_izraz> OP_BIN_ILI <bin_xili_izraz>");
 
-        addNewProduction("<log i izraz>", "<bin_ili_izraz>");
-        addNewProduction("<log i izraz>", "<log_i_izraz> OP_I <bin_ili_izraz>");
+        addNewProduction("<log_i_izraz>", "<bin_ili_izraz>");
+        addNewProduction("<log_i_izraz>", "<log_i_izraz> OP_I <bin_ili_izraz>");
 
-        addNewProduction("<log ili izraz>", "<log_i_izraz>");
-        addNewProduction("<log ili izraz>", "<log_ili_izraz> OP_ILI <log_i_izraz>");
+        addNewProduction("<log_ili_izraz>", "<log_i_izraz>");
+        addNewProduction("<log_ili_izraz>", "<log_ili_izraz> OP_ILI <log_i_izraz>");
 
         addNewProduction("<izraz_pridruzivanja>", "<log_ili_izraz>");
         addNewProduction("<izraz_pridruzivanja>", "<postfiks_izraz> OP_PRIDRUZI <izraz_pridruzivanja>");
@@ -182,61 +187,70 @@ public class SemantickiAnalizator {
         addNewProduction("<izraz>", "<izraz_pridruzivanja>");
         addNewProduction("<izraz>", "<izraz> ZAREZ <izraz_pridruzivanja>");
 
-        addNewProduction("<slozena naredba>", "L_VIT_ZAGRADA <lista_naredbi> D_VIT_ZAGRADA");
-        addNewProduction("<slozena naredba>", "L_VIT_ZAGRADA <lista_deklaracija> <lista_naredbi> D_VIT_ZAGRADA");
+        addNewProduction("<slozena_naredba>", "L_VIT_ZAGRADA <lista_naredbi> D_VIT_ZAGRADA");
+        addNewProduction("<slozena_naredba>", "L_VIT_ZAGRADA <lista_deklaracija> <lista_naredbi> D_VIT_ZAGRADA");
 
         addNewProduction("<lista_naredbi>", "<naredba>");
         addNewProduction("<lista_naredbi>", "<lista_naredbi> <naredba>");
 
-        addNewProduction("<izraz naredba>", "TOCKAZAREZ");
-        addNewProduction("<izraz naredba>", "<izraz> TOCKAZAREZ");
+        addNewProduction("<naredba>", "<slozena_naredba>");
+        addNewProduction("<naredba>", "<izraz_naredba>");
+        addNewProduction("<naredba>", "<naredba_grananja>");
+        addNewProduction("<naredba>", "<naredba_petlje>");
+        addNewProduction("<naredba>", "<naredba_skoka>");
+
+        addNewProduction("<izraz_naredba>", "TOCKAZAREZ");
+        addNewProduction("<izraz_naredba>", "<izraz> TOCKAZAREZ");
 
         addNewProduction("<naredba_grananja>", "KR_IF L_ZAGRADA <izraz> D_ZAGRADA <naredba>");
         addNewProduction("<naredba_grananja>", "KR_IF L_ZAGRADA <izraz> D_ZAGRADA <naredba> KR_ELSE <naredba>");
 
-        addNewProduction("<naredba petlje>", "KR_WHILE L_ZAGRADA <izraz> D_ZAGRADA <naredba>");
-        addNewProduction("<naredba petlje>", "KR_FOR L_ZAGRADA <izraz_naredba> <izraz_naredba> D_ZAGRADA <naredba>");
-        addNewProduction("<naredba petlje>", "KR_FOR L_ZAGRADA <izraz_naredba> <izraz_naredba> <izraz> D_ZAGRADA <naredba>");
+        addNewProduction("<naredba_petlje>", "KR_WHILE L_ZAGRADA <izraz> D_ZAGRADA <naredba>");
+        addNewProduction("<naredba_petlje>", "KR_FOR L_ZAGRADA <izraz_naredba> <izraz_naredba> D_ZAGRADA <naredba>");
+        addNewProduction("<naredba_petlje>", "KR_FOR L_ZAGRADA <izraz_naredba> <izraz_naredba> <izraz> D_ZAGRADA <naredba>");
 
-        addNewProduction("<naredba skoka>", "KR_CONTINUE TOCKAZAREZ");
-        addNewProduction("<naredba skoka>", "KR_BREAK TOCKAZAREZ");
-        addNewProduction("<naredba skoka>", "KR_RETURN TOCKAZAREZ");
-        addNewProduction("<naredba skoka>", "KR_RETURN <izraz> TOCKAZAREZ");
+        addNewProduction("<naredba_skoka>", "KR_CONTINUE TOCKAZAREZ");
+        addNewProduction("<naredba_skoka>", "KR_BREAK TOCKAZAREZ");
+        addNewProduction("<naredba_skoka>", "KR_RETURN TOCKAZAREZ");
+        addNewProduction("<naredba_skoka>", "KR_RETURN <izraz> TOCKAZAREZ");
 
-        addNewProduction("<prijevodna jedinica>", "<vanjska_deklaracija>");
-        addNewProduction("<prijevodna jedinica>", "<prijevodna_jedinica> <vanjska_deklaracija>");
+        addNewProduction("<prijevodna_jedinica>", "<vanjska_deklaracija>");
+        addNewProduction("<prijevodna_jedinica>", "<prijevodna_jedinica> <vanjska_deklaracija>");
 
-        addNewProduction("<definicija funkcije>", "<ime_tipa> IDN L_ZAGRADA KR_VOID D_ZAGRADA <slozena_naredba>");
-        addNewProduction("<definicija funkcije>", "<ime_tipa> IDN L_ZAGRADA <lista_parametara> D_ZAGRADA <slozena_naredba>");
 
-        addNewProduction("<lista parametara>", "<deklaracija_parametra>");
-        addNewProduction("<lista parametara>", "<lista_parametara> ZAREZ <deklaracija_parametra>");
+        addNewProduction("<vanjska_deklaracija>","<definicija_funkcije>");
+        addNewProduction("<vanjska_deklaracija>","<deklaracija>");
 
-        addNewProduction("<deklaracija parametra>", "<ime_tipa> IDN");
-        addNewProduction("<deklaracija parametra>", "<ime_tipa> IDN L_UGL_ZAGRADA D_UGL_ZAGRADA");
+        addNewProduction("<definicija_funkcije>", "<ime_tipa> IDN L_ZAGRADA KR_VOID D_ZAGRADA <slozena_naredba>");
+        addNewProduction("<definicija_funkcije>", "<ime_tipa> IDN L_ZAGRADA <lista_parametara> D_ZAGRADA <slozena_naredba>");
 
-        addNewProduction("<lista deklaracija>", "<deklaracija>");
-        addNewProduction("<lista deklaracija>", "<lista_deklaracija> <deklaracija>");
+        addNewProduction("<lista_parametara>", "<deklaracija_parametra>");
+        addNewProduction("<lista_parametara>", "<lista_parametara> ZAREZ <deklaracija_parametra>");
+
+        addNewProduction("<deklaracija_parametra>", "<ime_tipa> IDN");
+        addNewProduction("<deklaracija_parametra>", "<ime_tipa> IDN L_UGL_ZAGRADA D_UGL_ZAGRADA");
+
+        addNewProduction("<lista_deklaracija>", "<deklaracija>");
+        addNewProduction("<lista_deklaracija>", "<lista_deklaracija> <deklaracija>");
 
         addNewProduction("<deklaracija>", "<ime_tipa> <lista_init_deklaratora> TOCKAZAREZ");
 
-        addNewProduction("<lista init deklaratora>", "<init_deklarator>");
-        addNewProduction("<lista init deklaratora>", "<lista_init_deklaratora> ZAREZ <init_deklarator>");
+        addNewProduction("<lista_init_deklaratora>", "<init_deklarator>");
+        addNewProduction("<lista_init_deklaratora>", "<lista_init_deklaratora> ZAREZ <init_deklarator>");
 
-        addNewProduction("<init deklarator>", "<izravni_deklarator>");
-        addNewProduction("<init deklarator>", "<izravni_deklarator> OP_PRIDRUZI <inicijalizator>");
+        addNewProduction("<init_deklarator>", "<izravni_deklarator>");
+        addNewProduction("<init_deklarator>", "<izravni_deklarator> OP_PRIDRUZI <inicijalizator>");
 
-        addNewProduction("<izravni deklarator>", "IDN");
-        addNewProduction("<izravni deklarator>", "IDN L_UGL_ZAGRADA BROJ D_UGL_ZAGRADA");
-        addNewProduction("<izravni deklarator>", "IDN L_ZAGRADA KR_VOID D_ZAGRADA");
-        addNewProduction("<izravni deklarator>", "IDN L_ZAGRADA <lista_parametara> D_ZAGRADA");
-        addNewProduction("<izravni deklarator>", "IDN L_UGL_ZAGRADA BROJ D_UGL_ZAGRADA");
+        addNewProduction("<izravni_deklarator>", "IDN");
+        addNewProduction("<izravni_deklarator>", "IDN L_UGL_ZAGRADA BROJ D_UGL_ZAGRADA");
+        addNewProduction("<izravni_deklarator>", "IDN L_ZAGRADA KR_VOID D_ZAGRADA");
+        addNewProduction("<izravni_deklarator>", "IDN L_ZAGRADA <lista_parametara> D_ZAGRADA");
 
         addNewProduction("<inicijalizator>", "<izraz_pridruzivanja>");
         addNewProduction("<inicijalizator>", "L_VIT_ZAGRADA <lista_izraza_pridruzivanja> D_VIT_ZAGRADA");
 
-        addNewProduction("<lista izraza pridruzivanja>", "<izraz_pridruzivanja>");
-        addNewProduction("<lista izraza pridruzivanja>", "<lista_izraza_pridruzivanja> ZAREZ <izraz_pridruzivanja>");
+        addNewProduction("<lista_izraza_pridruzivanja>", "<izraz_pridruzivanja>");
+        addNewProduction("<lista_izraza_pridruzivanja>", "<lista_izraza_pridruzivanja> ZAREZ <izraz_pridruzivanja>");
     }
     /**
      *
@@ -417,6 +431,7 @@ public class SemantickiAnalizator {
                         CodeBlock childBlock = buildCodeBlocks(line,  fLine);
                         childBlock.getVariables().addAll(functionVariables);
                         childBlock.setParentBlock(codeBlock);
+                        childBlock.setFunction(function);
                         codeBlock.getChildrenBlocks().add(childBlock);
                         line = fLine + 1;
                     }
@@ -446,8 +461,11 @@ public class SemantickiAnalizator {
                     });
                     line+=1;
                 }
-            }else if(currentLine.get(0).equals(L_VIT_ZAGRADA)){
-                //novi blok
+            }else if(currentLine.contains(L_VIT_ZAGRADA)){
+                if(currentLine.get(0).equals(FOR)||currentLine.get(0).equals(WHILE)){
+                    codeBlock.setLoop(true);
+                }
+                //novi blok ili petlja
                 List<TerminalSymbol> searchContent = blockSymbols.stream().filter(terminalSymbol -> terminalSymbol.getLine()>lamLine).collect(Collectors.toList());
                 int fLine = findNextRightParenthesis(searchContent);
                 CodeBlock childBlock = buildCodeBlocks(line,  fLine);
@@ -621,20 +639,28 @@ public class SemantickiAnalizator {
             case 4:
                 check(rightSide.get(1));
                 NonterminalSymbol izraz = getNonTerminalSymbol(rightSide.get(1));
-                setTypeAndL(leftSide, izraz.getTypes().get(0),izraz.getL_expression());
+                setTypeAndL(leftSide, izraz.getType(),izraz.getL_expression());
                 break;
 
             //<postfiks_izraz>
             //5->GRUPA1
             //GRUPA 1
             case 5:
-            case 12:
-            case 15:
-            case 22:
-            case 24:
+            case 13:
+            case 21:
+            case 32:
+            case 35:
+            case 40:
+            case 43:
+            case 45:
+            case 47:
+            case 49:
+            case 51:
+            case 53:
+            case 55:
                 check(rightSide.get(0));
                 NonterminalSymbol right = getNonTerminalSymbol(rightSide.get(1));
-                setTypeAndL(leftSide, right.getTypes().get(0),right.getL_expression());
+                setTypeAndL(leftSide, right.getType(),right.getL_expression());
                 break;
 
             case 6:
@@ -642,14 +668,14 @@ public class SemantickiAnalizator {
                 NonterminalSymbol izraz6 = getNonTerminalSymbol(rightSide.get(2));
 
                 check(rightSide.get(0));
-                if(!postfiks_izraz.getTypes().get(0).contains("niz")){
+                if(!postfiks_izraz.getType().contains("niz")){
                     semanticAnalysisFailure(production);
                 }
                 check(rightSide.get(2));
-                if (!checkImplicitCast(izraz6.getTypes().get(0),INT)) {
+                if (!checkImplicitCast(izraz6.getType(),INT)) {
                     semanticAnalysisFailure(production);
                 }
-                String type = extractFromNiz(postfiks_izraz.getTypes().get(0));
+                String type = extractFromNiz(postfiks_izraz.getType());
                 int l_expression = Variable.getLexpression(type);
                 setTypeAndL(leftSide,type, l_expression);
                 break;
@@ -657,7 +683,7 @@ public class SemantickiAnalizator {
             case 7:
                 check(rightSide.get(0));
                 NonterminalSymbol postfiks_izraz7 = getNonTerminalSymbol(rightSide.get(0));
-                String type7 = postfiks_izraz7.getTypes().get(0);
+                String type7 = postfiks_izraz7.getType();
                 if(!type7.contains("funkcija") ||
                         (type7.contains("funkcija") && !type7.split("->")[0].contains(VOID))){
                     semanticAnalysisFailure(production);
@@ -668,7 +694,7 @@ public class SemantickiAnalizator {
             case 8:
                 check(rightSide.get(0));
                 check(rightSide.get(2));
-                String type8 = getNonTerminalSymbol(rightSide.get(0)).getTypes().get(0);
+                String type8 = getNonTerminalSymbol(rightSide.get(0)).getType();
                 if(!type8.contains("funkcija")){
                     semanticAnalysisFailure(production);
                 }
@@ -683,150 +709,309 @@ public class SemantickiAnalizator {
                 break;
 
             case 9:
+            case 10:
                 check(rightSide.get(0));
                 NonterminalSymbol postfiks_izraz9 = getNonTerminalSymbol(rightSide.get(0));
-                if (postfiks_izraz9.getL_expression()!=1 || !checkImplicitCast(postfiks_izraz9.getTypes().get(0), INT)) {
+                if (postfiks_izraz9.getL_expression()!=1 || !checkImplicitCast(postfiks_izraz9.getType(), INT)) {
                     semanticAnalysisFailure(production);
                 }
                 setTypeAndL(leftSide, INT, 0);
                 break;
 
             //<lista_argumenata>
-            case 10:
+            case 11:
                 check(rightSide.get(0));
-                leftSide.getTypes().addAll(getNonTerminalSymbol(rightSide.get(0)).getTypes());
+                leftSide.getTypes().add(getNonTerminalSymbol(rightSide.get(0)).getType());
                 break;
 
-            case 11:
+            case 12:
                 check(rightSide.get(0));
                 check(rightSide.get(2));
                 leftSide.getTypes().addAll(getNonTerminalSymbol(rightSide.get(0)).getTypes());
-                leftSide.getTypes().addAll(getNonTerminalSymbol(rightSide.get(2)).getTypes());
+                leftSide.getTypes().add(getNonTerminalSymbol(rightSide.get(2)).getType());
                 break;
 
             //<unarni_izraz>
-            //12->GRUPA1
-            case 13:
+            //13->GRUPA1
             case 14:
+            case 15:
+            case 16:
                 check(rightSide.get(1));
                 NonterminalSymbol nonterminalSymbol14 = getNonTerminalSymbol(rightSide.get(1));
-                if (!checkImplicitCast(nonterminalSymbol14.getTypes().get(0),INT)) {
+                if (!checkImplicitCast(nonterminalSymbol14.getType(),INT)) {
                     semanticAnalysisFailure(production);
                 }
-                if(productionIndex == 13 && nonterminalSymbol14.getL_expression()!=1){
+                if((productionIndex == 14 || productionIndex==15) && nonterminalSymbol14.getL_expression()!=1){
                     semanticAnalysisFailure(production);
                 }
                 setTypeAndL(leftSide, INT, ZERO);
                 break;
 
+            //<unarni_operator>
+            case 17:
+            case 18:
+            case 19:
+            case 20:
+                break;
             //<cast_izraz>
-            //15->GRUPA1
-            case 16:
+            //21->GRUPA1
+            case 22:
                 check(rightSide.get(1));
                 check(rightSide.get(3));
                 NonterminalSymbol ime_tipa16 = getNonTerminalSymbol(rightSide.get(1));
-                if (!checkExplicitCast(getNonTerminalSymbol(rightSide.get(3)).getTypes().get(0), ime_tipa16.getTypes().get(0))) {
+                if (!checkExplicitCast(getNonTerminalSymbol(rightSide.get(3)).getType(), ime_tipa16.getType())) {
                     semanticAnalysisFailure(production);
                 }
-                setTypeAndL(leftSide, ime_tipa16.getTypes().get(0), ZERO);
+                setTypeAndL(leftSide, ime_tipa16.getType(), ZERO);
                 break;
 
             //<ime_tipa>
-            case 17:
+            case 23:
                 check(rightSide.get(0));
-                leftSide.getTypes().add(getNonTerminalSymbol(rightSide.get(0)).getTypes().get(0));
+                leftSide.getTypes().add(getNonTerminalSymbol(rightSide.get(0)).getType());
                 break;
 
-            case 18:
+            case 24:
                 check(rightSide.get(1));
-                if(getNonTerminalSymbol(rightSide.get(1)).getTypes().get(0)==VOID){
+                if(getNonTerminalSymbol(rightSide.get(1)).getType()==VOID){
                     semanticAnalysisFailure(production);
                 }
-                leftSide.getTypes().add(convertToConst(getNonTerminalSymbol(rightSide.get(1)).getTypes().get(0)));
+                leftSide.getTypes().add(convertToConst(getNonTerminalSymbol(rightSide.get(1)).getType()));
                 break;
 
             //<specifikator_tipa>
-            case 19:
-                leftSide.getTypes().add(VOID);
+            case 25:
+                leftSide.setType(VOID);
                 break;
 
-            case 20:
-                leftSide.getTypes().add(CHAR);
+            case 26:
+                leftSide.setType(CHAR);
                 break;
 
-            case 21:
-                leftSide.getTypes().add(INT);
+            case 27:
+                leftSide.setType(INT);
                 break;
 
             //<multiplikativni_izraz>
-            //22->GRUPA1
+            //28->GRUPA1
             //GRUPA2
-            case 23:
-            case 25:
+            case 29:
+            case 30:
+            case 31:
+            case 33:
+            case 36:
+            case 37:
+            case 38:
+            case 39:
+            case 41:
+            case 42:
+            case 44:
+            case 46:
+            case 48:
+            case 50:
+            case 52:
                 check(rightSide.get(0));
-                if (checkImplicitCast(getNonTerminalSymbol(rightSide.get(0)).getTypes().get(0), INT)) {
+                if (checkImplicitCast(getNonTerminalSymbol(rightSide.get(0)).getType(), INT)) {
                     semanticAnalysisFailure(production);
                 }
                 check(rightSide.get(2));
-                if (checkImplicitCast(getNonTerminalSymbol(rightSide.get(2)).getTypes().get(0),INT)) {
+                if (checkImplicitCast(getNonTerminalSymbol(rightSide.get(2)).getType(),INT)) {
                     semanticAnalysisFailure(production);
                 }
                 setTypeAndL(leftSide, INT, ZERO);
                 break;
 
             //<aditivni_izraz>
-            //24->GRUPA1
-            //25->GRUPA2
+            //32->GRUPA1
+            //33,34->GRUPA2
 
             //<odnosni_izraz>
-            /*
-            case 26:
+            //35->GRUPA1
+            //36,37,38,39 ->GRUPA2
 
-            case 50:
-                check(rightSide.get(0));
-                ((NonterminalSymbol) rightSide.get(0).getSymbol()).setL_expression(1);
-                check(rightSide.get(2));
-                if (!checkImplicitCast(getNonTerminalSymbol(rightSide.get(0)).getTypes(), getNonTerminalSymbol(rightSide.get(2)).getTypes())) {
-                    semanticAnalysisFailure(null);
-                }
-                leftSide.getTypes().addAll(getNonTerminalSymbol(rightSide.get(0)).getTypes());
-                leftSide.setL_expression(0);
-                break;
+            //<jednakosni_izraz>
+            //40->GRUPA1
+            //41,42->GRUPA2
 
-            case 52:
-                check(rightSide.get(0));
-                check(rightSide.get(2));
-                leftSide.getTypes().addAll(((NonterminalSymbol) rightSide.get(0).getSymbol()).getTypes());
-                leftSide.setL_expression(0);
-                break;
+            //<bin_i_izraz>
+            //43->GRUPA1
+            //44->GRUPA2
 
-            case 53:
-                check(rightSide.get(1));
-                break;
+            //<bin_xili_izraz>
+            //45->GRUPA1
+            //46->GRUPA2
 
+            //<bin_ili_izraz>
+            //47->GRUPA1
+            //48->GRUPA2
+
+            //<log_i_izraz>
+            //49->GRUPA1
+            //50->GRUPA2
+
+            //<log_ili_izraz>
+            //51->GRUPA1
+            //52->GRUPA2
+
+            //<izraz_pridruzivanja>
+            //53->GRUPA1
             case 54:
-                check(rightSide.get(1));
-                check(rightSide.get(2));
-                break;
-
-            case 55:
+                NonterminalSymbol postfiks_izraz54 = getNonTerminalSymbol(rightSide.get(0));
+                NonterminalSymbol izraz_pridruzivanja54 = getNonTerminalSymbol(rightSide.get(2));
                 check(rightSide.get(0));
+                if(postfiks_izraz54.getL_expression()!=1){
+                    semanticAnalysisFailure(production);
+                }
+                check(rightSide.get(2));
+                if(!checkImplicitCast(izraz_pridruzivanja54.getType(),postfiks_izraz54.getType())){
+                    semanticAnalysisFailure(production);
+                }
+                setTypeAndL(leftSide,postfiks_izraz54.getType(),0);
                 break;
 
+            //<izraz>
+            //55->GRUPA1
             case 56:
                 check(rightSide.get(0));
-                check(rightSide.get(1));
+                check(rightSide.get(2));
+                setTypeAndL(leftSide,getNonTerminalSymbol(rightSide.get(2)).getType(),0);
                 break;
 
+            //<slozena_naredba>
             case 57:
-                leftSide.getTypes().add(INT);
+                check(rightSide.get(1));
                 break;
 
             case 58:
-                leftSide.getTypes().addAll(((NonterminalSymbol) rightSide.get(0).getSymbol()).getTypes());
+                check(rightSide.get(1));
+                check(rightSide.get(2));
+                break;
+
+            //<lista_naredbi>
+            //GRUPA3
+            case 59:
+            case 61:
+            case 62:
+            case 63:
+            case 64:
+            case 65:
+            case 77:
+            case 79:
+            case 80:
                 check(rightSide.get(0));
                 break;
 
+            //GRUPA4
+            case 60:
+            case 78:
+                check(rightSide.get(0));
+                check(rightSide.get(1));
+                break;
+
+            //<naredba>
+            //61,62,63,64,65->GRUPA3
+
+            //<izraz_naredba>
+            case 66:
+                leftSide.setType(INT);
+                break;
+
+            case 67:
+                check(rightSide.get(0));
+                leftSide.setType(getNonTerminalSymbol(rightSide.get(0)).getType());
+                break;
+
+            //<naredba_grananja>
+            //GRUPA5
+            case 68:
+            case 69:
+            case 70:
+                check(rightSide.get(2));
+                if (!checkImplicitCast(getNonTerminalSymbol(rightSide.get(2)).getType(), INT)) {
+                    semanticAnalysisFailure(production);
+                }
+                check(rightSide.get(4));
+                if(productionIndex==69){
+                    check(rightSide.get(6));
+                }
+                break;
+
+            //<naredba_petlje>
+            //70->GRUPA5
+            case 71:
+                check(rightSide.get(2));
+                check(rightSide.get(3));
+                if (!checkImplicitCast(getNonTerminalSymbol(rightSide.get(3)).getType(), INT)) {
+                    semanticAnalysisFailure(production);
+                }
+                check(rightSide.get(5));
+                break;
+
+            case 72:
+                check(rightSide.get(2));
+                check(rightSide.get(3));
+                if (!checkImplicitCast(getNonTerminalSymbol(rightSide.get(3)).getType(), INT)) {
+                    semanticAnalysisFailure(production);
+                }
+                check(rightSide.get(4));
+                check(rightSide.get(6));
+                break;
+
+            //<naredba_skoka>
+            case 73:
+            case 74:
+                //provjera je li se naredba nalazi unutar petlje ili unutar bloka koji je ugniježđen u petlji
+                TerminalSymbol symbol74 = (TerminalSymbol)rightSide.get(0).getSymbol();
+                CodeBlock codeBlock74 = findCodeblock(symbol74.getLine());
+                boolean error74 = false;
+                while(true){
+                    if(codeBlock74.isLoop()){
+                        break;
+                    }else{
+                        if(codeBlock74.getParentBlock()==null){
+                            error74 = true;
+                            break;
+                        }else{
+                            codeBlock74 = codeBlock74.getParentBlock();
+                        }
+                    }
+                }
+                if(error74){
+                    semanticAnalysisFailure(production);
+                }
+                break;
+
+            case 75:
+                //provjera je li se naredba nalazi unutar funkcije tipa funkcija(params->void)
+                TerminalSymbol symbol75 = (TerminalSymbol)rightSide.get(0).getSymbol();
+                CodeBlock codeBlock75 = findCodeblock(symbol75.getLine());
+                Function function75 = codeBlock75.getFunction();
+                if(function75==null || !function75.getReturnType().equals(VOID)){
+                    semanticAnalysisFailure(production);
+                }
+                break;
+
+            case 76:
+                check(rightSide.get(1));
+                TerminalSymbol symbol76 = (TerminalSymbol)rightSide.get(0).getSymbol();
+                CodeBlock codeBlock76 = findCodeblock(symbol76.getLine());
+                Function function76 = codeBlock76.getFunction();
+                if(function76==null || function76.getInputParameters().contains(VOID)
+                    || !checkImplicitCast(getNonTerminalSymbol(rightSide.get(1)).getType(),function76.getReturnType())){
+                    semanticAnalysisFailure(production);
+                }
+                break;
+
+            //<prijevodna_jedinica>
+            //77->GRUPA3
+            //78->GRUPA4
+
+            //<vanjska_deklaracija>
+            //79,80->GRUPA3
+
+            //DEKLARACIJE I DEFINICIJA
+
+            /*
             case 59:
                 check(rightSide.get(2));
                 if (!checkImplicitCast(getNonTerminalSymbol(rightSide.get(2)).getTypes(), Collections.singletonList(INT))) {
@@ -949,11 +1134,11 @@ public class SemantickiAnalizator {
                 if (checkIfEqualTypes(getNonTerminalSymbol(rightSide.get(0)).getTypes(), Collections.singletonList(VOID))) {
                     semanticAnalysisFailure(null);
                 }
-                if (getNonTerminalSymbol(rightSide.get(0)).getTypes().get(0).equals(INT)) {
+                if (getNonTerminalSymbol(rightSide.get(0)).getType.equals(INT)) {
                     leftSide.getTypes().add(NIZ_INT);
-                } else if (getNonTerminalSymbol(rightSide.get(0)).getTypes().get(0).equals(CHAR)) {
+                } else if (getNonTerminalSymbol(rightSide.get(0)).getType.equals(CHAR)) {
                     leftSide.getTypes().add(NIZ_CHAR);
-                } else if (getNonTerminalSymbol(rightSide.get(0)).getTypes().get(0).equals(NIZ_CONST_INT)) {
+                } else if (getNonTerminalSymbol(rightSide.get(0)).getType.equals(NIZ_CONST_INT)) {
                     leftSide.getTypes().add(NIZ_CONST_INT);
                 } else {
                     leftSide.getTypes().add(NIZ_CONST_CHAR);
@@ -973,29 +1158,29 @@ public class SemantickiAnalizator {
             // ntip
             case 77:
                 check(rightSide.get(0));
-                getNonTerminalSymbol(rightSide.get(1)).getTypes().add(getNonTerminalSymbol(rightSide.get(0)).getTypes().get(0));
+                getNonTerminalSymbol(rightSide.get(1)).getTypes().add(getNonTerminalSymbol(rightSide.get(0)).getType);
                 check(rightSide.get(1));
                 break;
 
             // ntip
             case 78:
-                getNonTerminalSymbol(rightSide.get(0)).getTypes().add(leftSide.getTypes().get(0));
+                getNonTerminalSymbol(rightSide.get(0)).getTypes().add(leftSide.getType);
                 check(rightSide.get(0));
                 break;
 
             // ntip
             case 79:
-                getNonTerminalSymbol(rightSide.get(0)).getTypes().add(leftSide.getTypes().get(0));
+                getNonTerminalSymbol(rightSide.get(0)).getTypes().add(leftSide.getType);
                 check(rightSide.get(0));
-                getNonTerminalSymbol(rightSide.get(1)).getTypes().add(leftSide.getTypes().get(0));
+                getNonTerminalSymbol(rightSide.get(1)).getTypes().add(leftSide.getType);
                 check(rightSide.get(1));
                 break;
 
             // ntip
             case 80:
-                getNonTerminalSymbol(rightSide.get(0)).getTypes().add(leftSide.getTypes().get(0));
+                getNonTerminalSymbol(rightSide.get(0)).getTypes().add(leftSide.getType);
                 check(rightSide.get(0));
-                switch (getNonTerminalSymbol(rightSide.get(0)).getTypes().get(0)) {
+                switch (getNonTerminalSymbol(rightSide.get(0)).getType) {
                     case CONST_INT:
                     case CONST_CHAR:
                     case NIZ_CONST_CHAR:
@@ -1007,10 +1192,10 @@ public class SemantickiAnalizator {
             // provjerit
             // ntip
             case 81:
-                getNonTerminalSymbol(rightSide.get(0)).getTypes().add(leftSide.getTypes().get(0));
+                getNonTerminalSymbol(rightSide.get(0)).getTypes().add(leftSide.getType);
                 check(rightSide.get(0));
                 check(rightSide.get(2));
-                String type81 = getNonTerminalSymbol(rightSide.get(0)).getTypes().get(0);
+                String type81 = getNonTerminalSymbol(rightSide.get(0)).getType;
                 switch (type81) {
                     case INT:
                     case CHAR:
@@ -1043,7 +1228,7 @@ public class SemantickiAnalizator {
             // provjera
             // ntip
             case 82:
-                if (leftSide.getTypes().get(0).equals(VOID)) {
+                if (leftSide.getType.equals(VOID)) {
                     semanticAnalysisFailure(null);
                 }
                 if (isNameDeclared(rightSide.get(0).getSymbol().getName())) {
@@ -1087,7 +1272,7 @@ public class SemantickiAnalizator {
                     // br-elem ← duljina niza znakova + 1
                     // tipovi ← lista duljine br-elem, svi elementi su char
                 } else {
-                    leftSide.getTypes().add(getNonTerminalSymbol(rightSide.get(0)).getTypes().get(0));
+                    leftSide.getTypes().add(getNonTerminalSymbol(rightSide.get(0)).getType);
                 }
                 break;
 
@@ -1233,7 +1418,7 @@ public class SemantickiAnalizator {
      *
      */
     private static void setTypeAndL(NonterminalSymbol leftSide, String type, int l_expr) {
-        leftSide.getTypes().add(type);
+        leftSide.setType(type);
         leftSide.setL_expression(l_expr);
     }
 
