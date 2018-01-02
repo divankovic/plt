@@ -1,6 +1,7 @@
 package hr.fer.ppj.lab3;
 
 import hr.fer.ppj.lab3.model.*;
+import jdk.nashorn.internal.ir.Terminal;
 
 import java.io.*;
 import java.util.*;
@@ -436,29 +437,31 @@ public class SemantickiAnalizator {
                     //deklarirana funkcija
                     if (currentLine.get(currentLine.size() - 1).equals(TOCKA_ZAREZ)) {
                         function.setFirstTimeDeclaredAt(line);
-                        if (!functions.contains(function)) {
-                            functions.add(function);
-                        }
+                        functions.add(function);
                         line += 1;
                     }
 
                     //funkcija definirana ( i deklarirana )
                     else {
                         function.setFirstTimeDeclaredAt(line);
-                        function.setDefined(true);
+                        function.setDefinedAt(line);
 
-                        if (!functions.contains(function)) {
-                            functions.add(function);
-                        } else {
+                        if(functions.contains(function)) {
                             int functionIndex = functions.indexOf(function);
                             Function listFunction = functions.get(functionIndex);
                             //funkcija je deklarirana ali nije bila definirana
-                            if (!listFunction.getDefined()) {
+                            if (listFunction.getDefinedAt() == -1) {
                                 functions.remove(functionIndex);
-                                listFunction.setDefined(true);
+                                listFunction.setDefinedAt(line);
                                 functions.add(functionIndex, listFunction);
+                            } else {
+                                function.setFirstTimeDeclaredAt(listFunction.getFirstTimeDeclaredAt());
+                                functions.add(function);
                             }
+                        }else{
+                            functions.add(function);
                         }
+                    }
                         List<Variable> functionVariables = new LinkedList<>(); // varijable od funkcije pripadaju bloku u kojem je definirana funkcija
                         List<String> variableTypes = function.getInputParameters();
                         if (!variableTypes.contains(VOID)) {
@@ -481,7 +484,6 @@ public class SemantickiAnalizator {
                         childBlock.setFunction(function);
                         codeBlock.getChildrenBlocks().add(childBlock);
                         line = fLine + 1;
-                    }
                 } else {
                     //varijabla
 
@@ -947,12 +949,14 @@ public class SemantickiAnalizator {
             case 77:
             case 79:
             case 80:
+            case 87:
                 check(rightSide.get(0));
                 break;
 
             //GRUPA4
             case 60:
             case 78:
+            case 88:
                 check(rightSide.get(0));
                 check(rightSide.get(1));
                 break;
@@ -1059,8 +1063,144 @@ public class SemantickiAnalizator {
             //79,80->GRUPA3
 
             //DEKLARACIJE I DEFINICIJA
+            //<definicija_funkcije>
+            case 81:
+            case 82:
+                check(rightSide.get(0));
+                if(getNonTerminalSymbol(rightSide.get(0)).getType().startsWith(CONST)){
+                    semanticAnalysisFailure(production);
+                }
+                TerminalSymbol IDN81 = (TerminalSymbol)rightSide.get(1).getSymbol();
+                if(functions.stream().filter(f->f.getName().equals(IDN81.getValue())).collect(Collectors.toList()).size()>1){
+                    semanticAnalysisFailure(production);
 
-            /*
+                }
+                if(productionIndex==82) {
+                    check(rightSide.get(2));
+                }
+                check(rightSide.get(5));
+                break;
+
+            //<lista_parametara>
+            case 83:
+                check(rightSide.get(0));
+                leftSide.getTypes().add(getNonTerminalSymbol(rightSide.get(0)).getType());
+                leftSide.getNames().add(getNonTerminalSymbol(rightSide.get(0)).getNameProperty());
+                break;
+
+            case 84:
+                check(rightSide.get(0));
+                check(rightSide.get(2));
+                NonterminalSymbol lista_parametara84 = getNonTerminalSymbol(rightSide.get(0));
+                NonterminalSymbol deklaracija_parametra84 = getNonTerminalSymbol(rightSide.get(2));
+                if(lista_parametara84.getNames().contains(deklaracija_parametra84.getNameProperty())){
+                    semanticAnalysisFailure(production);
+                }
+                leftSide.getTypes().addAll(lista_parametara84.getTypes());
+                leftSide.getTypes().add(deklaracija_parametra84.getType());
+
+                leftSide.getNames().addAll(lista_parametara84.getNames());
+                leftSide.getNames().add(deklaracija_parametra84.getNameProperty());
+                break;
+
+            //<deklaracija_parametra>
+            case 85:
+            case 86:
+                NonterminalSymbol ime_tipa85 = getNonTerminalSymbol(rightSide.get(0));
+                check(rightSide.get(0));
+                if(ime_tipa85.getType().equals(VOID)){
+                    semanticAnalysisFailure(production);
+                }
+                String type85=ime_tipa85.getType();
+                if(productionIndex==86){
+                    type85 = turnToNiz(ime_tipa85.getType());
+                }
+                setTypeAndName(leftSide,type85,((TerminalSymbol)rightSide.get(1).getSymbol()).getValue());
+                break;
+
+            //<lista_deklaracija>
+            //87->GRUPA3
+            //88->GRUPA4
+
+            //<deklaracija>
+            case 89:
+                check(rightSide.get(0));
+                getNonTerminalSymbol(rightSide.get(1)).setNtype(getNonTerminalSymbol(rightSide.get(0)).getType());
+                check(rightSide.get(1));
+                break;
+
+            //<lista_init_deklaratora>
+            case 90:
+                getNonTerminalSymbol(rightSide.get(0)).setNtype(leftSide.getNtype());
+                check(rightSide.get(0));
+                break;
+
+            case 91:
+                getNonTerminalSymbol(rightSide.get(0)).setNtype(leftSide.getNtype());
+                check(rightSide.get(0));
+                getNonTerminalSymbol(rightSide.get(2)).setNtype(leftSide.getNtype());
+                check(rightSide.get(2));
+                break;
+
+            //<init_deklarator>
+            case 92:
+                getNonTerminalSymbol(rightSide.get(0)).setNtype(leftSide.getNtype());
+                check(rightSide.get(0));
+                NonterminalSymbol izravni_deklarator92 = getNonTerminalSymbol(rightSide.get(0));
+                if(izravni_deklarator92.getType().startsWith(CONST) || izravni_deklarator92.getType().startsWith("niz("+CONST)){
+                    semanticAnalysisFailure(production);
+                }
+                break;
+
+            case 93:
+                getNonTerminalSymbol(rightSide.get(0)).setNtype(leftSide.getNtype());
+                check(rightSide.get(0));
+                NonterminalSymbol izravni_deklarator93 = getNonTerminalSymbol(rightSide.get(0));
+                NonterminalSymbol inicijalizator93 = getNonTerminalSymbol(rightSide.get(2));
+                if(checkX(izravni_deklarator93.getType())){
+                    if(!checkImplicitCast(inicijalizator93.getType(),CHAR) && !checkImplicitCast(inicijalizator93.getType(),INT)){
+                        semanticAnalysisFailure(production);
+                    }
+                }else if(checkNizX(izravni_deklarator93.getType())){
+                    if(inicijalizator93.getNumOfElements()>izravni_deklarator93.getNumOfElements()){
+                        semanticAnalysisFailure(production);
+                    }
+                    List<String> types93 = inicijalizator93.getTypes();
+                    for(String type93:types93){
+                        if(!checkImplicitCast(type93,CHAR) && !checkImplicitCast(type93,INT)){
+                            semanticAnalysisFailure(production);
+                        }
+                    }
+                }else{
+                    semanticAnalysisFailure(production);
+                }
+                break;
+
+            //<izravni_deklarator>
+            case 94:
+                if(leftSide.getNtype().equals(VOID)){
+                    semanticAnalysisFailure(production);
+                }
+                TerminalSymbol IDN94 = (TerminalSymbol)rightSide.get(0).getSymbol();
+                CodeBlock codeBlock = findCodeblock(IDN94.getLine());
+                for(Variable variable94 : codeBlock.getVariables()) {
+                    if (variable94.getName().equals(IDN94.getValue())) {
+                        if(variable94.getDeclaredAt()!=IDN94.getLine()){
+                            semanticAnalysisFailure(production);
+                        }
+                    }
+                }
+                break;
+
+            case 95:
+                break;
+
+            case 96:
+                break;
+
+            case 97:
+                break;
+                /*
             case 59:
                 check(rightSide.get(2));
                 if (!checkImplicitCast(getNonTerminalSymbol(rightSide.get(2)).getTypes(), Collections.singletonList(INT))) {
@@ -1325,14 +1465,14 @@ public class SemantickiAnalizator {
                 }
                 break;
 
-            case 87:
+            case :
                 check(rightSide.get(1));
                 leftSide.setNumOfElements(getNonTerminalSymbol(rightSide.get(1)).getNumOfElements());
                 leftSide.getTypes().addAll(getNonTerminalSymbol(rightSide.get(1)).getTypes());
                 break;
             */
             //<inicijalizator>
-            case 88:
+            case 98:
                 check(rightSide.get(0));
                 String content = generates(rightSide.get(0));
                 if (!content.equals("")) {
@@ -1346,21 +1486,21 @@ public class SemantickiAnalizator {
                 }
                 break;
 
-            case 89:
+            case 99:
                 check(rightSide.get(1));
                 leftSide.setNumOfElements(getNonTerminalSymbol(rightSide.get(1)).getNumOfElements());
                 leftSide.getTypes().addAll(getNonTerminalSymbol(rightSide.get(1)).getTypes());
                 break;
 
             //<lista_izraza_pridruzivanja>
-            case 90:
+            case 100:
                 check(rightSide.get(0));
                 List<String> types90 = leftSide.getTypes();
                 types90.addAll(getNonTerminalSymbol(rightSide.get(0)).getTypes());
                 leftSide.setNumOfElements(1);
                 break;
 
-            case 91:
+            case 101:
                 check(rightSide.get(0));
                 check(rightSide.get(2));
 
@@ -1373,6 +1513,7 @@ public class SemantickiAnalizator {
 
                 leftSide.setNumOfElements(first.getNumOfElements() + 1);
                 break;
+
         }
 
     }
@@ -1476,6 +1617,13 @@ public class SemantickiAnalizator {
         leftSide.setL_expression(l_expr);
     }
 
+    /**
+     *
+     */
+    private static void setTypeAndName(NonterminalSymbol leftSide, String type, String name){
+        leftSide.setType(type);
+        leftSide.setNameProperty(name);
+    }
     /**
      *
      */

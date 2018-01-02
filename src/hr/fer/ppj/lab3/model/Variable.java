@@ -40,6 +40,7 @@ public class Variable {
         }
         return 0;
     }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -47,14 +48,14 @@ public class Variable {
 
         Variable variable = (Variable) o;
 
-        if (type != null ? !type.equals(variable.type) : variable.type != null) return false;
+        if (declaredAt != variable.declaredAt) return false;
         return name != null ? name.equals(variable.name) : variable.name == null;
     }
 
     @Override
     public int hashCode() {
-        int result = type != null ? type.hashCode() : 0;
-        result = 31 * result + (name != null ? name.hashCode() : 0);
+        int result = name != null ? name.hashCode() : 0;
+        result = 31 * result + declaredAt;
         return result;
     }
 }

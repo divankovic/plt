@@ -10,15 +10,14 @@ public class Function {
     private List<String> inputParameters;
     private String returnType;
     private int firstTimeDeclaredAt;
-    private boolean defined;
-    private CodeBlock codeblock;
+    private int definedAt;
 
     public Function(String name, List<String> inputParameters, String returnType) {
         this.name = name;
         this.inputParameters = inputParameters;
         this.returnType = returnType;
-        firstTimeDeclaredAt = 0;
-        defined = false;
+        firstTimeDeclaredAt = -1;
+        definedAt = -1;
     }
 
     public String getName() {
@@ -53,37 +52,29 @@ public class Function {
         this.firstTimeDeclaredAt = firstTimeDeclaredAt;
     }
 
-    public boolean getDefined() {
-        return defined;
+    public int getDefinedAt() {
+        return definedAt;
     }
 
-    public void setDefined(boolean defined) {
-        this.defined = defined;
+    public void setDefinedAt(int definedAt) {
+        this.definedAt = definedAt;
     }
 
-    public CodeBlock getCodeblock() {
-        return codeblock;
-    }
-
-    public void setCodeblock(CodeBlock codeblock) {
-        this.codeblock = codeblock;
-    }
-
-    public static String getType(List<String> inputParameters, String returnType){
+    public static String getType(List<String> inputParameters, String returnType) {
         String parameters;
         StringBuilder parameterBuilder = new StringBuilder();
         inputParameters.forEach(s -> parameterBuilder.append(s).append(","));
         parameters = parameterBuilder.substring(0, parameterBuilder.length() - 1);
-        return "funkcija("+parameters+" -> "+returnType;
+        return "funkcija(" + parameters + " -> " + returnType;
     }
 
-    public static String getReturnValue(String type){
-        return type.split("->")[1].trim().replace(")","");
+    public static String getReturnValue(String type) {
+        return type.split("->")[1].trim().replace(")", "");
     }
 
-    public static List<String> getInputParameters(String type){
+    public static List<String> getInputParameters(String type) {
         List<String> parameters = new LinkedList<>();
-        String[] par = type.split("->")[0].trim().replace("(","").split(",");
+        String[] par = type.split("->")[0].trim().replace("(", "").split(",");
         parameters.addAll(Arrays.asList(par));
         return parameters;
     }
@@ -109,3 +100,4 @@ public class Function {
         return result;
     }
 }
+

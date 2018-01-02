@@ -33,17 +33,17 @@ public class Const {
     public static final String FOR = "for";
     public static final String WHILE = "while";
 
-    public static List<String> turnToNiz(String type) {
+    public static String turnToNiz(String type) {
         if(type.equals(INT)){
-            return Collections.singletonList(NIZ_INT);
+            return NIZ_INT;
         }else if(type.equals(CHAR)){
-            return Collections.singletonList(NIZ_CHAR);
+            return NIZ_CHAR;
         }else if(type.equals(CONST_INT)){
-            return Collections.singletonList(NIZ_CONST_INT);
+            return NIZ_CONST_INT;
         }else if(type.equals(CONST_CHAR)){
-            return Collections.singletonList(NIZ_CONST_CHAR);
+            return NIZ_CONST_CHAR;
         }else{
-            return new LinkedList<>();
+            return "";
         }
     }
 

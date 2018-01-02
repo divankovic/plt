@@ -98,4 +98,12 @@ public class Checker {
     public static boolean checkIntRange(Integer intValue) {
         return intValue >= -Math.pow(2,31) && intValue <= Math.pow(2,31)-1;
     }
+
+    public static boolean checkX(String type){
+        return false;
+    }
+
+    public static boolean checkNizX(String type){
+        return false;
+    }
 }

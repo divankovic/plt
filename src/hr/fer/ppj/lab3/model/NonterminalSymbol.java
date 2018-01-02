@@ -7,6 +7,7 @@ import java.util.List;
 public class NonterminalSymbol extends Symbol{
 
     private String type;
+    private String ntype; //nasljedno svojstvo tip
     private String nameProperty;
     private List<String> types;
     private List<String> names;
@@ -26,6 +27,14 @@ public class NonterminalSymbol extends Symbol{
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public String getNtype() {
+        return ntype;
+    }
+
+    public void setNtype(String ntype) {
+        this.ntype = ntype;
     }
 
     public String getNameProperty() {
