@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 
-public class NonterminalSymbol extends Symbol implements Serializable {
+public class NonterminalSymbol extends Symbol{
 
     private String type;
     private String nameProperty;

@@ -2,7 +2,7 @@ package hr.fer.ppj.lab3.model;
 
 import java.io.Serializable;
 
-public class TerminalSymbol extends Symbol implements Serializable {
+public class TerminalSymbol extends Symbol{
 
     private String value;
     private int line;
@@ -47,6 +47,10 @@ public class TerminalSymbol extends Symbol implements Serializable {
 
     @Override
     public String toString() {
-        return name;
+        if(value==null) {
+            return name;
+        }else{
+            return name+"("+line+", "+value+")";
+        }
     }
 }

@@ -3,7 +3,7 @@ package hr.fer.ppj.lab3.model;
 import java.io.Serializable;
 import java.util.List;
 
-public class Production implements Serializable {
+public class Production{
 
     NonterminalSymbol leftSide;
     List<Symbol> rightSide;

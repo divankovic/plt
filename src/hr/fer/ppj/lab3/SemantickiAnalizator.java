@@ -34,37 +34,33 @@ public class SemantickiAnalizator {
     public static void main(String[] args) throws Exception {
 
         setupStdIO();
-
-//        readFromInput();
-
-        serializeProductions();
-        deserializeProductions();
+        readProductions();
+        readFromInput();
 
         for (Production production : productions) {
             System.out.println(production);
         }
 
-//        fillProductions();
-//        buildGeneratingTree();
-//
-//        functions = new LinkedList<>();
-//        lastLine = terminalSymbols.get(terminalSymbols.size() - 1).getLine();
-//        startingCodeBlock = buildCodeBlocks(1, lastLine);
-//
-//        check(startingElement);
-//        //System.out.println("OK");
+        fillProductions();
+        buildGeneratingTree();
+
+        functions = new LinkedList<>();
+        lastLine = terminalSymbols.get(terminalSymbols.size() - 1).getLine();
+        startingCodeBlock = buildCodeBlocks(1, lastLine);
+
+        check(startingElement);
     }
 
     /**
      *
      */
-    private static void serializeProductions() throws IOException {
+    private static void readProductions() throws IOException {
 
         Scanner scanner = new Scanner(new FileInputStream(new File(PRODUCTIONS_TXT_FILE_PATH)));
 
         String line;
         String leftSide = null;
-        List<Production> productions = new ArrayList<>();
+        productions = new LinkedList<>();
 
         while (scanner.hasNextLine()) {
 
@@ -77,7 +73,7 @@ public class SemantickiAnalizator {
                 line = line.trim();
 
                 NonterminalSymbol leftSideOfProd = new NonterminalSymbol(leftSide);
-                List<Symbol> rightSideOfProd = new ArrayList<>();
+                List<Symbol> rightSideOfProd = new LinkedList<>();
 
                 for (String token : line.split("\\s+")) {
 
@@ -95,36 +91,6 @@ public class SemantickiAnalizator {
         }
 
         scanner.close();
-
-        File file = new File(PRODUCTIONS_SER_FILE_PATH);
-        FileOutputStream fos = new FileOutputStream(file);
-        ObjectOutputStream oos = new ObjectOutputStream(fos);
-
-        oos.writeObject(productions);
-
-        fos.close();
-        oos.close();
-    }
-
-    /**
-     *
-     */
-    private static void deserializeProductions() throws Exception {
-
-        try {
-            File file = new File(PRODUCTIONS_SER_FILE_PATH);
-            FileInputStream fis = new FileInputStream(file);
-            ObjectInputStream ois = new ObjectInputStream(fis);
-
-            productions = (List<Production>) ois.readObject();
-
-            fis.close();
-            ois.close();
-
-        } catch (Exception exc) {
-            throw new Exception(exc.getMessage());
-        }
-
     }
 
     /**

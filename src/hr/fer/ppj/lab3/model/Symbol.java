@@ -2,7 +2,7 @@ package hr.fer.ppj.lab3.model;
 
 import java.io.Serializable;
 
-public abstract class Symbol implements Serializable {
+public abstract class Symbol{
 
     protected String name;
 
