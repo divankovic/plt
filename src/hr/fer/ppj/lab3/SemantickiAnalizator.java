@@ -2,7 +2,6 @@ package hr.fer.ppj.lab3;
 
 import hr.fer.ppj.lab3.model.*;
 
-import javax.swing.*;
 import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -17,8 +16,8 @@ public class SemantickiAnalizator {
 
     private static final String TEST_FILE_INPUT_PATH = "./src/hr/fer/ppj/lab2/res/out/SA_out.txt";
     private static final String TEST_FILE_OUTPUT_PATH = "./src/hr/fer/ppj/lab3/res/out/out.txt";
-    private static final String PRODUCTIONS_TXT_FILE_PATH = "./src/hr/fer/ppj/lab3/res/in/simplePpjLang.san";
-    private static final String PRODUCTIONS_SER_FILE_PATH = "./src/hr/fer/ppj/lab3/res/in/simplePpjLang.ser";
+    private static final String PRODUCTIONS_TXT_FILE_PATH = "./src/hr/fer/ppj/lab3/res/in/ppjC.san";
+    private static final String PRODUCTIONS_SER_FILE_PATH = "./src/hr/fer/ppj/lab3/res/in/ppjC.ser";
 
     private static List<Production> productions;
     private static List<String> input;
@@ -37,10 +36,13 @@ public class SemantickiAnalizator {
         setupStdIO();
 
 //        readFromInput();
-//        serializeProductions();
 
+        serializeProductions();
         deserializeProductions();
 
+        for (Production production : productions) {
+            System.out.println(production);
+        }
 
 //        fillProductions();
 //        buildGeneratingTree();
