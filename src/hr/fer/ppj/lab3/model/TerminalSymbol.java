@@ -28,24 +28,6 @@ public class TerminalSymbol extends Symbol{
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        TerminalSymbol that = (TerminalSymbol) o;
-
-        if (line != that.line) return false;
-        return value != null ? value.equals(that.value) : that.value == null;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = value != null ? value.hashCode() : 0;
-        result = 31 * result + line;
-        return result;
-    }
-
-    @Override
     public String toString() {
         if(value==null) {
             return name;

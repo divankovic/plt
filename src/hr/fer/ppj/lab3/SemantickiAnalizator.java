@@ -38,9 +38,9 @@ public class SemantickiAnalizator {
         readProductions();
         readFromInput();
 
-        for (Production production : productions) {
+        /*for (Production production : productions) {
             System.out.println(production);
-        }
+        }*/
 
         //fillProductions();
         buildGeneratingTree();
@@ -50,6 +50,30 @@ public class SemantickiAnalizator {
         startingCodeBlock = buildCodeBlocks(1, lastLine);
 
         check(startingElement);
+
+
+        //dodatne provjere
+        //1.postoji funkcija int main(void)
+        //2.svaka deklarirana funkcija mora biti definirana
+        boolean foundMain = false;
+        boolean allDefined = true;
+        for(Function function : functions){
+            if(function.getName().equals("main")&& function.getReturnType().equals(VOID) || function.getInputParameters().get(0).equals(INT)){
+                foundMain = true;
+            }
+            if(function.getDefinedAt()==-1){
+                allDefined = false;
+            }
+        }
+        if(!foundMain){
+            System.out.println("main");
+            System.exit(1);
+        }
+        if(!allDefined){
+            System.out.println("funkcija");
+            System.exit(2);
+        }
+
     }
 
     /**
@@ -511,13 +535,13 @@ public class SemantickiAnalizator {
                     line += 1;
                 }
             } else if (currentLine.contains(L_VIT_ZAGRADA)) {
-                if (currentLine.get(0).equals(FOR) || currentLine.get(0).equals(WHILE)) {
-                    codeBlock.setLoop(true);
-                }
                 //novi blok ili petlja
                 List<TerminalSymbol> searchContent = blockSymbols.stream().filter(terminalSymbol -> terminalSymbol.getLine() > lamLine).collect(Collectors.toList());
                 int fLine = findNextRightParenthesis(searchContent);
                 CodeBlock childBlock = buildCodeBlocks(line, fLine);
+                if (currentLine.get(0).equals(FOR) || currentLine.get(0).equals(WHILE)) {
+                    childBlock.setLoop(true);
+                }
                 childBlock.setParentBlock(codeBlock);
                 codeBlock.getChildrenBlocks().add(childBlock);
                 line = fLine + 1;
@@ -819,7 +843,7 @@ public class SemantickiAnalizator {
             //<ime_tipa>
             case 23:
                 check(rightSide.get(0));
-                leftSide.getTypes().add(getNonTerminalSymbol(rightSide.get(0)).getType());
+                leftSide.setType(getNonTerminalSymbol(rightSide.get(0)).getType());
                 break;
 
             case 24:
@@ -1076,7 +1100,7 @@ public class SemantickiAnalizator {
 
                 }
                 if(productionIndex==82) {
-                    check(rightSide.get(2));
+                    check(rightSide.get(3));
                 }
                 check(rightSide.get(5));
                 break;
@@ -1182,295 +1206,52 @@ public class SemantickiAnalizator {
                     semanticAnalysisFailure(production);
                 }
                 TerminalSymbol IDN94 = (TerminalSymbol)rightSide.get(0).getSymbol();
-                CodeBlock codeBlock = findCodeblock(IDN94.getLine());
-                for(Variable variable94 : codeBlock.getVariables()) {
+                CodeBlock codeBlock94 = findCodeblock(IDN94.getLine());
+                for(Variable variable94 : codeBlock94.getVariables()) {
                     if (variable94.getName().equals(IDN94.getValue())) {
                         if(variable94.getDeclaredAt()!=IDN94.getLine()){
                             semanticAnalysisFailure(production);
                         }
                     }
                 }
+                leftSide.setType(leftSide.getNtype());
                 break;
 
             case 95:
+                if(leftSide.getNtype().equals(VOID)){
+                    semanticAnalysisFailure(production);
+                }
+                TerminalSymbol IDN95 = (TerminalSymbol)rightSide.get(0).getSymbol();
+                CodeBlock codeBlock95 = findCodeblock(IDN95.getLine());
+                for(Variable variable95 : codeBlock95.getVariables()) {
+                    if (variable95.getName().equals(IDN95.getValue())) {
+                        if(variable95.getDeclaredAt()!=IDN95.getLine()){
+                            semanticAnalysisFailure(production);
+                        }
+                    }
+                }
+                int broj_vrijednost = Integer.parseInt(((TerminalSymbol)rightSide.get(2).getSymbol()).getValue());
+                if(!(broj_vrijednost>0 && broj_vrijednost<=1024)){
+                    semanticAnalysisFailure(production);
+                }
+                leftSide.setType(turnToNiz(leftSide.getNtype()));
+                leftSide.setNumOfElements(broj_vrijednost);
                 break;
 
             case 96:
-                break;
-
             case 97:
-                break;
-                /*
-            case 59:
-                check(rightSide.get(2));
-                if (!checkImplicitCast(getNonTerminalSymbol(rightSide.get(2)).getTypes(), Collections.singletonList(INT))) {
-                    semanticAnalysisFailure(null);
+                if(productionIndex==97){
+                    check(rightSide.get(2));
                 }
-                check(rightSide.get(4));
-                break;
+                TerminalSymbol IDN96 = (TerminalSymbol)rightSide.get(0).getSymbol();
+                if(functions.stream().filter(f->f.getName().equals(IDN96.getValue())).collect(Collectors.toList()).size()>1){
+                    semanticAnalysisFailure(production);
 
-            case 60:
-                check(rightSide.get(2));
-                if (!checkImplicitCast(getNonTerminalSymbol(rightSide.get(2)).getTypes(), Collections.singletonList(INT))) {
-                    semanticAnalysisFailure(null);
                 }
-                check(rightSide.get(4));
-                check(rightSide.get(5));
+                Function function96 = functions.stream().filter(f->f.getName().equals(IDN96.getValue())).collect(Collectors.toList()).get(0);
+                leftSide.setType(Function.getType(function96.getInputParameters(),function96.getReturnType()));
                 break;
 
-
-            case 61:
-                check(rightSide.get(2));
-                if (!checkImplicitCast(getNonTerminalSymbol(rightSide.get(2)).getTypes(), Collections.singletonList(INT))) {
-                    semanticAnalysisFailure(null);
-                }
-                check(rightSide.get(4));
-                break;
-
-            case 62:
-                check(rightSide.get(2));
-                check(rightSide.get(3));
-                if (!checkImplicitCast(getNonTerminalSymbol(rightSide.get(3)).getTypes(), Collections.singletonList(INT))) {
-                    semanticAnalysisFailure(null);
-                }
-                check(rightSide.get(5));
-                break;
-
-            case 63:
-                check(rightSide.get(2));
-                check(rightSide.get(3));
-                if (!checkImplicitCast(getNonTerminalSymbol(rightSide.get(3)).getTypes(), Collections.singletonList(INT))) {
-                    semanticAnalysisFailure(null);
-                }
-                check(rightSide.get(4));
-                check(rightSide.get(6));
-                break;
-
-            case 64:
-                //  naredba se nalazi unutar petlje ili unutar bloka koji je ugnijezden u petlji
-                break;
-
-            case 65:
-                // naredba se nalazi unutar funkcije tipa funkcija(params → void)
-                break;
-
-            case 66:
-                check(rightSide.get(1));
-                // naredba se nalazi unutar funkcije tipa funkcija(params → pov) i vrijedi <izraz>.tip ∼ pov
-                break;
-
-            case 67:
-                check(rightSide.get(0));
-                break;
-
-            case 68:
-                check(rightSide.get(0));
-                check(rightSide.get(1));
-                break;
-
-            case 69:
-                check(rightSide.get(0));
-                // if(checkIfEqualTypes()) {}
-                if (isNameDeclared(rightSide.get(1).getSymbol().getName())) {
-                    semanticAnalysisFailure(null);
-                }
-                // ako postoji deklaracija imena IDN.ime u globalnom djelokrugu onda je pripadni tip te deklaracije funkcija(void → <ime_tipa>.tip)
-                // zabiljezi definiciju i deklaraciju funkcije
-                check(rightSide.get(5));
-                break;
-
-            case 70:
-                check(rightSide.get(0));
-                // if(checkIfEqualTypes()) {}
-                if (isNameDeclared(rightSide.get(1).getSymbol().getName())) {
-                    semanticAnalysisFailure(null);
-                }
-                check(rightSide.get(3));
-                // ako postoji deklaracija imena IDN.ime u globalnom djelokrugu onda je pripadni tip te deklaracije funkcija(void → <ime_tipa>.tip)
-                // zabiljezi definiciju i deklaraciju funkcije
-                check(rightSide.get(5));
-                break;
-
-            case 71:
-                check(rightSide.get(0));
-                leftSide.getTypes().addAll(getNonTerminalSymbol(rightSide.get(0)).getTypes());
-                leftSide.getNames().addAll(getNonTerminalSymbol(rightSide.get(0)).getNames());
-                break;
-
-            case 72:
-                check(rightSide.get(0));
-                check(rightSide.get(2));
-                if (getNonTerminalSymbol(rightSide.get(0)).getNames().contains(getNonTerminalSymbol(rightSide.get(2)).getNames().get(0))) {
-                    semanticAnalysisFailure(null);
-                }
-                leftSide.getTypes().addAll(getNonTerminalSymbol(rightSide.get(0)).getTypes());
-                leftSide.getTypes().addAll(getNonTerminalSymbol(rightSide.get(2)).getTypes());
-                leftSide.getNames().addAll(getNonTerminalSymbol(rightSide.get(0)).getNames());
-                leftSide.getNames().addAll(getNonTerminalSymbol(rightSide.get(2)).getNames());
-                break;
-
-            case 73:
-                check(rightSide.get(0));
-                if (checkIfEqualTypes(getNonTerminalSymbol(rightSide.get(0)).getTypes(), Collections.singletonList(VOID))) {
-                    semanticAnalysisFailure(null);
-                }
-                leftSide.getTypes().addAll(getNonTerminalSymbol(rightSide.get(0)).getTypes());
-                leftSide.getTypes().add(rightSide.get(1).getSymbol().getName());
-                break;
-
-            case 74:
-                check(rightSide.get(0));
-                if (checkIfEqualTypes(getNonTerminalSymbol(rightSide.get(0)).getTypes(), Collections.singletonList(VOID))) {
-                    semanticAnalysisFailure(null);
-                }
-                if (getNonTerminalSymbol(rightSide.get(0)).getType.equals(INT)) {
-                    leftSide.getTypes().add(NIZ_INT);
-                } else if (getNonTerminalSymbol(rightSide.get(0)).getType.equals(CHAR)) {
-                    leftSide.getTypes().add(NIZ_CHAR);
-                } else if (getNonTerminalSymbol(rightSide.get(0)).getType.equals(NIZ_CONST_INT)) {
-                    leftSide.getTypes().add(NIZ_CONST_INT);
-                } else {
-                    leftSide.getTypes().add(NIZ_CONST_CHAR);
-                }
-                leftSide.getTypes().add(rightSide.get(1).getSymbol().getName());
-                break;
-
-            case 75:
-                check(rightSide.get(0));
-                break;
-
-            case 76:
-                check(rightSide.get(0));
-                check(rightSide.get(1));
-                break;
-
-            // ntip
-            case 77:
-                check(rightSide.get(0));
-                getNonTerminalSymbol(rightSide.get(1)).getTypes().add(getNonTerminalSymbol(rightSide.get(0)).getType);
-                check(rightSide.get(1));
-                break;
-
-            // ntip
-            case 78:
-                getNonTerminalSymbol(rightSide.get(0)).getTypes().add(leftSide.getType);
-                check(rightSide.get(0));
-                break;
-
-            // ntip
-            case 79:
-                getNonTerminalSymbol(rightSide.get(0)).getTypes().add(leftSide.getType);
-                check(rightSide.get(0));
-                getNonTerminalSymbol(rightSide.get(1)).getTypes().add(leftSide.getType);
-                check(rightSide.get(1));
-                break;
-
-            // ntip
-            case 80:
-                getNonTerminalSymbol(rightSide.get(0)).getTypes().add(leftSide.getType);
-                check(rightSide.get(0));
-                switch (getNonTerminalSymbol(rightSide.get(0)).getType) {
-                    case CONST_INT:
-                    case CONST_CHAR:
-                    case NIZ_CONST_CHAR:
-                    case NIZ_CONST_INT:
-                        semanticAnalysisFailure(null);
-                }
-                break;
-
-            // provjerit
-            // ntip
-            case 81:
-                getNonTerminalSymbol(rightSide.get(0)).getTypes().add(leftSide.getType);
-                check(rightSide.get(0));
-                check(rightSide.get(2));
-                String type81 = getNonTerminalSymbol(rightSide.get(0)).getType;
-                switch (type81) {
-                    case INT:
-                    case CHAR:
-                    case CONST_INT:
-                    case CONST_CHAR:
-                        if (!checkImplicitCast(getNonTerminalSymbol(rightSide.get(2)).getTypes(), Collections.singletonList(INT)) || !checkImplicitCast(getNonTerminalSymbol(rightSide.get(2)).getTypes(), Collections.singletonList(CHAR))) {
-                            semanticAnalysisFailure(null);
-                        }
-                        break;
-                    case NIZ_INT:
-                    case NIZ_CHAR:
-                    case NIZ_CONST_INT:
-                    case NIZ_CONST_CHAR:
-                        if (!(getNonTerminalSymbol(rightSide.get(2)).getNumOfElements() <= getNonTerminalSymbol(rightSide.get(0)).getNumOfElements())) {
-                            semanticAnalysisFailure(null);
-                        }
-                        for (String string : getNonTerminalSymbol(rightSide.get(2)).getTypes()) {
-                            if (!checkImplicitCast(Arrays.asList(string), Arrays.asList(INT)) && !checkImplicitCast(Arrays.asList(string), Arrays.asList(CHAR))) {
-                                semanticAnalysisFailure(null);
-                            }
-                        }
-                        break;
-
-                    default:
-                        semanticAnalysisFailure(null);
-                        break;
-                }
-                break;
-
-            // provjera
-            // ntip
-            case 82:
-                if (leftSide.getType.equals(VOID)) {
-                    semanticAnalysisFailure(null);
-                }
-                if (isNameDeclared(rightSide.get(0).getSymbol().getName())) {
-                    semanticAnalysisFailure(null);
-                }
-                // zabiljezi deklaraciju IDN.ime s odgovarajucim tipom
-                break;
-
-            // ntip
-            case 83:
-                if (isNameDeclared(rightSide.get(0).getSymbol().getName())) {
-                    semanticAnalysisFailure(null);
-                }
-                if (Integer.parseInt(rightSide.get(2).getSymbol().getName().split("\\s+")[2]) < 0 || (Integer.parseInt(rightSide.get(2).getSymbol().getName().split("\\s+")[2]) > 1024)) {
-                    semanticAnalysisFailure(null);
-                }
-                // zabiljeˇzi deklaraciju IDN.ime s odgovaraju´cim tipom
-                break;
-
-            //ntip
-            case 84:
-                if (isNameDeclared(rightSide.get(0).getSymbol().getName())) {
-                    // tip prethodne deklaracije je jednak funkcija(void → ntip)
-                }
-                //zabiljezi deklaraciju IDN.ime s odgovarajucim tipom ako ista funkcija vec nije deklarirana u lokalnom djelokrugu
-                break;
-
-            // provjera
-            case 85:
-                check(rightSide.get(2));
-                if (isNameDeclared(rightSide.get(0).getSymbol().getName())) {
-                    // tip prethodne deklaracije je jednak funkcija(<lista_parametara>.tipovi → ntip)
-                }
-                // zabiljezi deklaraciju IDN.ime s odgovarajucim tipom ako ista funkcija vec nijedeklarirana u lokalnom djelokrugu
-                break;
-
-            // provjera
-            case 86:
-                check(rightSide.get(0));
-                if (generates(rightSide.get(0)).equals("")) {
-                    // br-elem ← duljina niza znakova + 1
-                    // tipovi ← lista duljine br-elem, svi elementi su char
-                } else {
-                    leftSide.getTypes().add(getNonTerminalSymbol(rightSide.get(0)).getType);
-                }
-                break;
-
-            case :
-                check(rightSide.get(1));
-                leftSide.setNumOfElements(getNonTerminalSymbol(rightSide.get(1)).getNumOfElements());
-                leftSide.getTypes().addAll(getNonTerminalSymbol(rightSide.get(1)).getTypes());
-                break;
-            */
             //<inicijalizator>
             case 98:
                 check(rightSide.get(0));
@@ -1482,7 +1263,7 @@ public class SemantickiAnalizator {
                         types88.add(CHAR);
                     }
                 } else {
-                    leftSide.getTypes().addAll(((NonterminalSymbol) rightSide.get(0).getSymbol()).getTypes());
+                    leftSide.setType(((NonterminalSymbol) rightSide.get(0).getSymbol()).getType());
                 }
                 break;
 
@@ -1495,23 +1276,16 @@ public class SemantickiAnalizator {
             //<lista_izraza_pridruzivanja>
             case 100:
                 check(rightSide.get(0));
-                List<String> types90 = leftSide.getTypes();
-                types90.addAll(getNonTerminalSymbol(rightSide.get(0)).getTypes());
+                leftSide.getTypes().add(getNonTerminalSymbol(rightSide.get(0)).getType());
                 leftSide.setNumOfElements(1);
                 break;
 
             case 101:
                 check(rightSide.get(0));
                 check(rightSide.get(2));
-
-                NonterminalSymbol first = getNonTerminalSymbol(rightSide.get(0));
-                NonterminalSymbol second = getNonTerminalSymbol(rightSide.get(2));
-
-                List<String> types91 = leftSide.getTypes();
-                types91.addAll(first.getTypes());
-                types91.addAll(second.getTypes());
-
-                leftSide.setNumOfElements(first.getNumOfElements() + 1);
+                leftSide.getTypes().addAll(getNonTerminalSymbol(rightSide.get(0)).getTypes());
+                leftSide.getTypes().add(getNonTerminalSymbol(rightSide.get(2)).getType());
+                leftSide.setNumOfElements(getNonTerminalSymbol(rightSide.get(0)).getNumOfElements() + 1);
                 break;
 
         }
@@ -1560,24 +1334,25 @@ public class SemantickiAnalizator {
      */
     private static CodeBlock findCodeblock(int line) {
         CodeBlock codeblock = startingCodeBlock;
-        while (true) {
+        while (!codeblock.getChildrenBlocks().isEmpty()) {
             if (line >= codeblock.getStartLine() && line <= codeblock.getFinishLine()) {
                 List<CodeBlock> childrenBlocks = codeblock.getChildrenBlocks();
-                if (childrenBlocks.isEmpty()) {
-                    break;
-                }
+                boolean foundNew = false;
                 for (CodeBlock block : childrenBlocks) {
                     if (line >= block.getStartLine() && line <= block.getFinishLine()) {
                         codeblock = block;
+                        foundNew = true;
                         break;
                     }
                 }
+                if(!foundNew){
+                    break;
+                }
 
             } else {
-                break;
+                return codeblock;
             }
         }
-
         return codeblock;
 
     }
@@ -1600,8 +1375,9 @@ public class SemantickiAnalizator {
             if (childrenElements.size() != 1) {
                 break;
             }
-            if (((TerminalSymbol) childrenElements.get(0).getSymbol()).getValue().equals(uniform_symbol)) {
-                return childrenElements.get(0).getSymbol().getName().split(" ")[2];
+            TerminalSymbol terminalSymbol = (TerminalSymbol) childrenElements.get(0).getSymbol();
+            if (terminalSymbol.getValue().equals(uniform_symbol)) {
+                return terminalSymbol.getValue();
             } else {
                 temp = childrenElements.get(0);
             }

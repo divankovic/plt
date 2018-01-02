@@ -27,7 +27,8 @@ public class TransitionKey implements Serializable {
 
     @Override
     public int hashCode() {
-        return Integer.hashCode(state) + Character.hashCode(symbol);
+        int result = state;
+        result = 31 * result + (int) symbol;
+        return result;
     }
-
 }

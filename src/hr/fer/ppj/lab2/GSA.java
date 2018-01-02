@@ -18,7 +18,7 @@ public class GSA {
      */
     public final static String startingNonTerminalSymbol = "<S'>";
     final static String SERIALIZATION_FILE_PATH = "./src/hr/fer/ppj/lab2/analizator/definition.ser";
-    private final static String TEST_FILE_INPUT_PATH = "./src/hr/fer/ppj/lab2/res/in/14simplePpjLang/test.san";
+    private final static String TEST_FILE_INPUT_PATH = "./src/hr/fer/ppj/lab2/res/in/12ppjC/test.san";
     private final static String TEST_FILE_OUTPUT_PATH = "./src/hr/fer/ppj/lab2/res/out/GSA_out.txt";
 
     /**

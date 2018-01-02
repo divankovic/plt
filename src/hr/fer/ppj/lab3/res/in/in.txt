@@ -2,24 +2,20 @@
  <prijevodna_jedinica>
   <vanjska_deklaracija>
    <definicija_funkcije>
-    <specifikatori_deklaracije>
+    <ime_tipa>
      <specifikator_tipa>
       KR_VOID 1 void
-    <izravni_deklarator>
-     <izravni_deklarator>
-      IDN 1 fun
-     L_ZAGRADA 1 (
-     <lista_parametara>
-      <deklaracija_parametra>
-       <specifikatori_deklaracije>
-        <specifikator_tipa>
-         KR_INT 1 int
-       <izravni_deklarator>
-        <izravni_deklarator>
-         IDN 1 a
-        L_UGL_ZAGRADA 1 [
-        D_UGL_ZAGRADA 1 ]
-     D_ZAGRADA 1 )
+    IDN 1 fun
+    L_ZAGRADA 1 (
+    <lista_parametara>
+     <deklaracija_parametra>
+      <ime_tipa>
+       <specifikator_tipa>
+        KR_INT 1 int
+      IDN 1 a
+      L_UGL_ZAGRADA 1 [
+      D_UGL_ZAGRADA 1 ]
+    D_ZAGRADA 1 )
     <slozena_naredba>
      L_VIT_ZAGRADA 1 {
      <lista_naredbi>
@@ -30,19 +26,13 @@
      D_VIT_ZAGRADA 3 }
  <vanjska_deklaracija>
   <definicija_funkcije>
-   <specifikatori_deklaracije>
+   <ime_tipa>
     <specifikator_tipa>
      KR_INT 5 int
-   <izravni_deklarator>
-    <izravni_deklarator>
-     IDN 5 main
-    L_ZAGRADA 5 (
-    <lista_parametara>
-     <deklaracija_parametra>
-      <specifikatori_deklaracije>
-       <specifikator_tipa>
-        KR_VOID 5 void
-    D_ZAGRADA 5 )
+   IDN 5 main
+   L_ZAGRADA 5 (
+   KR_VOID 5 void
+   D_ZAGRADA 5 )
    <slozena_naredba>
     L_VIT_ZAGRADA 5 {
     <lista_deklaracija>
@@ -50,41 +40,27 @@
       <lista_deklaracija>
        <lista_deklaracija>
         <deklaracija>
-         <specifikatori_deklaracije>
+         <ime_tipa>
           <specifikator_tipa>
            KR_INT 6 int
          <lista_init_deklaratora>
           <init_deklarator>
            <izravni_deklarator>
-            <izravni_deklarator>
-             IDN 6 A
+            IDN 6 A
             L_UGL_ZAGRADA 6 [
-            <log_ili_izraz>
-             <log_i_izraz>
-              <bin_ili_izraz>
-               <bin_xili_izraz>
-                <bin_i_izraz>
-                 <jednakosni_izraz>
-                  <odnosni_izraz>
-                   <aditivni_izraz>
-                    <multiplikativni_izraz>
-                     <cast_izraz>
-                      <unarni_izraz>
-                       <postfiks_izraz>
-                        <primarni_izraz>
-                         BROJ 6 512
+            BROJ 6 512
             D_UGL_ZAGRADA 6 ]
          TOCKAZAREZ 6 ;
        <deklaracija>
-        <specifikatori_deklaracije>
+        <ime_tipa>
          <specifikator_tipa>
           KR_INT 7 int
         <lista_init_deklaratora>
          <init_deklarator>
           <izravni_deklarator>
-           <izravni_deklarator>
-            IDN 7 t
+           IDN 7 t
            L_UGL_ZAGRADA 7 [
+           BROJ 7 3
            D_UGL_ZAGRADA 7 ]
           OP_PRIDRUZI 7 =
           <inicijalizator>
@@ -142,17 +118,16 @@
            D_VIT_ZAGRADA 7 }
         TOCKAZAREZ 7 ;
       <deklaracija>
-       <specifikatori_deklaracije>
+       <ime_tipa>
         KR_CONST 8 const
-        <specifikatori_deklaracije>
-         <specifikator_tipa>
-          KR_CHAR 8 char
+        <specifikator_tipa>
+         KR_CHAR 8 char
        <lista_init_deklaratora>
         <init_deklarator>
          <izravni_deklarator>
-          <izravni_deklarator>
-           IDN 8 tmp
+          IDN 8 tmp
           L_UGL_ZAGRADA 8 [
+          BROJ 8 10
           D_UGL_ZAGRADA 8 ]
          OP_PRIDRUZI 8 =
          <inicijalizator>
@@ -173,7 +148,7 @@
                         NIZ_ZNAKOVA 8 "te  \nst"
        TOCKAZAREZ 8 ;
      <deklaracija>
-      <specifikatori_deklaracije>
+      <ime_tipa>
        <specifikator_tipa>
         KR_INT 9 int
       <lista_init_deklaratora>
@@ -197,10 +172,9 @@
             <izraz_naredba>
              <izraz>
               <izraz_pridruzivanja>
-               <unarni_izraz>
-                <postfiks_izraz>
-                 <primarni_izraz>
-                  IDN 11 xYz
+               <postfiks_izraz>
+                <primarni_izraz>
+                 IDN 11 xYz
                OP_PRIDRUZI 11 =
                <izraz_pridruzivanja>
                 <log_ili_izraz>
@@ -222,10 +196,9 @@
            <izraz_naredba>
             <izraz>
              <izraz_pridruzivanja>
-              <unarni_izraz>
-               <postfiks_izraz>
-                <primarni_izraz>
-                 IDN 12 abc
+              <postfiks_izraz>
+               <primarni_izraz>
+                IDN 12 abc
               OP_PRIDRUZI 12 =
               <izraz_pridruzivanja>
                <log_ili_izraz>
@@ -247,10 +220,9 @@
           <izraz_naredba>
            <izraz>
             <izraz_pridruzivanja>
-             <unarni_izraz>
-              <postfiks_izraz>
-               <primarni_izraz>
-                IDN 13 abc
+             <postfiks_izraz>
+              <primarni_izraz>
+               IDN 13 abc
              OP_PRIDRUZI 13 =
              <izraz_pridruzivanja>
               <log_ili_izraz>
@@ -282,10 +254,9 @@
          <izraz_naredba>
           <izraz>
            <izraz_pridruzivanja>
-            <unarni_izraz>
-             <postfiks_izraz>
-              <primarni_izraz>
-               IDN 14 abc
+            <postfiks_izraz>
+             <primarni_izraz>
+              IDN 14 abc
             OP_PRIDRUZI 14 =
             <izraz_pridruzivanja>
              <log_ili_izraz>
@@ -349,10 +320,9 @@
          <izraz_naredba>
           <izraz>
            <izraz_pridruzivanja>
-            <unarni_izraz>
-             <postfiks_izraz>
-              <primarni_izraz>
-               IDN 16 i
+            <postfiks_izraz>
+             <primarni_izraz>
+              IDN 16 i
             OP_PRIDRUZI 16 =
             <izraz_pridruzivanja>
              <log_ili_izraz>
@@ -425,29 +395,28 @@
               <izraz_naredba>
                <izraz>
                 <izraz_pridruzivanja>
-                 <unarni_izraz>
+                 <postfiks_izraz>
                   <postfiks_izraz>
-                   <postfiks_izraz>
-                    <primarni_izraz>
-                     IDN 17 tmp
-                   L_UGL_ZAGRADA 17 [
-                   <izraz>
-                    <izraz_pridruzivanja>
-                     <log_ili_izraz>
-                      <log_i_izraz>
-                       <bin_ili_izraz>
-                        <bin_xili_izraz>
-                         <bin_i_izraz>
-                          <jednakosni_izraz>
-                           <odnosni_izraz>
-                            <aditivni_izraz>
-                             <multiplikativni_izraz>
-                              <cast_izraz>
-                               <unarni_izraz>
-                                <postfiks_izraz>
-                                 <primarni_izraz>
-                                  IDN 17 i
-                   D_UGL_ZAGRADA 17 ]
+                   <primarni_izraz>
+                    IDN 17 tmp
+                  L_UGL_ZAGRADA 17 [
+                  <izraz>
+                   <izraz_pridruzivanja>
+                    <log_ili_izraz>
+                     <log_i_izraz>
+                      <bin_ili_izraz>
+                       <bin_xili_izraz>
+                        <bin_i_izraz>
+                         <jednakosni_izraz>
+                          <odnosni_izraz>
+                           <aditivni_izraz>
+                            <multiplikativni_izraz>
+                             <cast_izraz>
+                              <unarni_izraz>
+                               <postfiks_izraz>
+                                <primarni_izraz>
+                                 IDN 17 i
+                  D_UGL_ZAGRADA 17 ]
                  OP_PRIDRUZI 17 =
                  <izraz_pridruzivanja>
                   <log_ili_izraz>
@@ -462,9 +431,8 @@
                            <cast_izraz>
                             L_ZAGRADA 17 (
                             <ime_tipa>
-                             <lista_specifikatora_kvalifikatora>
-                              <specifikator_tipa>
-                               KR_CHAR 17 char
+                             <specifikator_tipa>
+                              KR_CHAR 17 char
                             D_ZAGRADA 17 )
                             <cast_izraz>
                              <unarni_izraz>

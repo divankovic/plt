@@ -16,7 +16,6 @@ public class Grammar implements Serializable {
 
     private List<String> emptyNonTerminalSymbols;
     private HashMap<String, List<GrammarProduction>> productionMap;
-    private HashMap<String, List<Clause>> clauseMap;
 
     private int n = GSA.nonterminalSymbols.size();
     private int m = GSA.terminalSymbols.size();
@@ -33,58 +32,7 @@ public class Grammar implements Serializable {
         return productionMap;
     }
 
-    public HashMap<String, List<Clause>> getClauseMap() {
-        return clauseMap;
-    }
-
     private void initialize() {
-
-        //creating dotted production map
-
-        clauseMap = new HashMap<>();
-        for (Map.Entry<String, List<GrammarProduction>> entry : productionMap.entrySet()) {
-
-            String keySymbol = entry.getKey();
-            List<GrammarProduction> productions = entry.getValue();
-            List<Clause> clauses = new LinkedList<>();
-
-            productions.forEach(production -> {
-
-
-                if (production.rightSide.get(0).equals(EpsilonNFA.epsilonSymbol)) {
-
-                    List<String> dot = new LinkedList<>();
-                    dot.add(dotSymbol);
-
-                    Clause clause = new Clause(production.getLeftSide(), dot, new LinkedList<>());
-                    clauses.add(clause);
-
-                    return;
-                }
-
-                int position = 0;
-                int length = production.getRightSide().size();
-
-                while (position < length) {
-                    List<String> dottedRightSide = new LinkedList<>();
-                    dottedRightSide.addAll(production.getRightSide());
-                    dottedRightSide.add(position, dotSymbol);
-                    Clause clause = new Clause(production.getLeftSide(), dottedRightSide, new LinkedList<>());
-                    clauses.add(clause);
-                    position += 1;
-                }
-
-                List<String> dottedRightSide = new LinkedList<>();
-
-                dottedRightSide.addAll(production.getRightSide());
-                dottedRightSide.add(dotSymbol);
-
-                clauses.add(new Clause(production.getLeftSide(), dottedRightSide, new LinkedList<>()));
-
-                clauseMap.put(keySymbol, clauses);
-
-            });
-        }
 
         findEmptyNonTerminalSymbols();
         fillStartsWithSymbolTable();

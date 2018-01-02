@@ -14,7 +14,7 @@ public class SA {
     /**
      * Path to the output file of generator
      */
-    private final static String TEST_FILE_INPUT_PATH = "./src/hr/fer/ppj/lab2/res/in/14simplePpjLang/test.in";
+    private final static String TEST_FILE_INPUT_PATH = "./src/hr/fer/ppj/lab2/res/in/12ppjC/test.in";
     private final static String TEST_FILE_OUTPUT_PATH = "./src/hr/fer/ppj/lab2/res/out/SA_out.txt";
     private final static String SERIALIZATION_FILE_PATH = "./definition.ser";
     private final static String WHITESPACE_REGEX = "\\s+";
