@@ -41,7 +41,7 @@ public class SemantickiAnalizator {
             System.out.println(production);
         }
 
-        fillProductions();
+        //fillProductions();
         buildGeneratingTree();
 
         functions = new LinkedList<>();
