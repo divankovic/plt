@@ -1,16 +1,14 @@
 package hr.fer.ppj.lab3;
 
-import hr.fer.ppj.lab3.helper.Checker;
 import hr.fer.ppj.lab3.model.*;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.PrintStream;
+
+import javax.swing.*;
+import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static hr.fer.ppj.lab3.model.Const.*;
 import static hr.fer.ppj.lab3.helper.Checker.*;
+import static hr.fer.ppj.lab3.model.Const.*;
 
 /**
  *
@@ -19,6 +17,8 @@ public class SemantickiAnalizator {
 
     private static final String TEST_FILE_INPUT_PATH = "./src/hr/fer/ppj/lab2/res/out/SA_out.txt";
     private static final String TEST_FILE_OUTPUT_PATH = "./src/hr/fer/ppj/lab3/res/out/out.txt";
+    private static final String PRODUCTIONS_TXT_FILE_PATH = "./src/hr/fer/ppj/lab3/res/in/simplePpjLang.san";
+    private static final String PRODUCTIONS_SER_FILE_PATH = "./src/hr/fer/ppj/lab3/res/in/simplePpjLang.ser";
 
     private static List<Production> productions;
     private static List<String> input;
@@ -32,23 +32,97 @@ public class SemantickiAnalizator {
     /**
      *
      */
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws Exception {
+
         setupStdIO();
-        readFromInput();
-        fillProductions();
 
-        /*for (Production production : productions) {
-            System.out.println(production);
-        }*/
+//        readFromInput();
+//        serializeProductions();
 
-        buildGeneratingTree();
+        deserializeProductions();
 
-        functions = new LinkedList<>();
-        lastLine = terminalSymbols.get(terminalSymbols.size() - 1).getLine();
-        startingCodeBlock = buildCodeBlocks(1, lastLine);
 
-        check(startingElement);
-        //System.out.println("OK");
+//        fillProductions();
+//        buildGeneratingTree();
+//
+//        functions = new LinkedList<>();
+//        lastLine = terminalSymbols.get(terminalSymbols.size() - 1).getLine();
+//        startingCodeBlock = buildCodeBlocks(1, lastLine);
+//
+//        check(startingElement);
+//        //System.out.println("OK");
+    }
+
+    /**
+     *
+     */
+    private static void serializeProductions() throws IOException {
+
+        Scanner scanner = new Scanner(new FileInputStream(new File(PRODUCTIONS_TXT_FILE_PATH)));
+
+        String line;
+        String leftSide = null;
+        List<Production> productions = new ArrayList<>();
+
+        while (scanner.hasNextLine()) {
+
+            line = scanner.nextLine();
+
+            if (line.startsWith("<")) {
+                leftSide = line;
+
+            } else {
+                line = line.trim();
+
+                NonterminalSymbol leftSideOfProd = new NonterminalSymbol(leftSide);
+                List<Symbol> rightSideOfProd = new ArrayList<>();
+
+                for (String token : line.split("\\s+")) {
+
+                    if (token.startsWith("<")) {
+                        rightSideOfProd.add(new NonterminalSymbol(token));
+                    } else {
+                        rightSideOfProd.add(new TerminalSymbol(token));
+                    }
+
+                }
+
+                productions.add(new Production(leftSideOfProd, rightSideOfProd));
+            }
+
+        }
+
+        scanner.close();
+
+        File file = new File(PRODUCTIONS_SER_FILE_PATH);
+        FileOutputStream fos = new FileOutputStream(file);
+        ObjectOutputStream oos = new ObjectOutputStream(fos);
+
+        oos.writeObject(productions);
+
+        fos.close();
+        oos.close();
+    }
+
+    /**
+     *
+     */
+    private static void deserializeProductions() throws Exception {
+
+        try {
+            File file = new File(PRODUCTIONS_SER_FILE_PATH);
+            FileInputStream fis = new FileInputStream(file);
+            ObjectInputStream ois = new ObjectInputStream(fis);
+
+            productions = (List<Production>) ois.readObject();
+
+            fis.close();
+            ois.close();
+
+        } catch (Exception exc) {
+            throw new Exception(exc.getMessage());
+        }
+
     }
 
     /**
@@ -83,15 +157,15 @@ public class SemantickiAnalizator {
                 String[] contents = new String[3];
                 if (line.contains(NIZ_ZNAKOVA) || line.contains(ZNAK)) {
                     int idx;
-                    if(line.contains(NIZ_ZNAKOVA)){
+                    if (line.contains(NIZ_ZNAKOVA)) {
                         idx = line.indexOf("\"");
-                    }else{
+                    } else {
                         idx = line.indexOf("\'");
                     }
 
-                    String content = line.substring(idx+1,line.length()-1); //bez navodnika
+                    String content = line.substring(idx + 1, line.length() - 1); //bez navodnika
 
-                    line = line.substring(0,idx);
+                    line = line.substring(0, idx);
                     contents[0] = line.split(" ")[0];
                     contents[1] = line.split(" ")[1];
                     contents[2] = content;
@@ -132,10 +206,10 @@ public class SemantickiAnalizator {
         addNewProduction("<unarni_izraz>", "OP_DEC <unarni_izraz>");
         addNewProduction("<unarni_izraz>", "<unarni_operator> <cast_izraz>");
 
-        addNewProduction("<unarni_operator>","PLUS");
-        addNewProduction("<unarni_operator>","MINUS");
-        addNewProduction("<unarni_operator>","OP_TILDA");
-        addNewProduction("<unarni_operator>","OP_NEG");
+        addNewProduction("<unarni_operator>", "PLUS");
+        addNewProduction("<unarni_operator>", "MINUS");
+        addNewProduction("<unarni_operator>", "OP_TILDA");
+        addNewProduction("<unarni_operator>", "OP_NEG");
 
         addNewProduction("<cast_izraz>", "<unarni_izraz>");
         addNewProduction("<cast_izraz>", "L_ZAGRADA <ime_tipa> D_ZAGRADA <cast_izraz>");
@@ -218,8 +292,8 @@ public class SemantickiAnalizator {
         addNewProduction("<prijevodna_jedinica>", "<prijevodna_jedinica> <vanjska_deklaracija>");
 
 
-        addNewProduction("<vanjska_deklaracija>","<definicija_funkcije>");
-        addNewProduction("<vanjska_deklaracija>","<deklaracija>");
+        addNewProduction("<vanjska_deklaracija>", "<definicija_funkcije>");
+        addNewProduction("<vanjska_deklaracija>", "<deklaracija>");
 
         addNewProduction("<definicija_funkcije>", "<ime_tipa> IDN L_ZAGRADA KR_VOID D_ZAGRADA <slozena_naredba>");
         addNewProduction("<definicija_funkcije>", "<ime_tipa> IDN L_ZAGRADA <lista_parametara> D_ZAGRADA <slozena_naredba>");
@@ -252,6 +326,7 @@ public class SemantickiAnalizator {
         addNewProduction("<lista_izraza_pridruzivanja>", "<izraz_pridruzivanja>");
         addNewProduction("<lista_izraza_pridruzivanja>", "<lista_izraza_pridruzivanja> ZAREZ <izraz_pridruzivanja>");
     }
+
     /**
      *
      */
@@ -297,6 +372,7 @@ public class SemantickiAnalizator {
         //printGeneratingTree(startingElement,0);
 
     }
+
     /**
      *
      */
@@ -322,6 +398,7 @@ public class SemantickiAnalizator {
         return childrenElements;
 
     }
+
     /**
      *
      */
@@ -332,6 +409,7 @@ public class SemantickiAnalizator {
         }
         return i;
     }
+
     /**
      *
      */
@@ -344,6 +422,7 @@ public class SemantickiAnalizator {
             }
         }
     }
+
     /**
      *
      */
@@ -363,22 +442,22 @@ public class SemantickiAnalizator {
      */
     private static CodeBlock buildCodeBlocks(int startLine, int finishLine) {
         CodeBlock codeBlock = new CodeBlock(startLine, finishLine);
-        if(!(startLine==1 && finishLine == lastLine)){
+        if (!(startLine == 1 && finishLine == lastLine)) {
             //zbog viticastih zagrada na pocetku i na kraju
-            startLine+=1;
-            finishLine-=1;
+            startLine += 1;
+            finishLine -= 1;
         }
         int finalStartLine = startLine;
         int finalFinishLine = finishLine;
-        List<TerminalSymbol> blockSymbols = terminalSymbols.stream().filter(terminalSymbol -> terminalSymbol.getLine()>= finalStartLine && terminalSymbol.getLine()<= finalFinishLine).collect(Collectors.toList());
+        List<TerminalSymbol> blockSymbols = terminalSymbols.stream().filter(terminalSymbol -> terminalSymbol.getLine() >= finalStartLine && terminalSymbol.getLine() <= finalFinishLine).collect(Collectors.toList());
 
         int line = startLine;
         while (line <= finishLine) {
             int lamLine = line;
             List<String> currentLine = blockSymbols.stream().filter(symbol -> symbol.getLine() == lamLine).map(TerminalSymbol::getValue).collect(Collectors.toList());
-            List<TerminalSymbol> lineSymbols = blockSymbols.stream().filter(symbol->symbol.getLine()== lamLine).collect(Collectors.toList());
-            if(currentLine.isEmpty()){
-                line+=1;
+            List<TerminalSymbol> lineSymbols = blockSymbols.stream().filter(symbol -> symbol.getLine() == lamLine).collect(Collectors.toList());
+            if (currentLine.isEmpty()) {
+                line += 1;
                 continue;
             }
             if (declarationIdentifiers.contains(currentLine.get(0))) {
@@ -414,11 +493,11 @@ public class SemantickiAnalizator {
                         }
                         List<Variable> functionVariables = new LinkedList<>(); // varijable od funkcije pripadaju bloku u kojem je definirana funkcija
                         List<String> variableTypes = function.getInputParameters();
-                        if(!variableTypes.contains(VOID)){
+                        if (!variableTypes.contains(VOID)) {
                             List<String> identifiers = lineSymbols.stream().filter(terminalSymbol -> terminalSymbol.getName().equals(IDN)).map(TerminalSymbol::getValue).collect(Collectors.toList());
                             identifiers.remove(0); // prvi identifikator je identifikator funkcije
-                            for(int i = 0;i<variableTypes.size();i++) {
-                                Variable variable = new Variable(variableTypes.get(i),identifiers.get(i));
+                            for (int i = 0; i < variableTypes.size(); i++) {
+                                Variable variable = new Variable(variableTypes.get(i), identifiers.get(i));
                                 variable.setDeclaredAt(line);
                                 functionVariables.add(variable);
                             }
@@ -426,9 +505,9 @@ public class SemantickiAnalizator {
                         //fline je linija prve sljedece zatvorene viticaste zagrade
                         //pokrece se analiza koda izmedju sljedece dvije zatvorene zagrade
                         //dodaje se childBlock , a analiza se nastavlja od sljedece linije iza bloka
-                        List<TerminalSymbol> searchContent = blockSymbols.stream().filter(terminalSymbol -> terminalSymbol.getLine()>lamLine).collect(Collectors.toList());
+                        List<TerminalSymbol> searchContent = blockSymbols.stream().filter(terminalSymbol -> terminalSymbol.getLine() > lamLine).collect(Collectors.toList());
                         int fLine = findNextRightParenthesis(searchContent);
-                        CodeBlock childBlock = buildCodeBlocks(line,  fLine);
+                        CodeBlock childBlock = buildCodeBlocks(line, fLine);
                         childBlock.getVariables().addAll(functionVariables);
                         childBlock.setParentBlock(codeBlock);
                         childBlock.setFunction(function);
@@ -439,68 +518,70 @@ public class SemantickiAnalizator {
                     //varijabla
 
                     //ako ima jednako u deklaraciji, odreži
-                    if(lineSymbols.stream().map(TerminalSymbol::getValue).anyMatch(s -> s.equals(JEDNAKOST))){
-                        int idx=lineSymbols.size();
-                        for(TerminalSymbol symbol : lineSymbols){
-                            if(symbol.getValue().equals(JEDNAKOST)){
+                    if (lineSymbols.stream().map(TerminalSymbol::getValue).anyMatch(s -> s.equals(JEDNAKOST))) {
+                        int idx = lineSymbols.size();
+                        for (TerminalSymbol symbol : lineSymbols) {
+                            if (symbol.getValue().equals(JEDNAKOST)) {
                                 idx = lineSymbols.indexOf(symbol);
                                 break;
                             }
                         }
-                        lineSymbols = lineSymbols.subList(0,idx);
+                        lineSymbols = lineSymbols.subList(0, idx);
                     }
 
                     String type = parseType(currentLine);
 
                     List<String> names = lineSymbols.stream().filter(symbol -> symbol.getName().equals(IDN)).map(TerminalSymbol::getValue).collect(Collectors.toList());
 
-                    names.forEach(name->{
-                        Variable variable = new Variable(type,name);
+                    names.forEach(name -> {
+                        Variable variable = new Variable(type, name);
                         variable.setDeclaredAt(lamLine);
                         codeBlock.getVariables().add(variable);
                     });
-                    line+=1;
+                    line += 1;
                 }
-            }else if(currentLine.contains(L_VIT_ZAGRADA)){
-                if(currentLine.get(0).equals(FOR)||currentLine.get(0).equals(WHILE)){
+            } else if (currentLine.contains(L_VIT_ZAGRADA)) {
+                if (currentLine.get(0).equals(FOR) || currentLine.get(0).equals(WHILE)) {
                     codeBlock.setLoop(true);
                 }
                 //novi blok ili petlja
-                List<TerminalSymbol> searchContent = blockSymbols.stream().filter(terminalSymbol -> terminalSymbol.getLine()>lamLine).collect(Collectors.toList());
+                List<TerminalSymbol> searchContent = blockSymbols.stream().filter(terminalSymbol -> terminalSymbol.getLine() > lamLine).collect(Collectors.toList());
                 int fLine = findNextRightParenthesis(searchContent);
-                CodeBlock childBlock = buildCodeBlocks(line,  fLine);
+                CodeBlock childBlock = buildCodeBlocks(line, fLine);
                 childBlock.setParentBlock(codeBlock);
                 codeBlock.getChildrenBlocks().add(childBlock);
                 line = fLine + 1;
-            }else{
-                line+=1;
+            } else {
+                line += 1;
             }
         }
 
         return codeBlock;
 
     }
+
     /**
      *
      */
-    private static int findNextRightParenthesis(List<TerminalSymbol> content){
-        int position=0;
+    private static int findNextRightParenthesis(List<TerminalSymbol> content) {
+        int position = 0;
         int cnt = 0;
-        for (TerminalSymbol symbol: content) {
+        for (TerminalSymbol symbol : content) {
             if (symbol.getValue().equals(D_VIT_ZAGRADA)) {
-                if(cnt == 0) {
+                if (cnt == 0) {
                     position = symbol.getLine();
                     break;
-                }else{
-                    cnt-=1;
+                } else {
+                    cnt -= 1;
                 }
             }
-            if(symbol.getValue().equals(L_VIT_ZAGRADA)){
+            if (symbol.getValue().equals(L_VIT_ZAGRADA)) {
                 cnt++;
             }
         }
         return position;
     }
+
     /**
      *
      */
@@ -527,40 +608,41 @@ public class SemantickiAnalizator {
 
         return new Function(name, inputParameters, returnType);
     }
+
     /**
      *
      */
     private static String parseType(List<String> content) {
-        if(content.contains(L_UGL_ZAGRADA)){
+        if (content.contains(L_UGL_ZAGRADA)) {
             //NIZ
-            if(content.get(0).equals(CONST)){
-                switch(content.get(1)){
+            if (content.get(0).equals(CONST)) {
+                switch (content.get(1)) {
                     case CHAR:
                         return NIZ_CONST_CHAR;
                     default:
                         return NIZ_CONST_INT;
                 }
-            }else{
-                switch(content.get(0)){
+            } else {
+                switch (content.get(0)) {
                     case CHAR:
-                        return  NIZ_CHAR;
+                        return NIZ_CHAR;
                     default:
                         return NIZ_INT;
                 }
             }
 
-        }else{
-            if(content.get(0).equals(CONST)){
-                switch(content.get(1)){
+        } else {
+            if (content.get(0).equals(CONST)) {
+                switch (content.get(1)) {
                     case CHAR:
                         return CONST_CHAR;
                     default:
                         return CONST_INT;
                 }
-            }else{
-                switch(content.get(0)){
+            } else {
+                switch (content.get(0)) {
                     case CHAR:
-                        return  CHAR;
+                        return CHAR;
                     case INT:
                         return INT;
                     default:
@@ -569,7 +651,6 @@ public class SemantickiAnalizator {
             }
         }
     }
-
 
     /**
      *
@@ -600,20 +681,20 @@ public class SemantickiAnalizator {
             //<primarni_izraz>
             case 0:
                 Function function = findFunction(rightSide.get(0));
-                if(function == null) {
+                if (function == null) {
                     Variable variable = findVariable(rightSide.get(0));
                     if (variable == null) {
                         semanticAnalysisFailure(production);
                     } else {
                         setTypeAndL(leftSide, variable.getType(), Variable.getLexpression(variable.getType()));
                     }
-                }else{
-                    setTypeAndL(leftSide,Function.getType(function.getInputParameters(),function.getReturnType()),0);
+                } else {
+                    setTypeAndL(leftSide, Function.getType(function.getInputParameters(), function.getReturnType()), 0);
                 }
                 break;
 
             case 1:
-                Integer intValue = Integer.valueOf(((TerminalSymbol)rightSide.get(0).getSymbol()).getValue());
+                Integer intValue = Integer.valueOf(((TerminalSymbol) rightSide.get(0).getSymbol()).getValue());
                 if (!checkIntRange(intValue)) {
                     semanticAnalysisFailure(production);
                 }
@@ -621,7 +702,7 @@ public class SemantickiAnalizator {
                 break;
 
             case 2:
-                String charValue = ((TerminalSymbol)rightSide.get(0).getSymbol()).getValue();
+                String charValue = ((TerminalSymbol) rightSide.get(0).getSymbol()).getValue();
                 if (!checkCharSyntax(charValue)) {
                     semanticAnalysisFailure(production);
                 }
@@ -629,7 +710,7 @@ public class SemantickiAnalizator {
                 break;
 
             case 3:
-                String strValue = ((TerminalSymbol)rightSide.get(0).getSymbol()).getValue();
+                String strValue = ((TerminalSymbol) rightSide.get(0).getSymbol()).getValue();
                 if (checkStringSyntax(strValue)) {
                     semanticAnalysisFailure(production);
                 }
@@ -639,7 +720,7 @@ public class SemantickiAnalizator {
             case 4:
                 check(rightSide.get(1));
                 NonterminalSymbol izraz = getNonTerminalSymbol(rightSide.get(1));
-                setTypeAndL(leftSide, izraz.getType(),izraz.getL_expression());
+                setTypeAndL(leftSide, izraz.getType(), izraz.getL_expression());
                 break;
 
             //<postfiks_izraz>
@@ -660,7 +741,7 @@ public class SemantickiAnalizator {
             case 55:
                 check(rightSide.get(0));
                 NonterminalSymbol right = getNonTerminalSymbol(rightSide.get(1));
-                setTypeAndL(leftSide, right.getType(),right.getL_expression());
+                setTypeAndL(leftSide, right.getType(), right.getL_expression());
                 break;
 
             case 6:
@@ -668,51 +749,51 @@ public class SemantickiAnalizator {
                 NonterminalSymbol izraz6 = getNonTerminalSymbol(rightSide.get(2));
 
                 check(rightSide.get(0));
-                if(!postfiks_izraz.getType().contains("niz")){
+                if (!postfiks_izraz.getType().contains("niz")) {
                     semanticAnalysisFailure(production);
                 }
                 check(rightSide.get(2));
-                if (!checkImplicitCast(izraz6.getType(),INT)) {
+                if (!checkImplicitCast(izraz6.getType(), INT)) {
                     semanticAnalysisFailure(production);
                 }
                 String type = extractFromNiz(postfiks_izraz.getType());
                 int l_expression = Variable.getLexpression(type);
-                setTypeAndL(leftSide,type, l_expression);
+                setTypeAndL(leftSide, type, l_expression);
                 break;
 
             case 7:
                 check(rightSide.get(0));
                 NonterminalSymbol postfiks_izraz7 = getNonTerminalSymbol(rightSide.get(0));
                 String type7 = postfiks_izraz7.getType();
-                if(!type7.contains("funkcija") ||
-                        (type7.contains("funkcija") && !type7.split("->")[0].contains(VOID))){
+                if (!type7.contains("funkcija") ||
+                        (type7.contains("funkcija") && !type7.split("->")[0].contains(VOID))) {
                     semanticAnalysisFailure(production);
                 }
-                setTypeAndL(leftSide,Function.getReturnValue(type7),0);
+                setTypeAndL(leftSide, Function.getReturnValue(type7), 0);
                 break;
 
             case 8:
                 check(rightSide.get(0));
                 check(rightSide.get(2));
                 String type8 = getNonTerminalSymbol(rightSide.get(0)).getType();
-                if(!type8.contains("funkcija")){
+                if (!type8.contains("funkcija")) {
                     semanticAnalysisFailure(production);
                 }
                 List<String> types = Function.getInputParameters(type8);
                 List<String> argTypes = getNonTerminalSymbol(rightSide.get(2)).getTypes();
-                for (int i =0;i<argTypes.size();i++) {
-                    if(!checkImplicitCast(argTypes.get(i),types.get(i))){
+                for (int i = 0; i < argTypes.size(); i++) {
+                    if (!checkImplicitCast(argTypes.get(i), types.get(i))) {
                         semanticAnalysisFailure(production);
                     }
                 }
-                setTypeAndL(leftSide,Function.getReturnValue(type8),0);
+                setTypeAndL(leftSide, Function.getReturnValue(type8), 0);
                 break;
 
             case 9:
             case 10:
                 check(rightSide.get(0));
                 NonterminalSymbol postfiks_izraz9 = getNonTerminalSymbol(rightSide.get(0));
-                if (postfiks_izraz9.getL_expression()!=1 || !checkImplicitCast(postfiks_izraz9.getType(), INT)) {
+                if (postfiks_izraz9.getL_expression() != 1 || !checkImplicitCast(postfiks_izraz9.getType(), INT)) {
                     semanticAnalysisFailure(production);
                 }
                 setTypeAndL(leftSide, INT, 0);
@@ -738,10 +819,10 @@ public class SemantickiAnalizator {
             case 16:
                 check(rightSide.get(1));
                 NonterminalSymbol nonterminalSymbol14 = getNonTerminalSymbol(rightSide.get(1));
-                if (!checkImplicitCast(nonterminalSymbol14.getType(),INT)) {
+                if (!checkImplicitCast(nonterminalSymbol14.getType(), INT)) {
                     semanticAnalysisFailure(production);
                 }
-                if((productionIndex == 14 || productionIndex==15) && nonterminalSymbol14.getL_expression()!=1){
+                if ((productionIndex == 14 || productionIndex == 15) && nonterminalSymbol14.getL_expression() != 1) {
                     semanticAnalysisFailure(production);
                 }
                 setTypeAndL(leftSide, INT, ZERO);
@@ -773,7 +854,7 @@ public class SemantickiAnalizator {
 
             case 24:
                 check(rightSide.get(1));
-                if(getNonTerminalSymbol(rightSide.get(1)).getType()==VOID){
+                if (getNonTerminalSymbol(rightSide.get(1)).getType() == VOID) {
                     semanticAnalysisFailure(production);
                 }
                 leftSide.getTypes().add(convertToConst(getNonTerminalSymbol(rightSide.get(1)).getType()));
@@ -815,7 +896,7 @@ public class SemantickiAnalizator {
                     semanticAnalysisFailure(production);
                 }
                 check(rightSide.get(2));
-                if (checkImplicitCast(getNonTerminalSymbol(rightSide.get(2)).getType(),INT)) {
+                if (checkImplicitCast(getNonTerminalSymbol(rightSide.get(2)).getType(), INT)) {
                     semanticAnalysisFailure(production);
                 }
                 setTypeAndL(leftSide, INT, ZERO);
@@ -859,14 +940,14 @@ public class SemantickiAnalizator {
                 NonterminalSymbol postfiks_izraz54 = getNonTerminalSymbol(rightSide.get(0));
                 NonterminalSymbol izraz_pridruzivanja54 = getNonTerminalSymbol(rightSide.get(2));
                 check(rightSide.get(0));
-                if(postfiks_izraz54.getL_expression()!=1){
+                if (postfiks_izraz54.getL_expression() != 1) {
                     semanticAnalysisFailure(production);
                 }
                 check(rightSide.get(2));
-                if(!checkImplicitCast(izraz_pridruzivanja54.getType(),postfiks_izraz54.getType())){
+                if (!checkImplicitCast(izraz_pridruzivanja54.getType(), postfiks_izraz54.getType())) {
                     semanticAnalysisFailure(production);
                 }
-                setTypeAndL(leftSide,postfiks_izraz54.getType(),0);
+                setTypeAndL(leftSide, postfiks_izraz54.getType(), 0);
                 break;
 
             //<izraz>
@@ -874,7 +955,7 @@ public class SemantickiAnalizator {
             case 56:
                 check(rightSide.get(0));
                 check(rightSide.get(2));
-                setTypeAndL(leftSide,getNonTerminalSymbol(rightSide.get(2)).getType(),0);
+                setTypeAndL(leftSide, getNonTerminalSymbol(rightSide.get(2)).getType(), 0);
                 break;
 
             //<slozena_naredba>
@@ -931,7 +1012,7 @@ public class SemantickiAnalizator {
                     semanticAnalysisFailure(production);
                 }
                 check(rightSide.get(4));
-                if(productionIndex==69){
+                if (productionIndex == 69) {
                     check(rightSide.get(6));
                 }
                 break;
@@ -961,43 +1042,43 @@ public class SemantickiAnalizator {
             case 73:
             case 74:
                 //provjera je li se naredba nalazi unutar petlje ili unutar bloka koji je ugniježđen u petlji
-                TerminalSymbol symbol74 = (TerminalSymbol)rightSide.get(0).getSymbol();
+                TerminalSymbol symbol74 = (TerminalSymbol) rightSide.get(0).getSymbol();
                 CodeBlock codeBlock74 = findCodeblock(symbol74.getLine());
                 boolean error74 = false;
-                while(true){
-                    if(codeBlock74.isLoop()){
+                while (true) {
+                    if (codeBlock74.isLoop()) {
                         break;
-                    }else{
-                        if(codeBlock74.getParentBlock()==null){
+                    } else {
+                        if (codeBlock74.getParentBlock() == null) {
                             error74 = true;
                             break;
-                        }else{
+                        } else {
                             codeBlock74 = codeBlock74.getParentBlock();
                         }
                     }
                 }
-                if(error74){
+                if (error74) {
                     semanticAnalysisFailure(production);
                 }
                 break;
 
             case 75:
                 //provjera je li se naredba nalazi unutar funkcije tipa funkcija(params->void)
-                TerminalSymbol symbol75 = (TerminalSymbol)rightSide.get(0).getSymbol();
+                TerminalSymbol symbol75 = (TerminalSymbol) rightSide.get(0).getSymbol();
                 CodeBlock codeBlock75 = findCodeblock(symbol75.getLine());
                 Function function75 = codeBlock75.getFunction();
-                if(function75==null || !function75.getReturnType().equals(VOID)){
+                if (function75 == null || !function75.getReturnType().equals(VOID)) {
                     semanticAnalysisFailure(production);
                 }
                 break;
 
             case 76:
                 check(rightSide.get(1));
-                TerminalSymbol symbol76 = (TerminalSymbol)rightSide.get(0).getSymbol();
+                TerminalSymbol symbol76 = (TerminalSymbol) rightSide.get(0).getSymbol();
                 CodeBlock codeBlock76 = findCodeblock(symbol76.getLine());
                 Function function76 = codeBlock76.getFunction();
-                if(function76==null || function76.getInputParameters().contains(VOID)
-                    || !checkImplicitCast(getNonTerminalSymbol(rightSide.get(1)).getType(),function76.getReturnType())){
+                if (function76 == null || function76.getInputParameters().contains(VOID)
+                        || !checkImplicitCast(getNonTerminalSymbol(rightSide.get(1)).getType(), function76.getReturnType())) {
                     semanticAnalysisFailure(production);
                 }
                 break;
@@ -1333,52 +1414,57 @@ public class SemantickiAnalizator {
      */
     private static Variable findVariable(Element element) {
         int line = element.getLineIdx();
-        String variableName = ((TerminalSymbol)element.getSymbol()).getValue();
+        String variableName = ((TerminalSymbol) element.getSymbol()).getValue();
         //prvo treba pronaci odgovarajuci blok
         CodeBlock codeBlock = findCodeblock(line);
-        while(true){
+        while (true) {
             List<Variable> variables = codeBlock.getVariables();
-            for(Variable variable : variables){
-                if(variable.getName().equals(variableName) && variable.getDeclaredAt()<=line){
+            for (Variable variable : variables) {
+                if (variable.getName().equals(variableName) && variable.getDeclaredAt() <= line) {
                     return variable;
                 }
             }
             codeBlock = codeBlock.getParentBlock();
-            if(codeBlock==null){
+            if (codeBlock == null) {
                 break;
             }
         }
         return null;
     }
 
+    /**
+     *
+     */
     private static Function findFunction(Element element) {
         int line = element.getLineIdx();
-        String functionName = ((TerminalSymbol)element.getSymbol()).getValue();
-        for(Function function : functions){
-            if(function.getName().equals(functionName) && function.getFirstTimeDeclaredAt()<=line){
+        String functionName = ((TerminalSymbol) element.getSymbol()).getValue();
+        for (Function function : functions) {
+            if (function.getName().equals(functionName) && function.getFirstTimeDeclaredAt() <= line) {
                 return function;
             }
         }
         return null;
     }
 
-
+    /**
+     *
+     */
     private static CodeBlock findCodeblock(int line) {
         CodeBlock codeblock = startingCodeBlock;
-        while(true){
-            if(line>=codeblock.getStartLine() && line<=codeblock.getFinishLine()){
+        while (true) {
+            if (line >= codeblock.getStartLine() && line <= codeblock.getFinishLine()) {
                 List<CodeBlock> childrenBlocks = codeblock.getChildrenBlocks();
-                if(childrenBlocks.isEmpty()){
+                if (childrenBlocks.isEmpty()) {
                     break;
                 }
-                for(CodeBlock block : childrenBlocks){
-                    if(line>=block.getStartLine() && line<=block.getFinishLine()){
+                for (CodeBlock block : childrenBlocks) {
+                    if (line >= block.getStartLine() && line <= block.getFinishLine()) {
                         codeblock = block;
                         break;
                     }
                 }
 
-            }else{
+            } else {
                 break;
             }
         }

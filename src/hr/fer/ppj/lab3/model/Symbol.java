@@ -1,10 +1,12 @@
 package hr.fer.ppj.lab3.model;
 
-public abstract class Symbol {
+import java.io.Serializable;
+
+public abstract class Symbol implements Serializable {
 
     protected String name;
 
-    public String getName(){
+    public String getName() {
         return name;
     }
 }

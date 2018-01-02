@@ -1,9 +1,10 @@
 package hr.fer.ppj.lab3.model;
 
+import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 
-public class NonterminalSymbol extends Symbol {
+public class NonterminalSymbol extends Symbol implements Serializable {
 
     private String type;
     private String nameProperty;
@@ -13,7 +14,7 @@ public class NonterminalSymbol extends Symbol {
     private int numOfElements;
 
     public NonterminalSymbol(String name) {
-        this.name=name;
+        this.name = name;
         types = new LinkedList<>();
         names = new LinkedList<>();
 
@@ -68,7 +69,7 @@ public class NonterminalSymbol extends Symbol {
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         return name;
     }
 
