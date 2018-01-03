@@ -13,6 +13,7 @@ public class NonterminalSymbol extends Symbol {
     private List<String> names;
     private int l_expression;
     private int numOfElements;
+    private CodeBlock codeBlock; //nasljedno svojstvo
 
     public NonterminalSymbol(String name) {
         this.name = name;
@@ -75,6 +76,14 @@ public class NonterminalSymbol extends Symbol {
 
     public void setNumOfElements(int numOfElements) {
         this.numOfElements = numOfElements;
+    }
+
+    public CodeBlock getCodeBlock() {
+        return codeBlock;
+    }
+
+    public void setCodeBlock(CodeBlock codeBlock) {
+        this.codeBlock = codeBlock;
     }
 
     @Override

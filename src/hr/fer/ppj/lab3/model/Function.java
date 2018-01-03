@@ -9,15 +9,13 @@ public class Function {
     private String name;
     private List<String> inputParameters;
     private String returnType;
-    private int firstTimeDeclaredAt;
-    private int definedAt;
+    private boolean defined;
 
     public Function(String name, List<String> inputParameters, String returnType) {
         this.name = name;
         this.inputParameters = inputParameters;
         this.returnType = returnType;
-        firstTimeDeclaredAt = -1;
-        definedAt = -1;
+        defined = false;
     }
 
     public String getName() {
@@ -44,39 +42,13 @@ public class Function {
         this.returnType = returnType;
     }
 
-    public int getFirstTimeDeclaredAt() {
-        return firstTimeDeclaredAt;
+
+    public boolean isDefined() {
+        return defined;
     }
 
-    public void setFirstTimeDeclaredAt(int firstTimeDeclaredAt) {
-        this.firstTimeDeclaredAt = firstTimeDeclaredAt;
-    }
-
-    public int getDefinedAt() {
-        return definedAt;
-    }
-
-    public void setDefinedAt(int definedAt) {
-        this.definedAt = definedAt;
-    }
-
-    public static String getType(List<String> inputParameters, String returnType) {
-        String parameters;
-        StringBuilder parameterBuilder = new StringBuilder();
-        inputParameters.forEach(s -> parameterBuilder.append(s).append(","));
-        parameters = parameterBuilder.substring(0, parameterBuilder.length() - 1);
-        return "funkcija(" + parameters + " -> " + returnType;
-    }
-
-    public static String getReturnValue(String type) {
-        return type.split("->")[1].trim().replace(")", "");
-    }
-
-    public static List<String> getInputParameters(String type) {
-        List<String> parameters = new LinkedList<>();
-        String[] par = type.split("->")[0].trim().replace("(", "").split(",");
-        parameters.addAll(Arrays.asList(par));
-        return parameters;
+    public void setDefined(boolean defined) {
+        this.defined = defined;
     }
 
     @Override

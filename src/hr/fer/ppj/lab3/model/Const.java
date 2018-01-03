@@ -1,5 +1,6 @@
 package hr.fer.ppj.lab3.model;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -67,5 +68,31 @@ public class Const {
         } else {
             return CONST_CHAR;
         }
+    }
+
+    public static int getLexpression(String type) {
+        if (type.equals(Const.CHAR) || type.equals(Const.INT)) {
+            return 1;
+        }
+        return 0;
+    }
+
+    public static String getFunctionReturnValue(String type) {
+        return type.split("->")[1].trim().replace(")", "");
+    }
+
+    public static String getFunctionType(List<String> inputParameters, String returnType) {
+        String parameters;
+        StringBuilder parameterBuilder = new StringBuilder();
+        inputParameters.forEach(s -> parameterBuilder.append(s).append(","));
+        parameters = parameterBuilder.substring(0, parameterBuilder.length() - 1);
+        return "funkcija(" + parameters + " -> " + returnType;
+    }
+
+    public static List<String> getFunctionInputParameters(String type) {
+        List<String> parameters = new LinkedList<>();
+        String[] par = type.split("->")[0].trim().replace("(", "").split(",");
+        parameters.addAll(Arrays.asList(par));
+        return parameters;
     }
 }

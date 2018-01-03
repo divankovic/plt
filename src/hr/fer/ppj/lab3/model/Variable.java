@@ -3,7 +3,6 @@ package hr.fer.ppj.lab3.model;
 public class Variable {
     private String type;
     private String name;
-    private int declaredAt;
 
     public Variable(String type, String name) {
         this.type = type;
@@ -26,21 +25,6 @@ public class Variable {
         this.name = name;
     }
 
-    public int getDeclaredAt() {
-        return declaredAt;
-    }
-
-    public void setDeclaredAt(int declaredAt) {
-        this.declaredAt = declaredAt;
-    }
-
-    public static int getLexpression(String type) {
-        if (type.equals(Const.CHAR) || type.equals(Const.INT)) {
-            return 1;
-        }
-        return 0;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -48,14 +32,12 @@ public class Variable {
 
         Variable variable = (Variable) o;
 
-        if (declaredAt != variable.declaredAt) return false;
         return name != null ? name.equals(variable.name) : variable.name == null;
     }
 
     @Override
     public int hashCode() {
         int result = name != null ? name.hashCode() : 0;
-        result = 31 * result + declaredAt;
         return result;
     }
 }
