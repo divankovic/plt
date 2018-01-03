@@ -17,7 +17,7 @@ import static hr.fer.ppj.lab3.model.Const.*;
  */
 public class SemantickiAnalizator {
 
-    private static final String TEST_FILE_INPUT_PATH = "./src/hr/fer/ppj/lab3/res/in/01_idn/test.in";
+    private static final String TEST_FILE_INPUT_PATH = "./src/hr/fer/ppj/lab3/res/in/03_niz_znakova/test.in";
     private static final String TEST_FILE_OUTPUT_PATH = "./src/hr/fer/ppj/lab3/res/out/out.txt";
     private static final String PRODUCTIONS_TXT_FILE_PATH = "./src/hr/fer/ppj/lab3/res/in/ppjC.san";
 
@@ -694,8 +694,9 @@ public class SemantickiAnalizator {
                 break;
 
             case 1:
-                Integer intValue = Integer.valueOf(((TerminalSymbol) rightSide.get(0).getSymbol()).getValue());
-                if (!checkIntRange(intValue)) {
+                try {
+                    Integer intValue = Integer.valueOf(((TerminalSymbol) rightSide.get(0).getSymbol()).getValue());
+                }catch(Exception exc){
                     semanticAnalysisFailure(production);
                 }
                 setTypeAndL(leftSide, INT, ZERO);
