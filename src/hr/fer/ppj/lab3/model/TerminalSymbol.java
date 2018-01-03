@@ -32,7 +32,7 @@ public class TerminalSymbol extends Symbol {
         if (value == null) {
             return name;
         } else {
-            return name + "(" + line + ", " + value + ")";
+            return name + "(" + line + "," + value + ")";
         }
     }
 }

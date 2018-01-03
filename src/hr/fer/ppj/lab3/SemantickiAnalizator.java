@@ -17,10 +17,9 @@ import static hr.fer.ppj.lab3.model.Const.*;
  */
 public class SemantickiAnalizator {
 
-    private static final String TEST_FILE_INPUT_PATH = "./src/hr/fer/ppj/lab2/res/out/SA_out.txt";
+    private static final String TEST_FILE_INPUT_PATH = "./src/hr/fer/ppj/lab3/res/in/01_idn/test.in";
     private static final String TEST_FILE_OUTPUT_PATH = "./src/hr/fer/ppj/lab3/res/out/out.txt";
     private static final String PRODUCTIONS_TXT_FILE_PATH = "./src/hr/fer/ppj/lab3/res/in/ppjC.san";
-    private static final String PRODUCTIONS_SER_FILE_PATH = "./src/hr/fer/ppj/lab3/res/in/ppjC.ser";
 
     private static List<Production> productions;
     private static List<String> input;
@@ -30,6 +29,7 @@ public class SemantickiAnalizator {
     private static List<String> declarationIdentifiers = Arrays.asList(VOID, INT, CHAR, CONST);
     private static List<Function> functions;
     private static int lastLine;
+    private static boolean startingBlock;
 
     /**
      *
@@ -49,6 +49,7 @@ public class SemantickiAnalizator {
 
         functions = new LinkedList<>();
         lastLine = terminalSymbols.get(terminalSymbols.size() - 1).getLine();
+        startingBlock = true;
         startingCodeBlock = buildCodeBlocks(1, lastLine);
 
         check(startingElement);
@@ -437,10 +438,12 @@ public class SemantickiAnalizator {
      */
     private static CodeBlock buildCodeBlocks(int startLine, int finishLine) {
         CodeBlock codeBlock = new CodeBlock(startLine, finishLine);
-        if (!(startLine == 1 && finishLine == lastLine)) {
+        if (!startingBlock) {
             //zbog viticastih zagrada na pocetku i na kraju
             startLine += 1;
             finishLine -= 1;
+        }else{
+            startingBlock = false;
         }
         int finalStartLine = startLine;
         int finalFinishLine = finishLine;
@@ -487,29 +490,30 @@ public class SemantickiAnalizator {
                         } else {
                             functions.add(function);
                         }
-                    }
-                    List<Variable> functionVariables = new LinkedList<>(); // varijable od funkcije pripadaju bloku u kojem je definirana funkcija
-                    List<String> variableTypes = function.getInputParameters();
-                    if (!variableTypes.contains(VOID)) {
-                        List<String> identifiers = lineSymbols.stream().filter(terminalSymbol -> terminalSymbol.getName().equals(IDN)).map(TerminalSymbol::getValue).collect(Collectors.toList());
-                        identifiers.remove(0); // prvi identifikator je identifikator funkcije
-                        for (int i = 0; i < variableTypes.size(); i++) {
-                            Variable variable = new Variable(variableTypes.get(i), identifiers.get(i));
-                            variable.setDeclaredAt(line);
-                            functionVariables.add(variable);
+
+                        List<Variable> functionVariables = new LinkedList<>(); // varijable od funkcije pripadaju bloku u kojem je definirana funkcija
+                        List<String> variableTypes = function.getInputParameters();
+                        if (!variableTypes.contains(VOID)) {
+                            List<String> identifiers = lineSymbols.stream().filter(terminalSymbol -> terminalSymbol.getName().equals(IDN)).map(TerminalSymbol::getValue).collect(Collectors.toList());
+                            identifiers.remove(0); // prvi identifikator je identifikator funkcije
+                            for (int i = 0; i < variableTypes.size(); i++) {
+                                Variable variable = new Variable(variableTypes.get(i), identifiers.get(i));
+                                variable.setDeclaredAt(line);
+                                functionVariables.add(variable);
+                            }
                         }
+                        //fline je linija prve sljedece zatvorene viticaste zagrade
+                        //pokrece se analiza koda izmedju sljedece dvije zatvorene zagrade
+                        //dodaje se childBlock , a analiza se nastavlja od sljedece linije iza bloka
+                        List<TerminalSymbol> searchContent = blockSymbols.stream().filter(terminalSymbol -> terminalSymbol.getLine() > lamLine).collect(Collectors.toList());
+                        int fLine = findNextRightParenthesis(searchContent);
+                        CodeBlock childBlock = buildCodeBlocks(line, fLine);
+                        childBlock.getVariables().addAll(functionVariables);
+                        childBlock.setParentBlock(codeBlock);
+                        childBlock.setFunction(function);
+                        codeBlock.getChildrenBlocks().add(childBlock);
+                        line = fLine + 1;
                     }
-                    //fline je linija prve sljedece zatvorene viticaste zagrade
-                    //pokrece se analiza koda izmedju sljedece dvije zatvorene zagrade
-                    //dodaje se childBlock , a analiza se nastavlja od sljedece linije iza bloka
-                    List<TerminalSymbol> searchContent = blockSymbols.stream().filter(terminalSymbol -> terminalSymbol.getLine() > lamLine).collect(Collectors.toList());
-                    int fLine = findNextRightParenthesis(searchContent);
-                    CodeBlock childBlock = buildCodeBlocks(line, fLine);
-                    childBlock.getVariables().addAll(functionVariables);
-                    childBlock.setParentBlock(codeBlock);
-                    childBlock.setFunction(function);
-                    codeBlock.getChildrenBlocks().add(childBlock);
-                    line = fLine + 1;
                 } else {
                     //varijabla
 
@@ -725,6 +729,7 @@ public class SemantickiAnalizator {
             case 5:
             case 13:
             case 21:
+            case 28:
             case 32:
             case 35:
             case 40:
@@ -736,7 +741,7 @@ public class SemantickiAnalizator {
             case 53:
             case 55:
                 check(rightSide.get(0));
-                NonterminalSymbol right = getNonTerminalSymbol(rightSide.get(1));
+                NonterminalSymbol right = getNonTerminalSymbol(rightSide.get(0));
                 setTypeAndL(leftSide, right.getType(), right.getL_expression());
                 break;
 
