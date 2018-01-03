@@ -12,7 +12,7 @@ public class CodeBlock {
     private boolean loop;
     private Function function;
 
-    public CodeBlock(int startLine, int finishLine){
+    public CodeBlock(int startLine, int finishLine) {
         this.startLine = startLine;
         this.finishLine = finishLine;
         childrenBlocks = new LinkedList<>();

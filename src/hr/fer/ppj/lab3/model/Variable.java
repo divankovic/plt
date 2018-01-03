@@ -34,8 +34,8 @@ public class Variable {
         this.declaredAt = declaredAt;
     }
 
-    public static int getLexpression(String type){
-        if(type.equals(Const.CHAR) || type.equals(Const.INT)){
+    public static int getLexpression(String type) {
+        if (type.equals(Const.CHAR) || type.equals(Const.INT)) {
             return 1;
         }
         return 0;

@@ -27,44 +27,44 @@ public class Const {
     public static final String ZAREZ = ",";
     public static final String TOCKA_ZAREZ = ";";
     public static final String IDN = "IDN";
-    public static final String JEDNAKOST ="=";
+    public static final String JEDNAKOST = "=";
     public static final String NIZ_ZNAKOVA = "NIZ_ZNAKOVA";
     public static final String ZNAK = "ZNAK";
     public static final String FOR = "for";
     public static final String WHILE = "while";
 
     public static String turnToNiz(String type) {
-        if(type.equals(INT)){
+        if (type.equals(INT)) {
             return NIZ_INT;
-        }else if(type.equals(CHAR)){
+        } else if (type.equals(CHAR)) {
             return NIZ_CHAR;
-        }else if(type.equals(CONST_INT)){
+        } else if (type.equals(CONST_INT)) {
             return NIZ_CONST_INT;
-        }else if(type.equals(CONST_CHAR)){
+        } else if (type.equals(CONST_CHAR)) {
             return NIZ_CONST_CHAR;
-        }else{
+        } else {
             return "";
         }
     }
 
-    public static String extractFromNiz(String niz){
-        if(niz.equals(NIZ_INT)){
+    public static String extractFromNiz(String niz) {
+        if (niz.equals(NIZ_INT)) {
             return INT;
-        }else if(niz.equals(NIZ_CHAR)){
+        } else if (niz.equals(NIZ_CHAR)) {
             return CHAR;
-        }else if(niz.equals(NIZ_CONST_INT)){
+        } else if (niz.equals(NIZ_CONST_INT)) {
             return CONST_INT;
-        }else if(niz.equals(NIZ_CONST_CHAR)){
+        } else if (niz.equals(NIZ_CONST_CHAR)) {
             return CONST_CHAR;
-        }else{
+        } else {
             return "";
         }
     }
 
-    public static String convertToConst(String type){
-        if(type.equals(INT)){
+    public static String convertToConst(String type) {
+        if (type.equals(INT)) {
             return CONST_INT;
-        }else{
+        } else {
             return CONST_CHAR;
         }
     }

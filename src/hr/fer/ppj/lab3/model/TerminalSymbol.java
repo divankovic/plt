@@ -2,7 +2,7 @@ package hr.fer.ppj.lab3.model;
 
 import java.io.Serializable;
 
-public class TerminalSymbol extends Symbol{
+public class TerminalSymbol extends Symbol {
 
     private String value;
     private int line;
@@ -29,10 +29,10 @@ public class TerminalSymbol extends Symbol{
 
     @Override
     public String toString() {
-        if(value==null) {
+        if (value == null) {
             return name;
-        }else{
-            return name+"("+line+", "+value+")";
+        } else {
+            return name + "(" + line + ", " + value + ")";
         }
     }
 }
