@@ -18,7 +18,7 @@ import static hr.fer.ppj.lab3.model.Const.*;
  */
 public class SemantickiAnalizator {
 
-    private static final String TEST_FILE_INPUT_PATH = "./src/hr/fer/ppj/lab3/res/in/03_niz_znakova/test.in";
+    private static final String TEST_FILE_INPUT_PATH = "./src/hr/fer/ppj/lab3/res/in/05_impl_int2char/test.in";
     private static final String TEST_FILE_OUTPUT_PATH = "./src/hr/fer/ppj/lab3/res/out/out.txt";
     private static final String PRODUCTIONS_TXT_FILE_PATH = "./src/hr/fer/ppj/lab3/res/in/ppjC.san";
 
@@ -136,27 +136,6 @@ public class SemantickiAnalizator {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    /**
-     *
-     */
-    private static void addNewProduction(String leftSide, String rightSides) {
-
-        NonterminalSymbol leftSideOfProd = new NonterminalSymbol(leftSide);
-        List<Symbol> rightSideOfProd = new ArrayList<>();
-
-        for (String symbol : rightSides.split("\\s+")) {
-
-            if (symbol.startsWith("<")) {
-                rightSideOfProd.add(new NonterminalSymbol(symbol));
-            } else {
-                rightSideOfProd.add(new TerminalSymbol(symbol));
-            }
-
-        }
-
-        productions.add(new Production(leftSideOfProd, rightSideOfProd));
     }
 
 
@@ -499,11 +478,11 @@ public class SemantickiAnalizator {
             case 50: //<log_i_izraz> ::= <log_i_izraz> OP_I <bin_ili_izraz>
             case 52: //<log_ili_izraz> ::= <log_ili_izraz> OP_ILI <log_i_izraz>
                 check(rightSide.get(0));
-                if (checkImplicitCast(getNonTerminalSymbol(rightSide.get(0)).getType(), INT)) {
+                if (!checkImplicitCast(getNonTerminalSymbol(rightSide.get(0)).getType(), INT)) {
                     semanticAnalysisFailure(production);
                 }
                 check(rightSide.get(2));
-                if (checkImplicitCast(getNonTerminalSymbol(rightSide.get(2)).getType(), INT)) {
+                if (!checkImplicitCast(getNonTerminalSymbol(rightSide.get(2)).getType(), INT)) {
                     semanticAnalysisFailure(production);
                 }
                 setTypeAndL(leftSide, INT, ZERO);
@@ -862,7 +841,7 @@ public class SemantickiAnalizator {
                 izravni_deklarator = getNonTerminalSymbol(rightSide.get(0));
                 NonterminalSymbol inicijalizator = getNonTerminalSymbol(rightSide.get(2));
                 if (checkX(izravni_deklarator.getType())) {
-                    if (!checkImplicitCast(inicijalizator.getType(), CHAR) && !checkImplicitCast(inicijalizator.getType(), INT)) {
+                    if (!checkImplicitCast(inicijalizator.getType(), izravni_deklarator.getType())) {
                         semanticAnalysisFailure(production);
                     }
                 } else if (checkNizX(izravni_deklarator.getType())) {
@@ -871,7 +850,7 @@ public class SemantickiAnalizator {
                     }
                     types = inicijalizator.getTypes();
                     for (String type1 : types) {
-                        if (!checkImplicitCast(type1, CHAR) && !checkImplicitCast(type1, INT)) {
+                        if (!checkImplicitCast(type1, izravni_deklarator.getType())) {
                             semanticAnalysisFailure(production);
                         }
                     }
@@ -1058,10 +1037,14 @@ public class SemantickiAnalizator {
             if (childrenElements.size() != 1) {
                 break;
             }
-            TerminalSymbol terminalSymbol = (TerminalSymbol) childrenElements.get(0).getSymbol();
-            if (terminalSymbol.getValue().equals(uniform_symbol)) {
-                return terminalSymbol.getValue();
-            } else {
+            if(childrenElements.get(0).getSymbol() instanceof TerminalSymbol) {
+                TerminalSymbol terminalSymbol = (TerminalSymbol) childrenElements.get(0).getSymbol();
+                if (terminalSymbol.getName().equals(uniform_symbol)) {
+                    return terminalSymbol.getValue();
+                }else{
+                    break;
+                }
+            }else {
                 temp = childrenElements.get(0);
             }
         }
