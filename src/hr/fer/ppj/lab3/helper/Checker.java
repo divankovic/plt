@@ -13,7 +13,12 @@ public class Checker {
     /**
      *
      */
+    @SuppressWarnings("SimplifiableIfStatement")
     public static boolean checkImplicitCast(String from, String to) {
+
+        if (from.equals(to)) {
+            return true;
+        }
 
         if (from.equals(CONST_CHAR) && to.equals(CHAR)) {
             return true;
@@ -34,19 +39,12 @@ public class Checker {
             return true;
         }
 
-        if (from.equals(NIZ_CHAR) && to.equals(NIZ_CONST_CHAR)) {
-            return true;
-        }
-
-        return from.equals(NIZ_INT) && to.equals(NIZ_CONST_INT);
+        return from.equals(NIZ_CHAR) && to.equals(NIZ_CONST_CHAR) || from.equals(NIZ_INT) && to.equals(NIZ_CONST_INT);
 
     }
 
     public static boolean checkExplicitCast(String from, String to) {
-        if (checkImplicitCast(from, to)) {
-            return true;
-        }
-        return (from.equals(CONST_INT) || from.equals(INT)) && (to.equals(CHAR) || to.equals(CONST_CHAR));
+        return checkImplicitCast(from, to) || (from.equals(CONST_INT) || from.equals(INT)) && (to.equals(CHAR) || to.equals(CONST_CHAR));
     }
 
     /**
@@ -86,18 +84,16 @@ public class Checker {
         }
     }
 
-    /**
-     *
-     */
-    public static boolean checkIntRange(Integer intValue) {
-        return intValue >= -Math.pow(2, 31) && intValue <= Math.pow(2, 31) - 1;
-    }
 
     public static boolean checkX(String type) {
-        return false;
+        return type.equals(INT) || type.equals(CHAR) || type.equals(CONST_INT) || type.equals(CONST_CHAR);
     }
 
     public static boolean checkNizX(String type) {
-        return false;
+        if (!type.startsWith("niz")){
+            return false;
+        }
+        String content = type.substring(4,type.length()-1);
+        return checkX(content);
     }
 }
