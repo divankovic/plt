@@ -11,6 +11,7 @@ public class Function {
     private String returnType;
     private boolean defined;
 
+
     public Function(String name, List<String> inputParameters, String returnType) {
         this.name = name;
         this.inputParameters = inputParameters;
@@ -51,6 +52,7 @@ public class Function {
         this.defined = defined;
     }
 
+    @SuppressWarnings("SimplifiableIfStatement")
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -59,8 +61,9 @@ public class Function {
         Function function = (Function) o;
 
         if (name != null ? !name.equals(function.name) : function.name != null) return false;
-        if (inputParameters != null ? !inputParameters.equals(function.inputParameters) : function.inputParameters != null)
+        if (inputParameters != null ? !inputParameters.equals(function.inputParameters) : function.inputParameters != null) {
             return false;
+        }
         return returnType != null ? returnType.equals(function.returnType) : function.returnType == null;
     }
 

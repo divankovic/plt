@@ -1,7 +1,5 @@
 package hr.fer.ppj.lab3.model;
 
-import java.io.Serializable;
-
 public class TerminalSymbol extends Symbol {
 
     private String value;
@@ -15,7 +13,11 @@ public class TerminalSymbol extends Symbol {
         if (content.length == 3) {
             this.name = content[0];
             this.line = Integer.parseInt(content[1]);
-            this.value = content[2];
+            String value = content[2];
+            if(value.startsWith("\"") || value.startsWith("'")){
+                value = value.substring(1,value.length()-1);
+            }
+            this.value = value;
         }
     }
 
@@ -29,10 +31,14 @@ public class TerminalSymbol extends Symbol {
 
     @Override
     public String toString() {
+        String rValue=value;
+        if(name.equals("NIZ_ZNAKOVA")){
+            rValue="\""+value+"\"";
+        }
         if (value == null) {
             return name;
         } else {
-            return name + "(" + line + "," + value + ")";
+            return name + "(" + line + "," + rValue + ")";
         }
     }
 }

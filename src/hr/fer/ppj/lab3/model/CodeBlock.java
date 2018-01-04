@@ -6,11 +6,16 @@ import java.util.List;
 public class CodeBlock {
     private List<Variable> variables;
     private CodeBlock parentBlock;
+    private boolean setChildAsLoop;
     private boolean loop;
-    private Function function;
+    private Function function; //ako je blok funkcija
+    private List<Function> functions; //funkcije deklarirane i definirane u bloku
+    private List<CodeBlock> childrenBlocks;
 
     public CodeBlock(){
         variables = new LinkedList<>();
+        functions = new LinkedList<>();
+        childrenBlocks = new LinkedList<>();
     }
 
     public List<Variable> getVariables() {
@@ -29,6 +34,14 @@ public class CodeBlock {
         this.parentBlock = parentBlock;
     }
 
+    public Function getFunction() {
+        return function;
+    }
+
+    public void setFunction(Function function) {
+        this.function = function;
+    }
+
     public boolean isLoop() {
         return loop;
     }
@@ -37,11 +50,27 @@ public class CodeBlock {
         this.loop = loop;
     }
 
-    public Function getFunction() {
-        return function;
+    public List<Function> getFunctions() {
+        return functions;
     }
 
-    public void setFunction(Function function) {
-        this.function = function;
+    public void setFunctions(List<Function> functions) {
+        this.functions = functions;
+    }
+
+    public List<CodeBlock> getChildrenBlocks() {
+        return childrenBlocks;
+    }
+
+    public void setChildrenBlocks(List<CodeBlock> childrenBlocks) {
+        this.childrenBlocks = childrenBlocks;
+    }
+
+    public boolean isSetChildAsLoop() {
+        return setChildAsLoop;
+    }
+
+    public void setSetChildAsLoop(boolean setChildAsLoop) {
+        this.setChildAsLoop = setChildAsLoop;
     }
 }

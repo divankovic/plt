@@ -35,30 +35,32 @@ public class Const {
     public static final String WHILE = "while";
 
     public static String turnToNiz(String type) {
-        if (type.equals(INT)) {
-            return NIZ_INT;
-        } else if (type.equals(CHAR)) {
-            return NIZ_CHAR;
-        } else if (type.equals(CONST_INT)) {
-            return NIZ_CONST_INT;
-        } else if (type.equals(CONST_CHAR)) {
-            return NIZ_CONST_CHAR;
-        } else {
-            return "";
+        switch (type) {
+            case INT:
+                return NIZ_INT;
+            case CHAR:
+                return NIZ_CHAR;
+            case CONST_INT:
+                return NIZ_CONST_INT;
+            case CONST_CHAR:
+                return NIZ_CONST_CHAR;
+            default:
+                return "";
         }
     }
 
     public static String extractFromNiz(String niz) {
-        if (niz.equals(NIZ_INT)) {
-            return INT;
-        } else if (niz.equals(NIZ_CHAR)) {
-            return CHAR;
-        } else if (niz.equals(NIZ_CONST_INT)) {
-            return CONST_INT;
-        } else if (niz.equals(NIZ_CONST_CHAR)) {
-            return CONST_CHAR;
-        } else {
-            return "";
+        switch (niz) {
+            case NIZ_INT:
+                return INT;
+            case NIZ_CHAR:
+                return CHAR;
+            case NIZ_CONST_INT:
+                return CONST_INT;
+            case NIZ_CONST_CHAR:
+                return CONST_CHAR;
+            default:
+                return "";
         }
     }
 
@@ -86,12 +88,12 @@ public class Const {
         StringBuilder parameterBuilder = new StringBuilder();
         inputParameters.forEach(s -> parameterBuilder.append(s).append(","));
         parameters = parameterBuilder.substring(0, parameterBuilder.length() - 1);
-        return "funkcija(" + parameters + " -> " + returnType;
+        return "funkcija(" + parameters + "->" + returnType+")";
     }
 
     public static List<String> getFunctionInputParameters(String type) {
         List<String> parameters = new LinkedList<>();
-        String[] par = type.split("->")[0].trim().replace("(", "").split(",");
+        String[] par = type.substring(9,type.length()).split("->")[0].split(",");
         parameters.addAll(Arrays.asList(par));
         return parameters;
     }
