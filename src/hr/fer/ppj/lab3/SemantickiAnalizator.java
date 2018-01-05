@@ -1140,7 +1140,7 @@ public class SemantickiAnalizator {
         Element temp = element;
         while (true) {
             List<Element> childrenElements = temp.getChildrenElements();
-            if (childrenElements.isEmpty() || childrenElements.size() != 1) {
+            if (childrenElements.size() != 1) {
                 break;
             }
             if (childrenElements.get(0).getSymbol() instanceof TerminalSymbol) {
