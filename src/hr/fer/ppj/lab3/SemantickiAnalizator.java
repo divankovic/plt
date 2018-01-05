@@ -17,7 +17,7 @@ import static hr.fer.ppj.lab3.model.Const.*;
  */
 public class SemantickiAnalizator {
 
-    private static final String TEST_FILE_INPUT_PATH = "./src/hr/fer/ppj/lab3/res/in/30_const_init/test.in";
+    private static final String TEST_FILE_INPUT_PATH = "./src/hr/fer/ppj/lab2/res/in/12ppjC/test.out";
     private static final String TEST_FILE_OUTPUT_PATH = "./src/hr/fer/ppj/lab3/res/out/out.txt";
     private static final String PRODUCTIONS_TXT_FILE_PATH = "./src/hr/fer/ppj/lab3/res/in/ppjC.san";
 
@@ -194,7 +194,17 @@ public class SemantickiAnalizator {
                 if (content.startsWith("<")) {
                     childrenElements.add(new Element(new NonterminalSymbol(content), i));
                 } else {
-                    childrenElements.add(new Element(new TerminalSymbol(content.split(" ")), i));
+                    String[] data = new String[3];
+                    if(content.startsWith("NIZ_ZNAKOVA")) {
+                        String tmp = content.substring(0, content.indexOf("\"") - 1);
+                        String value = content.substring(content.indexOf("\""),content.length());
+                        data[0] = tmp.split(" ")[0];
+                        data[1] = tmp.split(" ")[1];
+                        data[2] = value;
+                    }else{
+                        data = content.split(" ");
+                    }
+                    childrenElements.add(new Element(new TerminalSymbol(data), i));
                 }
             }
         }
