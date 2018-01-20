@@ -17,7 +17,7 @@ import static hr.fer.ppj.lab4.model.Const.*;
  */
 public class GeneratorKoda {
 
-    private static final String TEST_FILE_INPUT_PATH = "./src/hr/fer/ppj/lab4/res/in/01_ret_broj/test.in";
+    private static final String TEST_FILE_INPUT_PATH = "./src/hr/fer/ppj/lab4/res/in/03_veliki_broj/test.in";
     private static final String TEST_FILE_OUTPUT_PATH = "./src/hr/fer/ppj/lab4/res/out/out.txt";
     private static final String PRODUCTIONS_TXT_FILE_PATH = "./src/hr/fer/ppj/lab4/res/in/ppjC.san";
 
@@ -51,6 +51,13 @@ public class GeneratorKoda {
         System.out.println();
 
         check(startingElement);
+
+
+        System.out.println();
+        int i;
+        for(i = 0; i<globalVariablesDW.size();i+=2){
+            outCommand(globalVariablesDW.get(i),globalVariablesDW.get(i+1));
+        }
 
 
         //dodatne provjere
@@ -306,6 +313,8 @@ public class GeneratorKoda {
                         setTypeAndL(leftSide, getFunctionType(function.getInputParameters(), function.getReturnType()), 0);
                     }
                 }
+
+                leftSide.setValue(IDN.getValue());
                 break;
 
             case 1: //<primarni_izraz> ::= BROJ
@@ -319,8 +328,10 @@ public class GeneratorKoda {
                 leftSide.setValue(String.valueOf(intValue));
 
                 //Assembler commands
-                outCommand("MOVE %D "+intValue+", R0");
-                outCommand("PUSH R0");
+                if(!codeBlock.equals(startingCodeBlock)) {
+                    outCommand("MOVE %D " + intValue + ", R0");
+                    outCommand("PUSH R0");
+                }
 
                 break;
 
@@ -729,14 +740,21 @@ public class GeneratorKoda {
             case 76: //<naredba_skoka> ::= KR_RETURN <izraz> TOCKAZAREZ
                 check(rightSide.get(1));
                 function1 = findFunctionInBlock(codeBlock);
-                if (function1 == null || !checkImplicitCast(getNonTerminalSymbol(rightSide.get(1)).getType(), function1.getReturnType())) {
+                izraz = getNonTerminalSymbol(rightSide.get(1));
+                if (function1 == null || !checkImplicitCast(izraz.getType(), function1.getReturnType())) {
                     semanticAnalysisFailure(production);
                 }
 
                 //Assembler commands
-                outCommand("POP R6");
-                outCommand("RET");
+                Variable variable = findVariable(izraz.getValue(),codeBlock);
 
+                if(variable!=null){
+                    outCommand("LOAD R6, ("+variable.getName()+")");
+                    outCommand("RET");
+                }else {
+                    outCommand("POP R6");
+                    outCommand("RET");
+                }
                 break;
 
             //<prijevodna_jedinica>
@@ -955,7 +973,8 @@ public class GeneratorKoda {
                 //Assembler commands
 
                 if(codeBlock.equals(startingCodeBlock)){
-
+                    globalVariablesDW.add(izravni_deklarator.getValue());
+                    globalVariablesDW.add("DW %D "+inicijalizator.getValue());
                 }
 
 
@@ -982,6 +1001,7 @@ public class GeneratorKoda {
                 codeBlock.getVariables().add(new Variable(leftSide.getNtype(), IDN.getValue()));
 
                 leftSide.setType(leftSide.getNtype());
+                leftSide.setValue(IDN.getValue());
                 break;
 
             case 95: //<izravni_deklarator> ::= IDN L_UGL_ZAGRADA BROJ D_UGL_ZAGRADA
