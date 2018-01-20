@@ -17,7 +17,7 @@ import static hr.fer.ppj.lab4.model.Const.*;
  */
 public class GeneratorKoda {
 
-    private static final String TEST_FILE_INPUT_PATH = "./src/hr/fer/ppj/lab4/res/in/";
+    private static final String TEST_FILE_INPUT_PATH = "./src/hr/fer/ppj/lab4/res/in/01_ret_broj/test.in";
     private static final String TEST_FILE_OUTPUT_PATH = "./src/hr/fer/ppj/lab4/res/out/out.txt";
     private static final String PRODUCTIONS_TXT_FILE_PATH = "./src/hr/fer/ppj/lab4/res/in/ppjC.san";
 
@@ -26,6 +26,9 @@ public class GeneratorKoda {
     private static Element startingElement;
     private static CodeBlock startingCodeBlock;
     private static List<Integer> newBlockProductions = Arrays.asList(61, 81, 82);
+
+
+    private static List<String> globalVariablesDW = new LinkedList<>();
 
     /**
      *
@@ -40,6 +43,13 @@ public class GeneratorKoda {
 
         startingCodeBlock = new CodeBlock();
         getNonTerminalSymbol(startingElement).setCodeBlock(startingCodeBlock);
+
+        outCommand("MOVE 40000,R7");
+        outCommand("CALL main");
+        outCommand("HALT");
+        System.out.println();
+        System.out.println();
+
         check(startingElement);
 
 
@@ -299,12 +309,19 @@ public class GeneratorKoda {
                 break;
 
             case 1: //<primarni_izraz> ::= BROJ
+                Integer intValue = null;
                 try {
-                    Integer intValue = Integer.valueOf(((TerminalSymbol) rightSide.get(0).getSymbol()).getValue());
+                     intValue = Integer.valueOf(((TerminalSymbol) rightSide.get(0).getSymbol()).getValue());
                 } catch (Exception exc) {
                     semanticAnalysisFailure(production);
                 }
                 setTypeAndL(leftSide, INT, ZERO);
+                leftSide.setValue(String.valueOf(intValue));
+
+                //Assembler commands
+                outCommand("MOVE %D "+intValue+", R0");
+                outCommand("PUSH R0");
+
                 break;
 
             case 2: //<primarni_izraz> ::= ZNAK
@@ -349,6 +366,9 @@ public class GeneratorKoda {
                 check(rightSide.get(0));
                 NonterminalSymbol nonTerminalSymbol = getNonTerminalSymbol(rightSide.get(0));
                 setTypeAndL(leftSide, nonTerminalSymbol.getType(), nonTerminalSymbol.getL_expression());
+                if(!nonTerminalSymbol.getValue().isEmpty()){
+                    leftSide.setValue(nonTerminalSymbol.getValue());
+                }
                 break;
 
             case 6: //<postfiks_izraz> ::= <postfiks_izraz> L_UGL_ZAGRADA <izraz> D_UGL_ZAGRADA
@@ -712,6 +732,11 @@ public class GeneratorKoda {
                 if (function1 == null || !checkImplicitCast(getNonTerminalSymbol(rightSide.get(1)).getType(), function1.getReturnType())) {
                     semanticAnalysisFailure(production);
                 }
+
+                //Assembler commands
+                outCommand("POP R6");
+                outCommand("RET");
+
                 break;
 
             //<prijevodna_jedinica>
@@ -761,6 +786,12 @@ public class GeneratorKoda {
                 childBlock.setFunction(fun);
                 codeBlock.getChildrenBlocks().add(childBlock);
                 getNonTerminalSymbol(rightSide.get(5)).setCodeBlock(childBlock);
+
+                //Assembler code
+                outCommand(fun.getName(),"");
+
+
+
                 check(rightSide.get(5));
                 break;
 
@@ -919,6 +950,15 @@ public class GeneratorKoda {
                 } else {
                     semanticAnalysisFailure(production);
                 }
+
+
+                //Assembler commands
+
+                if(codeBlock.equals(startingCodeBlock)){
+
+                }
+
+
                 break;
 
             //<izravni_deklarator>
@@ -1014,6 +1054,7 @@ public class GeneratorKoda {
             //<inicijalizator>
             case 98: //<inicijalizator> ::= <izraz_pridruzivanja>
                 check(rightSide.get(0));
+                nonTerminalSymbol = getNonTerminalSymbol(rightSide.get(0));
                 String content = generates(rightSide.get(0));
                 if (!content.equals("")) {
                     leftSide.setNumOfElements(content.length() + 1);
@@ -1022,7 +1063,11 @@ public class GeneratorKoda {
                         types.add(CHAR);
                     }
                 } else {
-                    leftSide.setType(getNonTerminalSymbol(rightSide.get(0)).getType());
+                    leftSide.setType(nonTerminalSymbol.getType());
+                }
+
+                if(!nonTerminalSymbol.getValue().isEmpty()){
+                    leftSide.setValue(nonTerminalSymbol.getValue());
                 }
                 break;
 
@@ -1182,4 +1227,14 @@ public class GeneratorKoda {
         System.exit(0);
     }
 
+
+    private static void outCommand(String command){
+        System.out.println("      "+command);
+    }
+
+    private static void outCommand(String label, String command){
+        System.out.format("%-6s%s\n",label,command);
+    }
 }
+
+
