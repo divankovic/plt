@@ -1,1 +1,11 @@
-<init_deklarator> ::= <izravni_deklarator> OP_PRIDRUZI(7, =) <inicijalizator>
+      MOVE 40000,R7
+      CALL main
+      HALT
+
+
+main  
+      MOVE %D -84, R0
+      PUSH R0
+      POP R6
+      RET
+
