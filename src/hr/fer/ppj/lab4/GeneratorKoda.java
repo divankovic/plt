@@ -17,7 +17,7 @@ import static hr.fer.ppj.lab4.model.Const.*;
  */
 public class GeneratorKoda {
 
-    private static final String TEST_FILE_INPUT_PATH = "./src/hr/fer/ppj/lab4/res/in/12_fun2/test.in";
+    private static final String TEST_FILE_INPUT_PATH = "./src/hr/fer/ppj/lab2/res/out/SA_out.txt";
     private static final String TEST_FILE_OUTPUT_PATH = "./src/hr/fer/ppj/lab4/res/out/out.txt";
     private static final String PRODUCTIONS_TXT_FILE_PATH = "./src/hr/fer/ppj/lab4/res/in/ppjC.san";
     private static final Integer MAX_MOVE_VAL = 524287;
@@ -631,8 +631,6 @@ public class GeneratorKoda {
                 }
 
                 outCommand("PUSH R0");
-
-                leftSide.setValue(getNonTerminalSymbol(rightSide.get(0)).getValue()+symbol+getNonTerminalSymbol(rightSide.get(2)).getValue());
                 break;
 
             //<aditivni_izraz>
@@ -839,6 +837,7 @@ public class GeneratorKoda {
                 Function functionX = null;
 
                 if (izraz.getValue().contains("(")) {
+
                     functionX = findFunction(izraz.getValue().substring(0, izraz.getValue().indexOf("(")), codeBlock);
                 } else {
                     variable = findVariable(izraz.getValue(), codeBlock);
