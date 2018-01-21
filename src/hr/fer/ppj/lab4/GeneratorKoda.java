@@ -1,8 +1,6 @@
 package hr.fer.ppj.lab4;
 
 import hr.fer.ppj.lab4.model.*;
-import jdk.nashorn.internal.parser.Lexer;
-import sun.security.util.LegacyAlgorithmConstraints;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -19,7 +17,7 @@ import static hr.fer.ppj.lab4.model.Const.*;
  */
 public class GeneratorKoda {
 
-    private static final String TEST_FILE_INPUT_PATH = "./src/hr/fer/ppj/lab4/res/in/04_neg_broj/test.in";
+    private static final String TEST_FILE_INPUT_PATH = "./src/hr/fer/ppj/lab4/res/in/11_fun1/test.in";
     private static final String TEST_FILE_OUTPUT_PATH = "./src/hr/fer/ppj/lab4/res/out/out.txt";
     private static final String PRODUCTIONS_TXT_FILE_PATH = "./src/hr/fer/ppj/lab4/res/in/ppjC.san";
     private static final Integer MAX_MOVE_VAL = 524287;
@@ -420,6 +418,7 @@ public class GeneratorKoda {
                     semanticAnalysisFailure(production);
                 }
                 setTypeAndL(leftSide, getFunctionReturnValue(type), 0);
+                leftSide.setValue(postfiks_izraz.getValue() + "()");
                 break;
 
             case 8: //<postfiks_izraz> ::= <postfiks_izraz> L_ZAGRADA <lista_argumenata> D_ZAGRADA
@@ -982,11 +981,21 @@ public class GeneratorKoda {
                 }
 
                 //Assembler commands
-                Variable variable = findVariable(izraz.getValue(), codeBlock);
-                //Function function = findFunction(izraz.getValue(), codeBlock);
+                Variable variable = null;
+                Function functionX = null;
+
+                if (izraz.getValue().contains("()")) {
+                    functionX = findFunction(izraz.getValue().replace("()", ""), codeBlock);
+                } else {
+                    variable = findVariable(izraz.getValue(), codeBlock);
+                }
+
 
                 if (variable != null) {
                     outCommand("LOAD R6, (" + variable.getName() + ")");
+                    outCommand("RET");
+                } else if (functionX != null) {
+                    outCommand("CALL " + functionX.getName());
                     outCommand("RET");
                 } else {
                     Integer number = Integer.valueOf(izraz.getValue());
@@ -995,7 +1004,7 @@ public class GeneratorKoda {
                         outCommand("RET");
                         ++largeVarCounter;
                     } else {
-                        outCommand("MOVE %D "+number+", R6");
+                        outCommand("MOVE %D " + number + ", R6");
                         outCommand("RET");
                     }
                 }

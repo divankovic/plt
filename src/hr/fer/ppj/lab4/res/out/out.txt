@@ -4,8 +4,9 @@
 
 
 f     
-      MOVE %D 123, R0
-      PUSH R0
-      POP R6
+      MOVE %D 123, R6
       RET
 main  
+      CALL f
+      RET
+
