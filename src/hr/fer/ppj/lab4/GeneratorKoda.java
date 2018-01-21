@@ -19,7 +19,7 @@ import static hr.fer.ppj.lab4.model.Const.*;
  */
 public class GeneratorKoda {
 
-    private static final String TEST_FILE_INPUT_PATH = "./src/hr/fer/ppj/lab4/res/in/11_fun1/test.in";
+    private static final String TEST_FILE_INPUT_PATH = "./src/hr/fer/ppj/lab4/res/in/04_neg_broj/test.in";
     private static final String TEST_FILE_OUTPUT_PATH = "./src/hr/fer/ppj/lab4/res/out/out.txt";
     private static final String PRODUCTIONS_TXT_FILE_PATH = "./src/hr/fer/ppj/lab4/res/in/ppjC.san";
     private static final Integer MAX_MOVE_VAL = 524287;
@@ -340,9 +340,6 @@ public class GeneratorKoda {
                     if (newInt > MAX_MOVE_VAL || newInt < -MAX_MOVE_VAL) {
                         globalVariablesDW.add("GV" + largeVarCounter);
                         globalVariablesDW.add("DW %D " + newInt);
-                    } else {
-                        outCommand("MOVE %D " + newInt + ", R0");
-                        outCommand("PUSH R0");
                     }
                 }
 
@@ -707,6 +704,11 @@ public class GeneratorKoda {
                 }
                 check(rightSide.get(2));
 
+                if (!checkImplicitCast(getNonTerminalSymbol(rightSide.get(2)).getType(), INT)) {
+                    semanticAnalysisFailure(production);
+                }
+                setTypeAndL(leftSide, INT, ZERO);
+
                 //Assembler commands
                 value2 = nonTerminalSymbol2.getValue();
                 variable12 = findVariable(value2, codeBlock);
@@ -732,10 +734,7 @@ public class GeneratorKoda {
                     outCommand("PUSH R0");
                 }
 
-                if (!checkImplicitCast(getNonTerminalSymbol(rightSide.get(2)).getType(), INT)) {
-                    semanticAnalysisFailure(production);
-                }
-                setTypeAndL(leftSide, INT, ZERO);
+
                 break;
 
             case 34: //<aditivni_izraz> ::= <aditivni_izraz> MINUS <multiplikativni_izraz>
@@ -996,7 +995,7 @@ public class GeneratorKoda {
                         outCommand("RET");
                         ++largeVarCounter;
                     } else {
-                        outCommand("POP R6");
+                        outCommand("MOVE %D "+number+", R6");
                         outCommand("RET");
                     }
                 }
