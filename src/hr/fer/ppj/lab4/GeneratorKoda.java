@@ -17,7 +17,7 @@ import static hr.fer.ppj.lab4.model.Const.*;
  */
 public class GeneratorKoda {
 
-    private static final String TEST_FILE_INPUT_PATH = "./src/hr/fer/ppj/lab2/res/out/SA_out.txt";
+    private static final String TEST_FILE_INPUT_PATH = "./src/hr/fer/ppj/lab4/res/in/13_fun3/test.in";
     private static final String TEST_FILE_OUTPUT_PATH = "./src/hr/fer/ppj/lab4/res/out/out.txt";
     private static final String PRODUCTIONS_TXT_FILE_PATH = "./src/hr/fer/ppj/lab4/res/in/ppjC.san";
     private static final Integer MAX_MOVE_VAL = 524287;
@@ -450,6 +450,10 @@ public class GeneratorKoda {
                 }
                 setTypeAndL(leftSide, getFunctionReturnValue(type), 0);
                 leftSide.setValue(postfiks_izraz.getValue() + "()");
+
+
+                outCommand("CALL "+postfiks_izraz.getValue());
+                outCommand("PUSH R6");
                 break;
 
             case 8: //<postfiks_izraz> ::= <postfiks_izraz> L_ZAGRADA <lista_argumenata> D_ZAGRADA
@@ -470,6 +474,26 @@ public class GeneratorKoda {
                     }
                 }
                 setTypeAndL(leftSide, getFunctionReturnValue(type), 0);
+
+
+                String functionName = getNonTerminalSymbol(rightSide.get(0)).getValue();
+                izraz = getNonTerminalSymbol(rightSide.get(2));
+                Function functionX = findFunction(functionName,codeBlock);
+                int size = 0;
+                if (functionX!=null && !functionX.getInputParameters().contains(VOID)) {
+                    List<String> arguments = new LinkedList<>();
+                    if (izraz.getValue().contains(",")) {
+                        arguments = Arrays.asList(izraz.getValue().substring(izraz.getValue().indexOf("(") + 1, izraz.getValue().length() - 1).split(","));
+                    } else {
+                        arguments.add(izraz.getValue().substring(izraz.getValue().indexOf("(") + 1, izraz.getValue().length() - 1));
+                    }
+                    size = arguments.size();
+                }
+                outCommand("CALL " + functionX.getName());
+                if (size != 0) {
+                    outCommand("ADD R7, " + size * 4 + ", R7");
+                }
+                outCommand("PUSH R6");
 
 
                 leftSide.setValue(getNonTerminalSymbol(rightSide.get(0)).getValue() + "(" + getNonTerminalSymbol(rightSide.get(2)).getValue() + ")");
@@ -834,34 +858,12 @@ public class GeneratorKoda {
 
                 //Assembler commands
                 Variable variable = null;
-                Function functionX = null;
 
-                if (izraz.getValue().contains("(")) {
-
-                    functionX = findFunction(izraz.getValue().substring(0, izraz.getValue().indexOf("(")), codeBlock);
-                } else {
-                    variable = findVariable(izraz.getValue(), codeBlock);
-                }
+                variable = findVariable(izraz.getValue(), codeBlock);
 
 
                 if (variable != null) {
                     outCommand("LOAD R6, (" + variable.getName() + ")");
-                    outCommand("RET");
-                } else if (functionX != null) {
-                    int size = 0;
-                    if (!functionX.getInputParameters().contains(VOID)) {
-                        List<String> arguments = new LinkedList<>();
-                        if (izraz.getValue().contains(",")) {
-                            arguments = Arrays.asList(izraz.getValue().substring(izraz.getValue().indexOf("(") + 1, izraz.getValue().length() - 1).split(","));
-                        } else {
-                            arguments.add(izraz.getValue().substring(izraz.getValue().indexOf("(") + 1, izraz.getValue().length() - 1));
-                        }
-                        size = arguments.size();
-                    }
-                    outCommand("CALL " + functionX.getName());
-                    if (size != 0) {
-                        outCommand("ADD R7, " + size * 4 + ", R7");
-                    }
                     outCommand("RET");
                 } else {
                     outCommand("POP R6");

@@ -20,7 +20,7 @@ public class GLA {
      * Path to the output file of generator
      */
     final static String SERIALIZATION_FILE_PATH = "./src/hr/fer/ppj/lab1/analizator/definition.ser";
-    private final static String TEST_FILE_INPUT_PATH = "./src/hr/fer/ppj/lab1/res/in/svaki_drugi_a2.lan";
+    private final static String TEST_FILE_INPUT_PATH = "./src/hr/fer/ppj/lab1/res/in/c.lan";
     private final static String TEST_FILE_OUTPUT_PATH = "./src/hr/fer/ppj/lab1/res/out/GLA_out.txt";
 
     /**
@@ -28,7 +28,7 @@ public class GLA {
      */
     public static void main(String[] args) throws IOException {
 
-        //setupStdIO();
+        setupStdIO();
 
         try (Scanner scanner = new Scanner(System.in)) {
 
