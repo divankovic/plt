@@ -316,17 +316,32 @@ public class GeneratorKoda {
                 leftSide.setValue(IDN.getValue());
 
                 boolean globalVariable = false;
-                for(Variable variable : startingCodeBlock.getVariables()){
-                    if(variable.getName().equals(IDN.getValue())){
+                for (Variable variable : startingCodeBlock.getVariables()) {
+                    if (variable.getName().equals(IDN.getValue())) {
                         globalVariable = true;
                         break;
                     }
                 }
 
-                if(globalVariable){
-                    outCommand("LOAD R0, ("+IDN.getValue()+")");
+                if (globalVariable) {
+                    outCommand("LOAD R0, (" + IDN.getValue() + ")");
                     outCommand("PUSH R0");
                 }
+
+                if (codeBlock.getFunction() != null && !codeBlock.getFunction().getInputParameters().contains(VOID)) {
+                    int parameterSize = codeBlock.getFunction().getInputParameters().size();
+                    List<Variable> parameters = codeBlock.getVariables().subList(0, parameterSize);
+
+                    for (int i = 0; i < parameterSize; i++) {
+                        if (parameters.get(i).getName().equals(IDN.getValue())) {
+                            outCommand("LOAD R0, (R7 + " + (parameterSize - i) * 4 + ")");
+                            outCommand("PUSH R0");
+                            break;
+                        }
+                    }
+
+                }
+
                 break;
 
             case 1: //<primarni_izraz> ::= BROJ
@@ -351,8 +366,8 @@ public class GeneratorKoda {
                     if (newInt > MAX_MOVE_VAL || newInt < -MAX_MOVE_VAL) {
                         globalVariablesDW.add("GV" + largeVarCounter);
                         globalVariablesDW.add("DW %D " + newInt);
-                    }else{
-                        outCommand("MOVE %D "+newInt+", R0");
+                    } else {
+                        outCommand("MOVE %D " + newInt + ", R0");
                         outCommand("PUSH R0");
                     }
                 }
@@ -457,7 +472,7 @@ public class GeneratorKoda {
                 setTypeAndL(leftSide, getFunctionReturnValue(type), 0);
 
 
-                leftSide.setValue(getNonTerminalSymbol(rightSide.get(0)).getValue()+"("+getNonTerminalSymbol(rightSide.get(2)).getValue()+")");
+                leftSide.setValue(getNonTerminalSymbol(rightSide.get(0)).getValue() + "(" + getNonTerminalSymbol(rightSide.get(2)).getValue() + ")");
                 break;
 
             case 9: //<postfiks_izraz> ::= <postfiks_izraz> (OP_INC | OP_DEC)
@@ -483,7 +498,7 @@ public class GeneratorKoda {
                 leftSide.getTypes().addAll(getNonTerminalSymbol(rightSide.get(0)).getTypes());
                 leftSide.getTypes().add(getNonTerminalSymbol(rightSide.get(2)).getType());
 
-                leftSide.setValue(getNonTerminalSymbol(rightSide.get(0)).getValue()+","+getNonTerminalSymbol(rightSide.get(2)).getValue());
+                leftSide.setValue(getNonTerminalSymbol(rightSide.get(0)).getValue() + "," + getNonTerminalSymbol(rightSide.get(2)).getValue());
                 break;
 
             //<unarni_izraz>
@@ -591,25 +606,33 @@ public class GeneratorKoda {
 
                 outCommand("POP R1");
                 outCommand("POP R0");
-                switch(productionIndex){
-                    case 33 :
+                String symbol="";
+                switch (productionIndex) {
+                    case 33:
                         outCommand("ADD R0, R1, R0");
+                        symbol="+";
                         break;
                     case 34:
                         outCommand("SUB R0, R1, R0");
+                        symbol = "-";
                         break;
                     case 44:
                         outCommand("AND R0, R1, R0");
+                        symbol="&";
                         break;
                     case 46:
                         outCommand("XOR R0, R1, R0");
+                        symbol = "^";
                         break;
                     case 48:
                         outCommand("OR R0, R1, R0");
+                        symbol = "|";
                         break;
                 }
 
                 outCommand("PUSH R0");
+
+                leftSide.setValue(getNonTerminalSymbol(rightSide.get(0)).getValue()+symbol+getNonTerminalSymbol(rightSide.get(2)).getValue());
                 break;
 
             //<aditivni_izraz>
@@ -816,7 +839,7 @@ public class GeneratorKoda {
                 Function functionX = null;
 
                 if (izraz.getValue().contains("(")) {
-                    functionX = findFunction(izraz.getValue().substring(0,izraz.getValue().indexOf("(")), codeBlock);
+                    functionX = findFunction(izraz.getValue().substring(0, izraz.getValue().indexOf("(")), codeBlock);
                 } else {
                     variable = findVariable(izraz.getValue(), codeBlock);
                 }
@@ -826,19 +849,19 @@ public class GeneratorKoda {
                     outCommand("LOAD R6, (" + variable.getName() + ")");
                     outCommand("RET");
                 } else if (functionX != null) {
-                    int size=0;
-                    if(!functionX.getInputParameters().contains(VOID)){
+                    int size = 0;
+                    if (!functionX.getInputParameters().contains(VOID)) {
                         List<String> arguments = new LinkedList<>();
-                        if(izraz.getValue().contains(",")) {
+                        if (izraz.getValue().contains(",")) {
                             arguments = Arrays.asList(izraz.getValue().substring(izraz.getValue().indexOf("(") + 1, izraz.getValue().length() - 1).split(","));
-                        }else{
+                        } else {
                             arguments.add(izraz.getValue().substring(izraz.getValue().indexOf("(") + 1, izraz.getValue().length() - 1));
                         }
                         size = arguments.size();
                     }
                     outCommand("CALL " + functionX.getName());
-                    if(size!=0){
-                        outCommand("ADD R7, "+size*4+", R7");
+                    if (size != 0) {
+                        outCommand("ADD R7, " + size * 4 + ", R7");
                     }
                     outCommand("RET");
                 } else {
@@ -924,8 +947,7 @@ public class GeneratorKoda {
                 }
 
                 //Assembler code
-                outCommand(fun.getName(), ""); //generating function label
-
+                outCommand(IDN.getValue(), ""); //generating function label
 
                 check(rightSide.get(3));
                 NonterminalSymbol lista_parametara = getNonTerminalSymbol(rightSide.get(3));
@@ -952,6 +974,7 @@ public class GeneratorKoda {
                 codeBlock.getChildrenBlocks().add(childBlock);
                 getNonTerminalSymbol(rightSide.get(5)).setCodeBlock(childBlock);
                 check(rightSide.get(5));
+
                 break;
 
             //<lista_parametara>
