@@ -314,6 +314,19 @@ public class GeneratorKoda {
                 }
 
                 leftSide.setValue(IDN.getValue());
+
+                boolean globalVariable = false;
+                for(Variable variable : startingCodeBlock.getVariables()){
+                    if(variable.getName().equals(IDN.getValue())){
+                        globalVariable = true;
+                        break;
+                    }
+                }
+
+                if(globalVariable){
+                    outCommand("LOAD R0, ("+IDN.getValue()+")");
+                    outCommand("PUSH R0");
+                }
                 break;
 
             case 1: //<primarni_izraz> ::= BROJ
@@ -338,6 +351,9 @@ public class GeneratorKoda {
                     if (newInt > MAX_MOVE_VAL || newInt < -MAX_MOVE_VAL) {
                         globalVariablesDW.add("GV" + largeVarCounter);
                         globalVariablesDW.add("DW %D " + newInt);
+                    }else{
+                        outCommand("MOVE %D "+newInt+", R0");
+                        outCommand("PUSH R0");
                     }
                 }
 
@@ -439,6 +455,9 @@ public class GeneratorKoda {
                     }
                 }
                 setTypeAndL(leftSide, getFunctionReturnValue(type), 0);
+
+
+                leftSide.setValue(getNonTerminalSymbol(rightSide.get(0)).getValue()+"("+getNonTerminalSymbol(rightSide.get(1)).getValue()+")");
                 break;
 
             case 9: //<postfiks_izraz> ::= <postfiks_izraz> (OP_INC | OP_DEC)
@@ -455,6 +474,7 @@ public class GeneratorKoda {
             case 11: //<lista_argumenata> ::= <izraz_pridruzivanja>
                 check(rightSide.get(0));
                 leftSide.getTypes().add(getNonTerminalSymbol(rightSide.get(0)).getType());
+                leftSide.setValue(getNonTerminalSymbol(rightSide.get(0)).getValue());
                 break;
 
             case 12: //<lista_argumenata> ::= <lista_argumenata> ZAREZ <izraz_pridruzivanja>
@@ -462,6 +482,8 @@ public class GeneratorKoda {
                 check(rightSide.get(2));
                 leftSide.getTypes().addAll(getNonTerminalSymbol(rightSide.get(0)).getTypes());
                 leftSide.getTypes().add(getNonTerminalSymbol(rightSide.get(2)).getType());
+
+                leftSide.setValue(getNonTerminalSymbol(rightSide.get(0)).getValue()+","+getNonTerminalSymbol(rightSide.get(2)).getValue());
                 break;
 
             //<unarni_izraz>
@@ -544,12 +566,17 @@ public class GeneratorKoda {
             case 29: //<multiplikativni_izraz> ::= <multiplikativni_izraz> (OP_PUTA | OP_DIJELI | OP_MOD) <cast_izraz>
             case 30:
             case 31:
+            case 33: //<aditivni_izraz> ::= <aditivni_izraz> PLUS <multiplikativni_izraz>
+            case 34: //<aditivni_izraz> ::= <aditivni_izraz> MINUS <multiplikativni_izraz>
             case 36: //<odnosni_izraz> ::= <odnosni_izraz> (OP_LT | OP_GT | OP_LTE | OP_GTE)<aditivni_izraz>
             case 37:
             case 38:
             case 39:
             case 41: //<jednakosni_izraz> ::= <jednakosni_izraz> (OP_EQ | OP_NEQ) <odnosni_izraz>
             case 42:
+            case 44: //<bin_i_izraz> ::= <bin_i_izraz> OP_BIN_I <jednakosni_izraz>
+            case 46: //<bin_xili_izraz> ::= <bin_xili_izraz> OP_BIN_XILI <bin_i_izraz>
+            case 48:  //<bin_ili_izraz> ::= <bin_ili_izraz> OP_BIN_ILI <bin_xili_izraz>
             case 50: //<log_i_izraz> ::= <log_i_izraz> OP_I <bin_ili_izraz>
             case 52: //<log_ili_izraz> ::= <log_ili_izraz> OP_ILI <log_i_izraz>
                 check(rightSide.get(0));
@@ -561,224 +588,28 @@ public class GeneratorKoda {
                     semanticAnalysisFailure(production);
                 }
                 setTypeAndL(leftSide, INT, ZERO);
-                break;
 
-            case 48: //<bin_ili_izraz> ::= <bin_ili_izraz> OP_BIN_ILI <bin_xili_izraz>
-                check(rightSide.get(0));
-
-                String value1 = getNonTerminalSymbol(rightSide.get(0)).getValue();
-                Variable variable11 = findVariable(value1, codeBlock);
-
-                if (!checkImplicitCast(getNonTerminalSymbol(rightSide.get(0)).getType(), INT)) {
-                    semanticAnalysisFailure(production);
-                }
-                check(rightSide.get(2));
-
-                String value2 = getNonTerminalSymbol(rightSide.get(2)).getValue();
-                Variable variable12 = findVariable(value1, codeBlock);
-
-                if (variable11 != null) {
-                    value1 = globalVariablesDW.get(globalVariablesDW.indexOf(value1) + 1).split("\\s+")[2];
-                }
-                if (variable12 != null) {
-                    value2 = globalVariablesDW.get(globalVariablesDW.indexOf(value2) + 1).split("\\s+")[2];
+                outCommand("POP R1");
+                outCommand("POP R0");
+                switch(productionIndex){
+                    case 33 :
+                        outCommand("ADD R0, R1, R0");
+                        break;
+                    case 34:
+                        outCommand("SUB R0, R1, R0");
+                        break;
+                    case 44:
+                        outCommand("AND R0, R1, R0");
+                        break;
+                    case 46:
+                        outCommand("XOR R0, R1, R0");
+                        break;
+                    case 48:
+                        outCommand("OR R0, R1, R0");
+                        break;
                 }
 
-                Integer result = Integer.valueOf(value1) | Integer.valueOf(value2);
-                leftSide.setValue(String.valueOf(result));
-
-                if (result > MAX_MOVE_VAL || result < -MAX_MOVE_VAL) {
-                    globalVariablesDW.add("GV" + largeVarCounter);
-                    globalVariablesDW.add("DW %D " + result);
-                    outCommand("LOAD RO," + "(" + "GV" + largeVarCounter + ")");
-                    outCommand("PUSH R0");
-                    ++largeVarCounter;
-                } else {
-                    outCommand("MOVE %D " + result + ", R0");
-                    outCommand("PUSH R0");
-                }
-
-
-                if (!checkImplicitCast(getNonTerminalSymbol(rightSide.get(2)).getType(), INT)) {
-                    semanticAnalysisFailure(production);
-                }
-                setTypeAndL(leftSide, INT, ZERO);
-                break;
-
-            case 44: //<bin_i_izraz> ::= <bin_i_izraz> OP_BIN_I <jednakosni_izraz>
-                check(rightSide.get(0));
-
-                value1 = getNonTerminalSymbol(rightSide.get(0)).getValue();
-                variable11 = findVariable(value1, codeBlock);
-
-                if (!checkImplicitCast(getNonTerminalSymbol(rightSide.get(0)).getType(), INT)) {
-                    semanticAnalysisFailure(production);
-                }
-                check(rightSide.get(2));
-
-                value2 = getNonTerminalSymbol(rightSide.get(2)).getValue();
-                variable12 = findVariable(value1, codeBlock);
-
-                if (variable11 != null) {
-                    value1 = globalVariablesDW.get(globalVariablesDW.indexOf(value1) + 1).split("\\s+")[2];
-                }
-                if (variable12 != null) {
-                    value2 = globalVariablesDW.get(globalVariablesDW.indexOf(value2) + 1).split("\\s+")[2];
-                }
-
-                result = Integer.valueOf(value1) & Integer.valueOf(value2);
-                leftSide.setValue(String.valueOf(result));
-
-                if (result > MAX_MOVE_VAL || result < -MAX_MOVE_VAL) {
-                    globalVariablesDW.add("GV" + largeVarCounter);
-                    globalVariablesDW.add("DW %D " + result);
-                    outCommand("LOAD RO," + "(" + "GV" + largeVarCounter + ")");
-                    outCommand("PUSH R0");
-                    ++largeVarCounter;
-                } else {
-                    outCommand("MOVE %D " + result + ", R0");
-                    outCommand("PUSH R0");
-                }
-
-
-                if (!checkImplicitCast(getNonTerminalSymbol(rightSide.get(2)).getType(), INT)) {
-                    semanticAnalysisFailure(production);
-                }
-                setTypeAndL(leftSide, INT, ZERO);
-                break;
-
-            case 46: //<bin_xili_izraz> ::= <bin_xili_izraz> OP_BIN_XILI <bin_i_izraz>
-                check(rightSide.get(0));
-
-                value1 = getNonTerminalSymbol(rightSide.get(0)).getValue();
-                variable11 = findVariable(value1, codeBlock);
-
-                if (!checkImplicitCast(getNonTerminalSymbol(rightSide.get(0)).getType(), INT)) {
-                    semanticAnalysisFailure(production);
-                }
-                check(rightSide.get(2));
-
-                value2 = getNonTerminalSymbol(rightSide.get(2)).getValue();
-                variable12 = findVariable(value1, codeBlock);
-
-                if (variable11 != null) {
-                    value1 = globalVariablesDW.get(globalVariablesDW.indexOf(value1) + 1).split("\\s+")[2];
-                }
-                if (variable12 != null) {
-                    value2 = globalVariablesDW.get(globalVariablesDW.indexOf(value2) + 1).split("\\s+")[2];
-                }
-
-                result = Integer.valueOf(value1) ^ Integer.valueOf(value2);
-                leftSide.setValue(String.valueOf(result));
-
-                if (result > MAX_MOVE_VAL || result < -MAX_MOVE_VAL) {
-                    globalVariablesDW.add("GV" + largeVarCounter);
-                    globalVariablesDW.add("DW %D " + result);
-                    outCommand("LOAD RO," + "(" + "GV" + largeVarCounter + ")");
-                    outCommand("PUSH R0");
-                    ++largeVarCounter;
-                } else {
-                    outCommand("MOVE %D " + result + ", R0");
-                    outCommand("PUSH R0");
-                }
-
-
-                if (!checkImplicitCast(getNonTerminalSymbol(rightSide.get(2)).getType(), INT)) {
-                    semanticAnalysisFailure(production);
-                }
-                setTypeAndL(leftSide, INT, ZERO);
-                break;
-
-            case 33: //<aditivni_izraz> ::= <aditivni_izraz> PLUS <multiplikativni_izraz>
-                check(rightSide.get(0));
-
-                //Assembler commands
-                nonTerminalSymbol1 = getNonTerminalSymbol(rightSide.get(0));
-                nonTerminalSymbol2 = getNonTerminalSymbol(rightSide.get(2));
-                value1 = nonTerminalSymbol1.getValue();
-                variable11 = findVariable(value1, codeBlock);
-
-                if (!checkImplicitCast(getNonTerminalSymbol(rightSide.get(0)).getType(), INT)) {
-                    semanticAnalysisFailure(production);
-                }
-                check(rightSide.get(2));
-
-                if (!checkImplicitCast(getNonTerminalSymbol(rightSide.get(2)).getType(), INT)) {
-                    semanticAnalysisFailure(production);
-                }
-                setTypeAndL(leftSide, INT, ZERO);
-
-                //Assembler commands
-                value2 = nonTerminalSymbol2.getValue();
-                variable12 = findVariable(value2, codeBlock);
-
-                if (variable11 != null) {
-                    value1 = globalVariablesDW.get(globalVariablesDW.indexOf(value1) + 1).split("\\s+")[2];
-                }
-                if (variable12 != null) {
-                    value2 = globalVariablesDW.get(globalVariablesDW.indexOf(value2) + 1).split("\\s+")[2];
-                }
-
-                result = Integer.parseInt(value1) + Integer.parseInt(value2);
-                leftSide.setValue(String.valueOf(result));
-
-                if (result > MAX_MOVE_VAL || result < -MAX_MOVE_VAL) {
-                    globalVariablesDW.add("GV" + largeVarCounter);
-                    globalVariablesDW.add("DW %D " + result);
-                    outCommand("LOAD RO," + "(" + "GV" + largeVarCounter + ")");
-                    outCommand("PUSH R0");
-                    ++largeVarCounter;
-                } else {
-                    outCommand("MOVE %D " + result + ", R0");
-                    outCommand("PUSH R0");
-                }
-
-
-                break;
-
-            case 34: //<aditivni_izraz> ::= <aditivni_izraz> MINUS <multiplikativni_izraz>
-                check(rightSide.get(0));
-
-                //Assembler commands
-                nonTerminalSymbol1 = getNonTerminalSymbol(rightSide.get(0));
-                nonTerminalSymbol2 = getNonTerminalSymbol(rightSide.get(2));
-                value1 = nonTerminalSymbol1.getValue();
-                variable11 = findVariable(value1, codeBlock);
-
-                if (!checkImplicitCast(getNonTerminalSymbol(rightSide.get(0)).getType(), INT)) {
-                    semanticAnalysisFailure(production);
-                }
-                check(rightSide.get(2));
-
-                //Assembler commands
-                value2 = nonTerminalSymbol2.getValue();
-                variable12 = findVariable(value2, codeBlock);
-
-                if (variable11 != null) {
-                    value1 = globalVariablesDW.get(globalVariablesDW.indexOf(value1) + 1).split("\\s+")[2];
-                }
-                if (variable12 != null) {
-                    value2 = globalVariablesDW.get(globalVariablesDW.indexOf(value2) + 1).split("\\s+")[2];
-                }
-
-                result = Integer.parseInt(value1) - Integer.parseInt(value2);
-                leftSide.setValue(String.valueOf(result));
-
-                if (result > MAX_MOVE_VAL || result < -MAX_MOVE_VAL) {
-                    globalVariablesDW.add("GV" + largeVarCounter);
-                    globalVariablesDW.add("DW %D " + result);
-                    outCommand("LOAD RO," + "(" + "GV" + largeVarCounter + ")");
-                    outCommand("PUSH R0");
-                    ++largeVarCounter;
-                } else {
-                    outCommand("MOVE %D " + result + ", R0");
-                    outCommand("PUSH R0");
-                }
-
-                if (!checkImplicitCast(getNonTerminalSymbol(rightSide.get(2)).getType(), INT)) {
-                    semanticAnalysisFailure(production);
-                }
-                setTypeAndL(leftSide, INT, ZERO);
+                outCommand("PUSH R0");
                 break;
 
             //<aditivni_izraz>
@@ -984,8 +815,8 @@ public class GeneratorKoda {
                 Variable variable = null;
                 Function functionX = null;
 
-                if (izraz.getValue().contains("()")) {
-                    functionX = findFunction(izraz.getValue().replace("()", ""), codeBlock);
+                if (izraz.getValue().contains("(")) {
+                    functionX = findFunction(izraz.getValue().substring(0,izraz.getValue().indexOf("(")), codeBlock);
                 } else {
                     variable = findVariable(izraz.getValue(), codeBlock);
                 }
@@ -995,18 +826,23 @@ public class GeneratorKoda {
                     outCommand("LOAD R6, (" + variable.getName() + ")");
                     outCommand("RET");
                 } else if (functionX != null) {
+                    int size=0;
+                    if(!functionX.getInputParameters().contains(VOID)){
+                        String[] arguments = izraz.getValue().substring(izraz.getValue().indexOf("("+1),izraz.getValue().length()-1).split(",");
+                        for(String argument : arguments){
+                            outCommand("MOVE %D "+argument+", R0");
+                            outCommand("PUSH R0");
+                        }
+                        size = arguments.length;
+                    }
                     outCommand("CALL " + functionX.getName());
+                    if(size!=0){
+                        outCommand("ADD R7, "+size*4+", R7");
+                    }
                     outCommand("RET");
                 } else {
-                    Integer number = Integer.valueOf(izraz.getValue());
-                    if (number > MAX_MOVE_VAL) {
-                        outCommand("LOAD R6, " + "(" + "GV" + largeVarCounter + ")");
-                        outCommand("RET");
-                        ++largeVarCounter;
-                    } else {
-                        outCommand("MOVE %D " + number + ", R6");
-                        outCommand("RET");
-                    }
+                    outCommand("POP R6");
+                    outCommand("RET");
                 }
                 break;
 
