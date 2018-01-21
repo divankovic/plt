@@ -17,7 +17,7 @@ import static hr.fer.ppj.lab4.model.Const.*;
  */
 public class GeneratorKoda {
 
-    private static final String TEST_FILE_INPUT_PATH = "./src/hr/fer/ppj/lab4/res/in/11_fun1/test.in";
+    private static final String TEST_FILE_INPUT_PATH = "./src/hr/fer/ppj/lab4/res/in/12_fun2/test.in";
     private static final String TEST_FILE_OUTPUT_PATH = "./src/hr/fer/ppj/lab4/res/out/out.txt";
     private static final String PRODUCTIONS_TXT_FILE_PATH = "./src/hr/fer/ppj/lab4/res/in/ppjC.san";
     private static final Integer MAX_MOVE_VAL = 524287;
@@ -457,7 +457,7 @@ public class GeneratorKoda {
                 setTypeAndL(leftSide, getFunctionReturnValue(type), 0);
 
 
-                leftSide.setValue(getNonTerminalSymbol(rightSide.get(0)).getValue()+"("+getNonTerminalSymbol(rightSide.get(1)).getValue()+")");
+                leftSide.setValue(getNonTerminalSymbol(rightSide.get(0)).getValue()+"("+getNonTerminalSymbol(rightSide.get(2)).getValue()+")");
                 break;
 
             case 9: //<postfiks_izraz> ::= <postfiks_izraz> (OP_INC | OP_DEC)
@@ -828,12 +828,13 @@ public class GeneratorKoda {
                 } else if (functionX != null) {
                     int size=0;
                     if(!functionX.getInputParameters().contains(VOID)){
-                        String[] arguments = izraz.getValue().substring(izraz.getValue().indexOf("("+1),izraz.getValue().length()-1).split(",");
-                        for(String argument : arguments){
-                            outCommand("MOVE %D "+argument+", R0");
-                            outCommand("PUSH R0");
+                        List<String> arguments = new LinkedList<>();
+                        if(izraz.getValue().contains(",")) {
+                            arguments = Arrays.asList(izraz.getValue().substring(izraz.getValue().indexOf("(") + 1, izraz.getValue().length() - 1).split(","));
+                        }else{
+                            arguments.add(izraz.getValue().substring(izraz.getValue().indexOf("(") + 1, izraz.getValue().length() - 1));
                         }
-                        size = arguments.length;
+                        size = arguments.size();
                     }
                     outCommand("CALL " + functionX.getName());
                     if(size!=0){
@@ -921,6 +922,10 @@ public class GeneratorKoda {
                 if (fun != null && fun.isDefined()) {
                     semanticAnalysisFailure(production);
                 }
+
+                //Assembler code
+                outCommand(fun.getName(), ""); //generating function label
+
 
                 check(rightSide.get(3));
                 NonterminalSymbol lista_parametara = getNonTerminalSymbol(rightSide.get(3));
