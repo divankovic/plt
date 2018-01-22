@@ -17,7 +17,7 @@ import static hr.fer.ppj.lab4.model.Const.*;
  */
 public class GeneratorKoda {
 
-    private static final String TEST_FILE_INPUT_PATH = "./src/hr/fer/ppj/lab4/res/in/22_if4/test.in";
+    private static final String TEST_FILE_INPUT_PATH = "./src/hr/fer/ppj/lab4/res/in/25_niz3/test.in";
     private static final String TEST_FILE_OUTPUT_PATH = "./src/hr/fer/ppj/lab4/res/out/out.txt";
     private static final String PRODUCTIONS_TXT_FILE_PATH = "./src/hr/fer/ppj/lab4/res/in/ppjC.san";
     private static final Integer MAX_MOVE_VAL = 524287;
@@ -30,7 +30,7 @@ public class GeneratorKoda {
 
     private static Integer largeVarCounter = 0;
     private static List<String> globalVariablesDW = new LinkedList<>();
-    private static List<String> compareOperators = Arrays.asList(SGT,SGE,SLT,SLE,EQ,NE);
+    private static List<String> compareOperators = Arrays.asList(SGT, SGE, SLT, SLE, EQ, NE);
 
     /**
      *
@@ -314,7 +314,13 @@ public class GeneratorKoda {
                     }
                 }
 
+                String indicator = leftSide.getValue();
+
                 leftSide.setValue(IDN.getValue());
+
+                if (indicator.equals("niz")) {
+                    return;
+                }
 
                 boolean globalVariable = false;
                 CodeBlock codeBlock1 = findVariableCodeBlock(codeBlock, IDN.getValue());
@@ -364,12 +370,22 @@ public class GeneratorKoda {
                 }
                 setTypeAndL(leftSide, INT, ZERO);
 
+
+                indicator = leftSide.getValue();
+                if (indicator.equals("niz")) {
+                    leftSide.setValue("");
+                }
+
                 Integer newInt = intValue;
                 if (leftSide.getValue().equals("")) {
                     leftSide.setValue(String.valueOf(intValue));
                 } else {
                     newInt = -intValue;
                     leftSide.setValue(String.valueOf(newInt));
+                }
+
+                if (indicator.equals("niz")) {
+                    return;
                 }
 
                 //Assembler commands
@@ -395,12 +411,17 @@ public class GeneratorKoda {
                 }
                 setTypeAndL(leftSide, CHAR, ZERO);
 
+                indicator = leftSide.getValue();
+                leftSide.setValue(charValue);
+                if (indicator.equals("niz")) {
+                    return;
+                }
+
                 if (!codeBlock.equals(startingCodeBlock)) {
-                    outCommand("MOVE %D " + (int)charValue.charAt(0) + ", R0");
+                    outCommand("MOVE %D " + (int) charValue.charAt(0) + ", R0");
                     outCommand("PUSH R0");
                 }
 
-                leftSide.setValue(charValue);
 
                 break;
 
@@ -439,6 +460,7 @@ public class GeneratorKoda {
                 if (!leftSide.getValue().equals("")) {
                     nonTerminalSymbol.setValue(leftSide.getValue());
                 }
+                getNonTerminalSymbol(rightSide.get(0)).setValue(leftSide.getValue());
                 check(rightSide.get(0));
 
                 setTypeAndL(leftSide, nonTerminalSymbol.getType(), nonTerminalSymbol.getL_expression());
@@ -449,10 +471,13 @@ public class GeneratorKoda {
                 NonterminalSymbol postfiks_izraz = getNonTerminalSymbol(rightSide.get(0));
                 izraz = getNonTerminalSymbol(rightSide.get(2));
 
+                getNonTerminalSymbol(rightSide.get(0)).setValue("niz");
                 check(rightSide.get(0));
                 if (!postfiks_izraz.getType().startsWith("niz")) {
                     semanticAnalysisFailure(production);
                 }
+
+                getNonTerminalSymbol(rightSide.get(2)).setValue("niz");
                 check(rightSide.get(2));
                 if (!checkImplicitCast(izraz.getType(), INT)) {
                     semanticAnalysisFailure(production);
@@ -460,6 +485,21 @@ public class GeneratorKoda {
                 String type = extractFromNiz(postfiks_izraz.getType());
                 int l_expression = getLexpression(type);
                 setTypeAndL(leftSide, type, l_expression);
+
+                indicator = leftSide.getValue();
+                leftSide.setValue(postfiks_izraz.getValue() + L_UGL_ZAGRADA + izraz.getValue() + D_UGL_ZAGRADA);
+                if (indicator.equals("set")) {
+                    return; //inicijalizacija elements polja
+                }
+
+                int offset = Integer.parseInt(izraz.getValue()) * 4;
+                if (offset != 0) {
+                    outCommand("MOVE NIZ_" + postfiks_izraz.getValue() + ", R0");
+                    outCommand("LOAD R0, (R0" + " + " + toHex(offset) + ")");
+                } else {
+                    outCommand("LOAD R0, (NIZ_" + postfiks_izraz.getValue() + ")");
+                }
+                outCommand("PUSH R0");
                 break;
 
             case 7: //<postfiks_izraz> ::= <postfiks_izraz> L_ZAGRADA D_ZAGRADA
@@ -756,6 +796,8 @@ public class GeneratorKoda {
             case 54: //<izraz_pridruzivanja> ::= <postfiks_izraz> OP_PRIDRUZI <izraz_pridruzivanja>
                 postfiks_izraz = getNonTerminalSymbol(rightSide.get(0));
                 NonterminalSymbol izraz_pridruzivanja = getNonTerminalSymbol(rightSide.get(2));
+                postfiks_izraz = getNonTerminalSymbol(rightSide.get(0));
+                postfiks_izraz.setValue("set"); //pridruzivanje - oznacuje inicijalizaciju vrijednosti elementa polja
                 check(rightSide.get(0));
                 if (postfiks_izraz.getL_expression() != 1) {
                     semanticAnalysisFailure(production);
@@ -767,12 +809,32 @@ public class GeneratorKoda {
                 setTypeAndL(leftSide, postfiks_izraz.getType(), 0);
 
                 //Assembler commands
+                String name;
+                if(postfiks_izraz.getValue().contains(L_UGL_ZAGRADA)) {
+                    name = postfiks_izraz.getValue().substring(0, postfiks_izraz.getValue().indexOf(L_UGL_ZAGRADA));
+                }else{
+                    name = postfiks_izraz.getValue();
+                }
 
-                codeBlock1 = findVariableCodeBlock(codeBlock, postfiks_izraz.getValue());
+                codeBlock1 = findVariableCodeBlock(codeBlock, name);
                 if (codeBlock1.equals(startingCodeBlock)) {
-                    outCommand("POP R0");
-                    outCommand("STORE R0, (" + postfiks_izraz.getValue() + ")");
+                    if (postfiks_izraz.getValue().contains(L_UGL_ZAGRADA)) {
+                        //polje
+                        outCommand("POP R0");
 
+                        String value = postfiks_izraz.getValue();
+                        offset = Integer.parseInt(value.substring(value.indexOf(L_UGL_ZAGRADA) + 1, value.length() - 1)) * 4;
+                        if (offset != 0) {
+                            outCommand("MOVE NIZ_" + name + ", R1");
+                            outCommand("STORE R0, (R1" + " + " + toHex(offset) + ")");
+                        } else {
+                            outCommand("STORE R0, (NIZ_" + name + ")");
+                        }
+
+                    } else {
+                        outCommand("POP R0");
+                        outCommand("STORE R0, (" + postfiks_izraz.getValue() + ")");
+                    }
                 } else {
                     outCommand("POP R0");
 
@@ -874,19 +936,19 @@ public class GeneratorKoda {
                 }
 
                 izraz = getNonTerminalSymbol(rightSide.get(2));
-                if(!compareOperators.contains(izraz.getValue())) {
+                if (!compareOperators.contains(izraz.getValue())) {
                     //vraćen je brojevni izraz i rezultat je na stogu
                     outCommand("POP R0");
                     outCommand("CMP R0, 0");
-                    outCommand("JR_SLE DALJE"+largeVarCounter); //ako je broj 0 ili negativan onda preskoči if
-                }else{
+                    outCommand("JR_SLE DALJE" + largeVarCounter); //ako je broj 0 ili negativan onda preskoči if
+                } else {
                     String condition = getOppositeCondition(izraz.getValue());
-                    outCommand("JR_"+condition+" DALJE"+largeVarCounter); //za suprotan uvjet skoči na dalje
+                    outCommand("JR_" + condition + " DALJE" + largeVarCounter); //za suprotan uvjet skoči na dalje
                 }
 
                 check(rightSide.get(4));
 
-                outCommand("DALJE"+largeVarCounter++,"");
+                outCommand("DALJE" + largeVarCounter++, "");
 
                 if (productionIndex == 69) {
                     check(rightSide.get(6));
@@ -1194,6 +1256,20 @@ public class GeneratorKoda {
                     leftSide.setType(izravni_deklarator.getType());
                 }
 
+                leftSide.setValue(getNonTerminalSymbol(rightSide.get(0)).getValue());
+
+                if (codeBlock.equals(startingCodeBlock)) {
+                    if (izravni_deklarator.getValue().contains(L_UGL_ZAGRADA)) {//NIZ
+                        size = Integer.parseInt(izravni_deklarator.getValue().substring(izravni_deklarator.getValue().indexOf(L_UGL_ZAGRADA) + 1, izravni_deklarator.getValue().length() - 1));
+                        globalVariablesDW.add("NIZ_" + izravni_deklarator.getValue().substring(0, izravni_deklarator.getValue().indexOf(L_UGL_ZAGRADA)));
+                        for (int i = 0; i < size - 1; i++) {
+                            globalVariablesDW.add("");
+                        }
+                    } else {
+                        //varijabla
+                        globalVariablesDW.add(izravni_deklarator.getValue()); //labela za deklariranu globalnu varijablu
+                    }
+                }
                 break;
 
             case 93: //<init_deklarator> ::= <izravni_deklarator> OP_PRIDRUZI <inicijalizator>
@@ -1226,8 +1302,25 @@ public class GeneratorKoda {
                 if (codeBlock.equals(startingCodeBlock)) {
                     if (izravni_deklarator.getType().equals(INT) || izravni_deklarator.getType().equals(CONST_INT)) {
                         globalVariablesDW.add(izravni_deklarator.getValue() + "     DW %D " + inicijalizator.getValue()); //labela za globalnu varijablu
-                    }else if(izravni_deklarator.getType().equals(CHAR) ||izravni_deklarator.getType().equals(CONST_CHAR)){
-                        globalVariablesDW.add(izravni_deklarator.getValue() + "     DW %D " + (int)inicijalizator.getValue().charAt(0));
+                    } else if (izravni_deklarator.getType().equals(CHAR) || izravni_deklarator.getType().equals(CONST_CHAR)) {
+                        globalVariablesDW.add(izravni_deklarator.getValue() + "     DW %D " + (int) inicijalizator.getValue().charAt(0));
+                    } else { //niz
+                        String label = "NIZ_" + izravni_deklarator.getValue().substring(0, izravni_deklarator.getValue().indexOf(L_UGL_ZAGRADA));
+                        List<String> content = Arrays.asList(inicijalizator.getValue().split(","));
+                        for (int i = 0; i < content.size(); i++) {
+                            String value;
+                            if (Character.isLetter(content.get(i).charAt(0))) {
+                                value = String.valueOf((int) (content.get(i).charAt(0)));
+                            } else {
+                                value = content.get(i);
+                            }
+
+                            if (i == 0) {
+                                globalVariablesDW.add(label + " DW %D " + value);
+                            } else {
+                                globalVariablesDW.add("      DW %D " + value);
+                            }
+                        }
                     }
                 } else {
                     outCommand("POP R0");
@@ -1322,6 +1415,9 @@ public class GeneratorKoda {
 
                 leftSide.setType(type);
                 leftSide.setNumOfElements(broj_vrijednost);
+
+
+                leftSide.setValue(IDN.getValue() + L_UGL_ZAGRADA + broj_vrijednost + D_UGL_ZAGRADA);
                 break;
 
             case 96: //<izravni_deklarator> ::= IDN L_ZAGRADA KR_VOID D_ZAGRADA
@@ -1390,6 +1486,7 @@ public class GeneratorKoda {
                 check(rightSide.get(1));
                 leftSide.setNumOfElements(getNonTerminalSymbol(rightSide.get(1)).getNumOfElements());
                 leftSide.getTypes().addAll(getNonTerminalSymbol(rightSide.get(1)).getTypes());
+                leftSide.setValue(getNonTerminalSymbol(rightSide.get(1)).getValue());
                 break;
 
             //<lista_izraza_pridruzivanja>
@@ -1397,6 +1494,7 @@ public class GeneratorKoda {
                 check(rightSide.get(0));
                 leftSide.getTypes().add(getNonTerminalSymbol(rightSide.get(0)).getType());
                 leftSide.setNumOfElements(1);
+                leftSide.setValue(getNonTerminalSymbol(rightSide.get(0)).getValue());
                 break;
 
             case 101: //<lista_izraza_pridruzivanja> ::= <lista_izraza_pridruzivanja> ZAREZ <izraz_pridruzivanja>
@@ -1405,6 +1503,7 @@ public class GeneratorKoda {
                 leftSide.getTypes().addAll(getNonTerminalSymbol(rightSide.get(0)).getTypes());
                 leftSide.getTypes().add(getNonTerminalSymbol(rightSide.get(2)).getType());
                 leftSide.setNumOfElements(getNonTerminalSymbol(rightSide.get(0)).getNumOfElements() + 1);
+                leftSide.setValue(getNonTerminalSymbol(rightSide.get(0)).getValue() + "," + getNonTerminalSymbol(rightSide.get(2)).getValue());
                 break;
 
         }
@@ -1602,16 +1701,16 @@ public class GeneratorKoda {
     }
 
     private static String getOppositeCondition(String value) {
-        switch(value){
-            case(SGT):
+        switch (value) {
+            case (SGT):
                 return SLE;
-            case(SGE):
+            case (SGE):
                 return SLT;
-            case(SLT):
+            case (SLT):
                 return SGE;
-            case(SLE):
+            case (SLE):
                 return SGT;
-            case(EQ):
+            case (EQ):
                 return NE;
             default: //NE
                 return EQ;
