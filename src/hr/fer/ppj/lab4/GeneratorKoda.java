@@ -17,7 +17,7 @@ import static hr.fer.ppj.lab4.model.Const.*;
  */
 public class GeneratorKoda {
 
-    private static final String TEST_FILE_INPUT_PATH = "./src/hr/fer/ppj/lab4/res/in/16_scope4/test.in";
+    private static final String TEST_FILE_INPUT_PATH = "./src/hr/fer/ppj/lab4/res/in/22_if4/test.in";
     private static final String TEST_FILE_OUTPUT_PATH = "./src/hr/fer/ppj/lab4/res/out/out.txt";
     private static final String PRODUCTIONS_TXT_FILE_PATH = "./src/hr/fer/ppj/lab4/res/in/ppjC.san";
     private static final Integer MAX_MOVE_VAL = 524287;
@@ -30,6 +30,7 @@ public class GeneratorKoda {
 
     private static Integer largeVarCounter = 0;
     private static List<String> globalVariablesDW = new LinkedList<>();
+    private static List<String> compareOperators = Arrays.asList(SGT,SGE,SLT,SLE,EQ,NE);
 
     /**
      *
@@ -342,7 +343,7 @@ public class GeneratorKoda {
 
                     if (idx != -1) {
                         if (idx < parameterSize) {  //ulazni parametar funkcije
-                            outCommand("LOAD R0, (R5 + " +toHex((parameterSize - idx) * 4) + ")");
+                            outCommand("LOAD R0, (R5 + " + toHex((parameterSize - idx) * 4) + ")");
                             outCommand("PUSH R0");
                         } else {  //lokalna varijabla
                             outCommand("LOAD R0, (R5 - " + toHex((idx - parameterSize + 2) * 4) + ")");
@@ -372,7 +373,7 @@ public class GeneratorKoda {
                 }
 
                 //Assembler commands
-                if(!codeBlock.equals(startingCodeBlock)) {
+                if (!codeBlock.equals(startingCodeBlock)) {
                     if (newInt > MAX_MOVE_VAL || newInt < -MAX_MOVE_VAL) {
                         globalVariablesDW.add("GV" + largeVarCounter + "   DW %D " + newInt);
                         outCommand("LOAD R0, (GV" + largeVarCounter + ")");
@@ -393,6 +394,14 @@ public class GeneratorKoda {
                     semanticAnalysisFailure(production);
                 }
                 setTypeAndL(leftSide, CHAR, ZERO);
+
+                if (!codeBlock.equals(startingCodeBlock)) {
+                    outCommand("MOVE %D " + (int)charValue.charAt(0) + ", R0");
+                    outCommand("PUSH R0");
+                }
+
+                leftSide.setValue(charValue);
+
                 break;
 
             case 3: //<primarni_izraz> ::= NIZ_ZNAKOVA
@@ -403,7 +412,7 @@ public class GeneratorKoda {
                 setTypeAndL(leftSide, NIZ_CONST_CHAR, ZERO);
                 break;
 
-            case 4: //L_ZAGRADA <izraz> D_ZAGRADA
+            case 4: //<primarni_izraz> ::= L_ZAGRADA <izraz> D_ZAGRADA
                 check(rightSide.get(1));
                 NonterminalSymbol izraz = getNonTerminalSymbol(rightSide.get(1));
                 setTypeAndL(leftSide, izraz.getType(), izraz.getL_expression());
@@ -504,7 +513,7 @@ public class GeneratorKoda {
                 }
                 outCommand("CALL " + functionX.getName());
                 if (size != 0) {
-                    outCommand("ADD R7, " + toHex(size * 4)+ ", R7");
+                    outCommand("ADD R7, " + toHex(size * 4) + ", R7");
                 }
                 outCommand("PUSH R6");
 
@@ -643,31 +652,71 @@ public class GeneratorKoda {
 
                 outCommand("POP R1");
                 outCommand("POP R0");
-                String symbol = "";
                 switch (productionIndex) {
-                    case 33:
+                    case 33://<aditivni_izraz> ::= <aditivni_izraz> PLUS <multiplikativni_izraz>
                         outCommand("ADD R0, R1, R0");
-                        symbol = "+";
+                        outCommand("PUSH R0");
                         break;
-                    case 34:
+                    case 34://<aditivni_izraz> ::= <aditivni_izraz> MINUS <multiplikativni_izraz>
                         outCommand("SUB R0, R1, R0");
-                        symbol = "-";
+                        outCommand("PUSH R0");
                         break;
-                    case 44:
+                    case 36://<odnosni_izraz> ::= <odnosni_izraz> OP_LT <aditivni_izraz>
+                        outCommand("CMP R0, R1");
+                        leftSide.setValue(SLT);
+                        break;
+                    case 37://<odnosni_izraz> ::= <odnosni_izraz>  OP_GT <aditivni_izraz>
+                        outCommand("CMP R0, R1");
+                        leftSide.setValue(SGT);
+                        break;
+                    case 38://<odnosni_izraz> ::= <odnosni_izraz>  OP_LTE <aditivni_izraz>
+                        outCommand("CMP R0, R1");
+                        leftSide.setValue(SLE);
+                        break;
+                    case 39://<odnosni_izraz> ::= <odnosni_izraz>  OP_GTE <aditivni_izraz>
+                        outCommand("CMP R0, R1");
+                        leftSide.setValue(SGE);
+                        break;
+                    case 41://<jednakosni_izraz> ::= <jednakosni_izraz> OP_EQ  <odnosni_izraz>
+                        outCommand("CMP R0, R1");
+                        leftSide.setValue(EQ);
+                        break;
+                    case 42://<jednakosni_izraz> ::= <jednakosni_izraz>  OP_NEQ <odnosni_izraz>
+                        outCommand("CMP R0, R1");
+                        leftSide.setValue(NE);
+                        break;
+
+                    case 44://<bin_i_izraz> ::= <bin_i_izraz> OP_BIN_I <jednakosni_izraz>
                         outCommand("AND R0, R1, R0");
-                        symbol = "&";
+                        outCommand("PUSH R0");
                         break;
-                    case 46:
+                    case 46://<bin_xili_izraz> ::= <bin_xili_izraz> OP_BIN_XILI <bin_i_izraz>
                         outCommand("XOR R0, R1, R0");
-                        symbol = "^";
+                        outCommand("PUSH R0");
                         break;
-                    case 48:
+                    case 48://<bin_ili_izraz> ::= <bin_ili_izraz> OP_BIN_ILI <bin_xili_izraz>
                         outCommand("OR R0, R1, R0");
-                        symbol = "|";
+                        outCommand("PUSH R0");
+                        break;
+                    case 50://<log_i_izraz> ::= <log_i_izraz> OP_I <bin_ili_izraz>
+                        outCommand("CMP R0, 0");
+                        outCommand("MOVE_EQ 0, R0");
+                        outCommand("JR_EQ 10");
+                        outCommand("CMP R1, 0");
+                        outCommand("MOVE_EQ 0, R0");
+                        outCommand("MOVE_NE 1, R0");
+                        outCommand("PUSH R0");
+                        break;
+                    case 52://<log_ili_izraz> ::= <log_ili_izraz> OP_ILI <log_i_izraz>
+                        outCommand("CMP R0, 0");
+                        outCommand("MOVE_NE 1, R0");
+                        outCommand("JR_EQ 10");
+                        outCommand("CMP R1, 0");
+                        outCommand("MOVE_NE 1, R0");
+                        outCommand("MOVE_EQ 0, R0");
+                        outCommand("PUSH R0");
                         break;
                 }
-
-                outCommand("PUSH R0");
                 break;
 
             //<aditivni_izraz>
@@ -719,10 +768,10 @@ public class GeneratorKoda {
 
                 //Assembler commands
 
-                codeBlock1 = findVariableCodeBlock(codeBlock,postfiks_izraz.getValue());
+                codeBlock1 = findVariableCodeBlock(codeBlock, postfiks_izraz.getValue());
                 if (codeBlock1.equals(startingCodeBlock)) {
                     outCommand("POP R0");
-                    outCommand("STORE R0, ("+postfiks_izraz.getValue()+")");
+                    outCommand("STORE R0, (" + postfiks_izraz.getValue() + ")");
 
                 } else {
                     outCommand("POP R0");
@@ -823,10 +872,26 @@ public class GeneratorKoda {
                 if (!checkImplicitCast(getNonTerminalSymbol(rightSide.get(2)).getType(), INT)) {
                     semanticAnalysisFailure(production);
                 }
+
+                izraz = getNonTerminalSymbol(rightSide.get(2));
+                if(!compareOperators.contains(izraz.getValue())) {
+                    //vraćen je brojevni izraz i rezultat je na stogu
+                    outCommand("POP R0");
+                    outCommand("CMP R0, 0");
+                    outCommand("JR_SLE DALJE"+largeVarCounter); //ako je broj 0 ili negativan onda preskoči if
+                }else{
+                    String condition = getOppositeCondition(izraz.getValue());
+                    outCommand("JR_"+condition+" DALJE"+largeVarCounter); //za suprotan uvjet skoči na dalje
+                }
+
                 check(rightSide.get(4));
+
+                outCommand("DALJE"+largeVarCounter++,"");
+
                 if (productionIndex == 69) {
                     check(rightSide.get(6));
                 }
+
                 break;
 
             //<naredba_petlje>
@@ -1159,7 +1224,11 @@ public class GeneratorKoda {
                 //Assembler commands
 
                 if (codeBlock.equals(startingCodeBlock)) {
-                    globalVariablesDW.add(izravni_deklarator.getValue()+"     DW %D "+inicijalizator.getValue()); //labela za globalnu varijablu
+                    if (izravni_deklarator.getType().equals(INT) || izravni_deklarator.getType().equals(CONST_INT)) {
+                        globalVariablesDW.add(izravni_deklarator.getValue() + "     DW %D " + inicijalizator.getValue()); //labela za globalnu varijablu
+                    }else if(izravni_deklarator.getType().equals(CHAR) ||izravni_deklarator.getType().equals(CONST_CHAR)){
+                        globalVariablesDW.add(izravni_deklarator.getValue() + "     DW %D " + (int)inicijalizator.getValue().charAt(0));
+                    }
                 } else {
                     outCommand("POP R0");
 
@@ -1342,6 +1411,7 @@ public class GeneratorKoda {
 
     }
 
+
     private static CodeBlock findVariableCodeBlock(CodeBlock codeBlock, String variableName) {
         for (Variable variable : codeBlock.getVariables()) {
             if (variable.getName().equals(variableName)) {
@@ -1521,15 +1591,33 @@ public class GeneratorKoda {
         System.out.format("%-6s%s\n", label, command);
     }
 
-    private static String toHex(int value){
+    private static String toHex(int value) {
         String hexValue;
         hexValue = Integer.toHexString(value).toUpperCase();
-        if(hexValue.startsWith("A") || hexValue.startsWith("B") || hexValue.startsWith("C") || hexValue.startsWith("D") || hexValue.startsWith("E") ||
-                hexValue.startsWith("F")){
+        if (hexValue.startsWith("A") || hexValue.startsWith("B") || hexValue.startsWith("C") || hexValue.startsWith("D") || hexValue.startsWith("E") ||
+                hexValue.startsWith("F")) {
             hexValue = 0 + hexValue;
         }
         return hexValue;
     }
+
+    private static String getOppositeCondition(String value) {
+        switch(value){
+            case(SGT):
+                return SLE;
+            case(SGE):
+                return SLT;
+            case(SLT):
+                return SGE;
+            case(SLE):
+                return SGT;
+            case(EQ):
+                return NE;
+            default: //NE
+                return EQ;
+        }
+    }
+
 }
 
 

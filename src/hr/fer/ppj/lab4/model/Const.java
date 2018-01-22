@@ -32,6 +32,13 @@ public class Const {
     public static final String ZNAK = "ZNAK";
     public static final String FOR = "for";
     public static final String WHILE = "while";
+    public static final String SGT = "SGT";
+    public static final String SGE = "SGE";
+    public static final String SLT = "SLT";
+    public static final String SLE = "SLE";
+    public static final String EQ = "EQ";
+    public static final String NE = "NE";
+
 
     public static String turnToNiz(String type) {
         switch (type) {
