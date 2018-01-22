@@ -17,7 +17,7 @@ import static hr.fer.ppj.lab4.model.Const.*;
  */
 public class GeneratorKoda {
 
-    private static final String TEST_FILE_INPUT_PATH = "./src/hr/fer/ppj/lab4/res/in/13_fun3/test.in";
+    private static final String TEST_FILE_INPUT_PATH = "./src/hr/fer/ppj/lab4/res/in/16_scope4/test.in";
     private static final String TEST_FILE_OUTPUT_PATH = "./src/hr/fer/ppj/lab4/res/out/out.txt";
     private static final String PRODUCTIONS_TXT_FILE_PATH = "./src/hr/fer/ppj/lab4/res/in/ppjC.san";
     private static final Integer MAX_MOVE_VAL = 524287;
@@ -56,8 +56,8 @@ public class GeneratorKoda {
 
         System.out.println();
         int i;
-        for (i = 0; i < globalVariablesDW.size(); i += 2) {
-            outCommand(globalVariablesDW.get(i), globalVariablesDW.get(i + 1));
+        for (i = 0; i < globalVariablesDW.size(); i++) {
+            System.out.println(globalVariablesDW.get(i));
         }
 
 
@@ -316,27 +316,37 @@ public class GeneratorKoda {
                 leftSide.setValue(IDN.getValue());
 
                 boolean globalVariable = false;
-                for (Variable variable : startingCodeBlock.getVariables()) {
-                    if (variable.getName().equals(IDN.getValue())) {
-                        globalVariable = true;
-                        break;
-                    }
+                CodeBlock codeBlock1 = findVariableCodeBlock(codeBlock, IDN.getValue());
+                if (codeBlock1 != null && codeBlock1.equals(startingCodeBlock)) {
+                    globalVariable = true;
                 }
+
 
                 if (globalVariable) {
                     outCommand("LOAD R0, (" + IDN.getValue() + ")");
                     outCommand("PUSH R0");
-                }
+                } else {
 
-                if (codeBlock.getFunction() != null && !codeBlock.getFunction().getInputParameters().contains(VOID)) {
-                    int parameterSize = codeBlock.getFunction().getInputParameters().size();
-                    List<Variable> parameters = codeBlock.getVariables().subList(0, parameterSize);
+                    codeBlock1 = findFirstFunctionBlock(codeBlock);
+                    int parameterSize = codeBlock1.getFunction().getInputParameters().size();
+                    if (codeBlock1.getFunction().getInputParameters().contains(VOID)) {
+                        parameterSize = 0;
+                    }
+                    int idx = -1;
 
-                    for (int i = 0; i < parameterSize; i++) {
-                        if (parameters.get(i).getName().equals(IDN.getValue())) {
-                            outCommand("LOAD R0, (R7 + " + (parameterSize - i) * 4 + ")");
+                    for (int i = 0; i < codeBlock1.getVariables().size(); ++i) {
+                        if (codeBlock1.getVariables().get(i).getName().equals(IDN.getValue())) {
+                            idx = i;
+                        }
+                    }
+
+                    if (idx != -1) {
+                        if (idx < parameterSize) {  //ulazni parametar funkcije
+                            outCommand("LOAD R0, (R5 + " +toHex((parameterSize - idx) * 4) + ")");
                             outCommand("PUSH R0");
-                            break;
+                        } else {  //lokalna varijabla
+                            outCommand("LOAD R0, (R5 - " + toHex((idx - parameterSize + 2) * 4) + ")");
+                            outCommand("PUSH R0");
                         }
                     }
 
@@ -362,15 +372,18 @@ public class GeneratorKoda {
                 }
 
                 //Assembler commands
-                if (!codeBlock.equals(startingCodeBlock)) {
+                if(!codeBlock.equals(startingCodeBlock)) {
                     if (newInt > MAX_MOVE_VAL || newInt < -MAX_MOVE_VAL) {
-                        globalVariablesDW.add("GV" + largeVarCounter);
-                        globalVariablesDW.add("DW %D " + newInt);
+                        globalVariablesDW.add("GV" + largeVarCounter + "   DW %D " + newInt);
+                        outCommand("LOAD R0, (GV" + largeVarCounter + ")");
+                        outCommand("PUSH R0");
+                        ++largeVarCounter;
                     } else {
                         outCommand("MOVE %D " + newInt + ", R0");
                         outCommand("PUSH R0");
                     }
                 }
+
 
                 break;
 
@@ -452,7 +465,7 @@ public class GeneratorKoda {
                 leftSide.setValue(postfiks_izraz.getValue() + "()");
 
 
-                outCommand("CALL "+postfiks_izraz.getValue());
+                outCommand("CALL " + postfiks_izraz.getValue());
                 outCommand("PUSH R6");
                 break;
 
@@ -478,9 +491,9 @@ public class GeneratorKoda {
 
                 String functionName = getNonTerminalSymbol(rightSide.get(0)).getValue();
                 izraz = getNonTerminalSymbol(rightSide.get(2));
-                Function functionX = findFunction(functionName,codeBlock);
+                Function functionX = findFunction(functionName, codeBlock);
                 int size = 0;
-                if (functionX!=null && !functionX.getInputParameters().contains(VOID)) {
+                if (functionX != null && !functionX.getInputParameters().contains(VOID)) {
                     List<String> arguments = new LinkedList<>();
                     if (izraz.getValue().contains(",")) {
                         arguments = Arrays.asList(izraz.getValue().substring(izraz.getValue().indexOf("(") + 1, izraz.getValue().length() - 1).split(","));
@@ -491,7 +504,7 @@ public class GeneratorKoda {
                 }
                 outCommand("CALL " + functionX.getName());
                 if (size != 0) {
-                    outCommand("ADD R7, " + size * 4 + ", R7");
+                    outCommand("ADD R7, " + toHex(size * 4)+ ", R7");
                 }
                 outCommand("PUSH R6");
 
@@ -630,11 +643,11 @@ public class GeneratorKoda {
 
                 outCommand("POP R1");
                 outCommand("POP R0");
-                String symbol="";
+                String symbol = "";
                 switch (productionIndex) {
                     case 33:
                         outCommand("ADD R0, R1, R0");
-                        symbol="+";
+                        symbol = "+";
                         break;
                     case 34:
                         outCommand("SUB R0, R1, R0");
@@ -642,7 +655,7 @@ public class GeneratorKoda {
                         break;
                     case 44:
                         outCommand("AND R0, R1, R0");
-                        symbol="&";
+                        symbol = "&";
                         break;
                     case 46:
                         outCommand("XOR R0, R1, R0");
@@ -703,6 +716,37 @@ public class GeneratorKoda {
                     semanticAnalysisFailure(production);
                 }
                 setTypeAndL(leftSide, postfiks_izraz.getType(), 0);
+
+                //Assembler commands
+
+                codeBlock1 = findVariableCodeBlock(codeBlock,postfiks_izraz.getValue());
+                if (codeBlock1.equals(startingCodeBlock)) {
+                    outCommand("POP R0");
+                    outCommand("STORE R0, ("+postfiks_izraz.getValue()+")");
+
+                } else {
+                    outCommand("POP R0");
+
+                    int parameterSize = 0;
+                    codeBlock1 = findFirstFunctionBlock(codeBlock);
+                    if (!codeBlock1.getFunction().getInputParameters().contains(VOID)) {
+                        parameterSize = codeBlock1.getFunction().getInputParameters().size();
+                    }
+                    int idx = 0;
+
+                    for (int i = 0; i < codeBlock1.getVariables().size(); ++i) {
+                        if (codeBlock1.getVariables().get(i).getName().equals(postfiks_izraz.getValue())) {
+                            idx = i;
+                        }
+                    }
+
+                    if (idx < parameterSize) {  //ulazni parametar funkcije
+                        outCommand("STORE R0, (R5 + " + toHex((parameterSize - idx) * 4) + ")");
+                    } else {  //lokalna varijabla
+                        outCommand("STORE R0, (R5 - " + toHex((idx - parameterSize + 2) * 4) + ")");
+                    }
+                }
+
                 break;
 
             //<izraz>
@@ -846,6 +890,19 @@ public class GeneratorKoda {
                 if (function1 == null || !function1.getReturnType().equals(VOID)) {
                     semanticAnalysisFailure(production);
                 }
+
+                //skidanje lokalnih parametara sa stoga
+                int parSize = 0;
+                codeBlock1 = findFirstFunctionBlock(codeBlock);
+                if (!codeBlock1.getFunction().getInputParameters().contains(VOID)) {
+                    parSize = codeBlock1.getFunction().getInputParameters().size();
+                }
+                if ((codeBlock1.getVariables().size() - parSize) != 0) {
+                    outCommand("ADD R7, " + toHex(4 * (codeBlock1.getVariables().size() - parSize)) + ", R7");
+                }
+
+
+                outCommand("POP R5"); //obnavljanje konteksta
                 break;
 
             case 76: //<naredba_skoka> ::= KR_RETURN <izraz> TOCKAZAREZ
@@ -857,18 +914,22 @@ public class GeneratorKoda {
                 }
 
                 //Assembler commands
-                Variable variable = null;
-
-                variable = findVariable(izraz.getValue(), codeBlock);
 
 
-                if (variable != null) {
-                    outCommand("LOAD R6, (" + variable.getName() + ")");
-                    outCommand("RET");
-                } else {
-                    outCommand("POP R6");
-                    outCommand("RET");
+                outCommand("POP R6");
+
+                //skidanje lokalnih parametara sa stoga
+                parSize = 0;
+                codeBlock1 = findFirstFunctionBlock(codeBlock);
+                if (!codeBlock1.getFunction().getInputParameters().contains(VOID)) {
+                    parSize = codeBlock1.getFunction().getInputParameters().size();
                 }
+                if ((codeBlock1.getVariables().size() - parSize) != 0) {
+                    outCommand("ADD R7, " + toHex(4 * (codeBlock1.getVariables().size() - parSize)) + ", R7");
+                }
+
+                outCommand("POP R5"); //obnavljanje konteksta
+                outCommand("RET");
                 break;
 
             //<prijevodna_jedinica>
@@ -921,7 +982,9 @@ public class GeneratorKoda {
 
                 //Assembler code
                 outCommand(fun.getName(), "");
-
+                outCommand("PUSH R5");
+                outCommand("MOVE R7, R5");
+                outCommand("ADD R5, 4, R5");
 
                 check(rightSide.get(5));
                 break;
@@ -949,6 +1012,9 @@ public class GeneratorKoda {
 
                 //Assembler code
                 outCommand(IDN.getValue(), ""); //generating function label
+                outCommand("PUSH R5");
+                outCommand("MOVE R7, R5");
+                outCommand("ADD R5, 4, R5");
 
                 check(rightSide.get(3));
                 NonterminalSymbol lista_parametara = getNonTerminalSymbol(rightSide.get(3));
@@ -968,7 +1034,9 @@ public class GeneratorKoda {
                 childBlock.setParentBlock(codeBlock);
                 List<Variable> variables = new LinkedList<>();
                 for (int i = 0; i < lista_parametara.getTypes().size(); i++) {
-                    variables.add(new Variable(lista_parametara.getTypes().get(i), lista_parametara.getNames().get(i)));
+                    Variable variable = new Variable(lista_parametara.getTypes().get(i), lista_parametara.getNames().get(i));
+                    variable.setCodeBlock(childBlock);
+                    variables.add(variable);
                 }
                 childBlock.getVariables().addAll(variables);
                 childBlock.setFunction(fun);
@@ -1060,6 +1128,7 @@ public class GeneratorKoda {
                 if (izravni_deklarator.getType().startsWith("funkcija")) {
                     leftSide.setType(izravni_deklarator.getType());
                 }
+
                 break;
 
             case 93: //<init_deklarator> ::= <izravni_deklarator> OP_PRIDRUZI <inicijalizator>
@@ -1090,8 +1159,28 @@ public class GeneratorKoda {
                 //Assembler commands
 
                 if (codeBlock.equals(startingCodeBlock)) {
-                    globalVariablesDW.add(izravni_deklarator.getValue());
-                    globalVariablesDW.add("DW %D " + inicijalizator.getValue());
+                    globalVariablesDW.add(izravni_deklarator.getValue()+"     DW %D "+inicijalizator.getValue()); //labela za globalnu varijablu
+                } else {
+                    outCommand("POP R0");
+
+                    int parameterSize = 0;
+                    codeBlock1 = findFirstFunctionBlock(codeBlock);
+                    if (!codeBlock1.getFunction().getInputParameters().contains(VOID)) {
+                        parameterSize = codeBlock1.getFunction().getInputParameters().size();
+                    }
+                    int idx = 0;
+
+                    for (int i = 0; i < codeBlock1.getVariables().size(); ++i) {
+                        if (codeBlock1.getVariables().get(i).getName().equals(izravni_deklarator.getValue())) {
+                            idx = i;
+                        }
+                    }
+
+                    if (idx < parameterSize) {  //ulazni parametar funkcije
+                        outCommand("STORE R0, (R5 + " + toHex((parameterSize - idx) * 4) + ")");
+                    } else {  //lokalna varijabla
+                        outCommand("STORE R0, (R5 - " + toHex((idx - parameterSize + 2) * 4) + ")");
+                    }
                 }
 
 
@@ -1115,10 +1204,22 @@ public class GeneratorKoda {
                     }
                 }
 
-                codeBlock.getVariables().add(new Variable(leftSide.getNtype(), IDN.getValue()));
+                Variable variable = new Variable(leftSide.getNtype(), IDN.getValue());
+                variable.setCodeBlock(codeBlock);
+                codeBlock.getVariables().add(variable);
+
+                //za običan blok sve varijable pridružiti vanjskom bloku koji je funkcija
+                if (!codeBlock.equals(startingCodeBlock) && !codeBlock.isLoop() && codeBlock.getFunction() == null) {
+                    CodeBlock block = findFirstFunctionBlock(codeBlock);
+                    block.getVariables().add(variable);
+                }
 
                 leftSide.setType(leftSide.getNtype());
                 leftSide.setValue(IDN.getValue());
+
+                if (!codeBlock.equals(startingCodeBlock)) {
+                    outCommand("SUB R7, 4, R7"); //mjesto na stogu za lokalnu varijablu
+                }
                 break;
 
             case 95: //<izravni_deklarator> ::= IDN L_UGL_ZAGRADA BROJ D_UGL_ZAGRADA
@@ -1140,7 +1241,15 @@ public class GeneratorKoda {
                     semanticAnalysisFailure(production);
                 }
                 type = turnToNiz(leftSide.getNtype());
-                codeBlock.getVariables().add(new Variable(type, IDN.getValue()));
+                variable = new Variable(type, IDN.getValue());
+                variable.setCodeBlock(codeBlock);
+                codeBlock.getVariables().add(variable);
+
+                //za običan blok sve varijable pridružiti vanjskom bloku koji je funkcija
+                if (!codeBlock.equals(startingCodeBlock) && !codeBlock.isLoop() && codeBlock.getFunction() == null) {
+                    CodeBlock block = findFirstFunctionBlock(codeBlock);
+                    block.getVariables().add(variable);
+                }
 
                 leftSide.setType(type);
                 leftSide.setNumOfElements(broj_vrijednost);
@@ -1233,6 +1342,20 @@ public class GeneratorKoda {
 
     }
 
+    private static CodeBlock findVariableCodeBlock(CodeBlock codeBlock, String variableName) {
+        for (Variable variable : codeBlock.getVariables()) {
+            if (variable.getName().equals(variableName)) {
+                return codeBlock;
+            }
+        }
+        if (codeBlock.getParentBlock() != null) {
+            return findVariableCodeBlock(codeBlock.getParentBlock(), variableName);
+        } else {
+            return null;
+        }
+
+    }
+
     /**
      *
      */
@@ -1283,6 +1406,7 @@ public class GeneratorKoda {
         return null;
     }
 
+
     /**
      *
      */
@@ -1314,6 +1438,16 @@ public class GeneratorKoda {
             } else {
                 return null;
             }
+        }
+    }
+
+    private static CodeBlock findFirstFunctionBlock(CodeBlock codeBlock) {
+        if (codeBlock.getFunction() != null) {
+            return codeBlock;
+        } else if (codeBlock.getParentBlock() != null) {
+            return findFirstFunctionBlock(codeBlock.getParentBlock());
+        } else {
+            return null;
         }
     }
 
@@ -1385,6 +1519,16 @@ public class GeneratorKoda {
      */
     private static void outCommand(String label, String command) {
         System.out.format("%-6s%s\n", label, command);
+    }
+
+    private static String toHex(int value){
+        String hexValue;
+        hexValue = Integer.toHexString(value).toUpperCase();
+        if(hexValue.startsWith("A") || hexValue.startsWith("B") || hexValue.startsWith("C") || hexValue.startsWith("D") || hexValue.startsWith("E") ||
+                hexValue.startsWith("F")){
+            hexValue = 0 + hexValue;
+        }
+        return hexValue;
     }
 }
 

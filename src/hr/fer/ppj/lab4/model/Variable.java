@@ -3,6 +3,7 @@ package hr.fer.ppj.lab4.model;
 public class Variable {
     private String type;
     private String name;
+    private CodeBlock codeBlock;
 
     public Variable(String type, String name) {
         this.type = type;
@@ -25,6 +26,14 @@ public class Variable {
         this.name = name;
     }
 
+    public CodeBlock getCodeBlock() {
+        return codeBlock;
+    }
+
+    public void setCodeBlock(CodeBlock codeBlock) {
+        this.codeBlock = codeBlock;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -32,12 +41,16 @@ public class Variable {
 
         Variable variable = (Variable) o;
 
-        return name != null ? name.equals(variable.name) : variable.name == null;
+        if (type != null ? !type.equals(variable.type) : variable.type != null) return false;
+        if (name != null ? !name.equals(variable.name) : variable.name != null) return false;
+        return codeBlock != null ? codeBlock.equals(variable.codeBlock) : variable.codeBlock == null;
     }
 
     @Override
     public int hashCode() {
-        int result = name != null ? name.hashCode() : 0;
+        int result = type != null ? type.hashCode() : 0;
+        result = 31 * result + (name != null ? name.hashCode() : 0);
+        result = 31 * result + (codeBlock != null ? codeBlock.hashCode() : 0);
         return result;
     }
 }
