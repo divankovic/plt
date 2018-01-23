@@ -3,10 +3,44 @@
       HALT
 
 
-f     
-      MOVE %D 123, R6
-      RET
 main  
-      CALL f
+      PUSH R5
+      MOVE R7, R5
+      ADD R5, 4, R5
+      LOAD R0, (n)
+      PUSH R0
+      MOVE %D 0, R0
+      PUSH R0
+      POP R1
+      POP R0
+      CMP R0, R1
+      JR_NE DALJE0
+      MOVE %D 0, R0
+      PUSH R0
+      POP R6
+      POP R5
+      RET
+DALJE0
+      LOAD R0, (n)
+      PUSH R0
+      MOVE %D 1, R0
+      PUSH R0
+      POP R1
+      POP R0
+      SUB R0, R1, R0
+      PUSH R0
+      POP R0
+      STORE R0, (n)
+      MOVE %D 1, R0
+      PUSH R0
+      CALL main
+      PUSH R6
+      POP R1
+      POP R0
+      ADD R0, R1, R0
+      PUSH R0
+      POP R6
+      POP R5
       RET
 
+n     DW %D 5
