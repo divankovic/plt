@@ -4,6 +4,8 @@ public class Variable {
     private String type;
     private String name;
     private CodeBlock codeBlock;
+    private int arraySize =0;
+
 
     public Variable(String type, String name) {
         this.type = type;
@@ -32,6 +34,14 @@ public class Variable {
 
     public void setCodeBlock(CodeBlock codeBlock) {
         this.codeBlock = codeBlock;
+    }
+
+    public int getArraySize() {
+        return arraySize;
+    }
+
+    public void setArraySize(int arraySize) {
+        this.arraySize = arraySize;
     }
 
     @Override

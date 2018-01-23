@@ -14,6 +14,15 @@ public class NonterminalSymbol extends Symbol {
     private int numOfElements;
     private String Value="";
     private CodeBlock codeBlock; //nasljedno svojstvo
+    private boolean unarPush = false;
+
+    public boolean isUnarPush() {
+        return unarPush;
+    }
+
+    public void setUnarPush(boolean unarPush) {
+        this.unarPush = unarPush;
+    }
 
     public NonterminalSymbol(String name) {
         this.name = name;
