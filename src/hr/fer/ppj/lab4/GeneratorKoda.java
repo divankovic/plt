@@ -1,6 +1,7 @@
 package hr.fer.ppj.lab4;
 
 import hr.fer.ppj.lab4.model.*;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -14,9 +15,10 @@ import static hr.fer.ppj.lab4.model.Const.*;
 /**
  *
  */
+@SuppressWarnings("ALL")
 public class GeneratorKoda {
     //"./src/hr/fer/ppj/lab2/res/out/SA_out.txt"; for testing purposes
-    private static final String TEST_FILE_INPUT_PATH = "./src/hr/fer/ppj/lab4/res/in/31_inc/test.in";
+    private static final String TEST_FILE_INPUT_PATH = "./src/hr/fer/ppj/lab4/res/in/37_funcloop/test.in";
     private static final String TEST_FILE_OUTPUT_PATH = "./src/hr/fer/ppj/lab4/res/out/out.txt";
     private static final String PRODUCTIONS_TXT_FILE_PATH = "./src/hr/fer/ppj/lab4/res/in/ppjC.san";
     private static final Integer MAX_MOVE_VAL = 524287;
@@ -30,7 +32,6 @@ public class GeneratorKoda {
     private static Integer largeVarCounter = 0;
     private static Integer labelCounter = 0;
     private static List<String> globalVariablesDW = new LinkedList<>();
-    private static List<String> compareOperators = Arrays.asList(SGT, SGE, SLT, SLE, EQ, NE);
 
     /**
      *
@@ -40,6 +41,7 @@ public class GeneratorKoda {
         setupStdIO();
         readProductions();
         readFromInput();
+
 
         buildGeneratingTree();
 
@@ -107,7 +109,7 @@ public class GeneratorKoda {
     }
 
     private static void generateMultiplicationFunction() {
-        outCommand("mul","");
+        outCommand("mul", "");
         outCommand("PUSH R5");
         outCommand("MOVE R7, R5");
         outCommand("ADD R5, 4, R5");
@@ -116,7 +118,7 @@ public class GeneratorKoda {
         outCommand("LOAD R0, (R5 + 8)");
         outCommand("LOAD R1, (R5 + 4)");
         outCommand("MOVE 0, R2");
-        outCommand("M","ADD R0, R2, R2");
+        outCommand("M", "ADD R0, R2, R2");
         outCommand("SUB R1, 1, R1");
         outCommand("CMP R1, 0");
         outCommand("JP_SGT M");
@@ -131,7 +133,7 @@ public class GeneratorKoda {
     }
 
     private static void generateDivisionFunction() {
-        outCommand("div","");
+        outCommand("div", "");
         outCommand("PUSH R5");
         outCommand("MOVE R7, R5");
         outCommand("ADD R5, 4, R5");
@@ -140,7 +142,7 @@ public class GeneratorKoda {
         outCommand("LOAD R0, (R5 + 8)");
         outCommand("LOAD R1, (R5 + 4)");
         outCommand("MOVE 0, R2");
-        outCommand("D","SUB R0, R1, R0");
+        outCommand("D", "SUB R0, R1, R0");
         outCommand("ADD R2, 1, R2");
         outCommand("CMP R0, 0");
         outCommand("JP_SGE D");
@@ -156,7 +158,7 @@ public class GeneratorKoda {
     }
 
     private static void generateModFunction() {
-        outCommand("mod","");
+        outCommand("mod", "");
         outCommand("PUSH R5");
         outCommand("MOVE R7, R5");
         outCommand("ADD R5, 4, R5");
@@ -164,7 +166,7 @@ public class GeneratorKoda {
         outCommand("");
         outCommand("LOAD R0, (R5 + 8)");
         outCommand("LOAD R1, (R5 + 4)");
-        outCommand("MD","SUB R0, R1, R0");
+        outCommand("MD", "SUB R0, R1, R0");
         outCommand("CMP R0, 0");
         outCommand("JP_SGE MD");
         outCommand("ADD R0, R1, R0");
@@ -394,9 +396,11 @@ public class GeneratorKoda {
 
                 leftSide.setValue(IDN.getValue());
 
-                if (indicator.equals("niz") || indicator.equals("set")) { //inicijalizacija polja ili već deklarirane varijable
+                if (indicator.equals("niz") || indicator.equals("set")) { //ako je identifikator za niz ili se identifikatoru pridruzuje nova vrijednost(dekariran je prije),
+                                                                            //onda ne dohvaćati vrijednost i spremati na stog
                     return;
                 }
+
 
                 boolean globalVariable = false;
                 CodeBlock codeBlock1 = findVariableCodeBlock(codeBlock, IDN.getValue());
@@ -421,7 +425,7 @@ public class GeneratorKoda {
                     for (int i = 0; i < codeBlock1.getVariables().size(); ++i) {
                         if (codeBlock1.getVariables().get(i).getName().equals(IDN.getValue())) {
                             idx = i;
-                            if(codeBlock1.getVariables().get(i).getArraySize()!=0){
+                            if (codeBlock1.getVariables().get(i).getArraySize() != 0) {
                                 array = true;
                             }
                         }
@@ -429,21 +433,21 @@ public class GeneratorKoda {
 
                     if (idx != -1) {
                         if (idx < parameterSize) {  //ulazni parametar funkcije
-                            if(array){
+                            if (array) {
                                 outCommand("MOVE R5, R0");
-                                outCommand("ADD R0, "+toHex((parameterSize - idx) * 4)+", R0");
-                            }else {
+                                outCommand("ADD R0, " + toHex((parameterSize - idx) * 4) + ", R0");
+                            } else {
                                 outCommand("LOAD R0, (R5 + " + toHex((parameterSize - idx) * 4) + ")");
                             }
                             outCommand("PUSH R0");
                         } else {  //lokalna varijabla
-                            idx-=parameterSize;
-                            idx = getVariableStackIndex(idx,codeBlock1);
-                            if(array){
+                            idx -= parameterSize;
+                            idx = getVariableStackIndex(idx, codeBlock1);
+                            if (array) {
                                 outCommand("MOVE R5, R0");
-                                outCommand("SUB R0, "+ toHex((idx - parameterSize + 2) * 4)+", R0");
-                            }else {
-                                outCommand("LOAD R0, (R5 - " + toHex((idx - parameterSize + 2) * 4) + ")");
+                                outCommand("SUB R0, " + toHex((idx+ 2) * 4) + ", R0");
+                            } else {
+                                outCommand("LOAD R0, (R5 - " + toHex((idx + 2) * 4) + ")");
                             }
                             outCommand("PUSH R0");
                         }
@@ -526,8 +530,10 @@ public class GeneratorKoda {
                 break;
 
             case 4: //<primarni_izraz> ::= L_ZAGRADA <izraz> D_ZAGRADA
-                check(rightSide.get(1));
                 NonterminalSymbol izraz = getNonTerminalSymbol(rightSide.get(1));
+                izraz.setLogPush(true);
+                check(rightSide.get(1));
+
                 setTypeAndL(leftSide, izraz.getType(), izraz.getL_expression());
                 break;
 
@@ -554,6 +560,7 @@ public class GeneratorKoda {
                 }
                 getNonTerminalSymbol(rightSide.get(0)).setValue(leftSide.getValue());
                 getNonTerminalSymbol(rightSide.get(0)).setUnarPush(leftSide.isUnarPush());
+                getNonTerminalSymbol(rightSide.get(0)).setLogPush(leftSide.isLogPush());
                 check(rightSide.get(0));
 
                 setTypeAndL(leftSide, nonTerminalSymbol.getType(), nonTerminalSymbol.getL_expression());
@@ -564,13 +571,12 @@ public class GeneratorKoda {
                 NonterminalSymbol postfiks_izraz = getNonTerminalSymbol(rightSide.get(0));
                 izraz = getNonTerminalSymbol(rightSide.get(2));
 
-                getNonTerminalSymbol(rightSide.get(0)).setValue("niz");
+                postfiks_izraz.setValue("niz");
                 check(rightSide.get(0));
                 if (!postfiks_izraz.getType().startsWith("niz")) {
                     semanticAnalysisFailure(production);
                 }
 
-                izraz.setValue("niz");
                 izraz.setUnarPush(true);
                 check(rightSide.get(2));
                 if (!checkImplicitCast(izraz.getType(), INT)) {
@@ -581,19 +587,28 @@ public class GeneratorKoda {
                 setTypeAndL(leftSide, type, l_expression);
 
                 indicator = leftSide.getValue();
-                leftSide.setValue(postfiks_izraz.getValue() + L_UGL_ZAGRADA + izraz.getValue() + D_UGL_ZAGRADA);
+                leftSide.setValue(postfiks_izraz.getValue() + L_UGL_ZAGRADA + D_UGL_ZAGRADA);
                 if (indicator.equals("set")) {
-                    return; //inicijalizacija elementa polja ili varijable
+                    return; //inicijalizacija elementa polja
                 }
 
-                int offset = Integer.parseInt(izraz.getValue()) * 4;
-                if (codeBlock.equals(startingCodeBlock)) {
-                    if (offset != 0) {
-                        outCommand("MOVE NIZ_" + postfiks_izraz.getValue() + ", R0");
-                        outCommand("LOAD R0, (R0" + " + " + toHex(offset) + ")");
-                    } else {
-                        outCommand("LOAD R0, (NIZ_" + postfiks_izraz.getValue() + ")");
-                    }
+                codeBlock1 = findVariableCodeBlock(codeBlock,postfiks_izraz.getValue());
+                if (codeBlock1.equals(startingCodeBlock)) {
+
+                    //indeks niza je na stogu
+                    // treba vrijednost pomnožiti sa 4 (ukupan odmak za indeksiranje)
+                    outCommand("MOVE %D 4, R0");
+                    outCommand("PUSH R0");
+                    outCommand("CALL mul");
+                    outCommand("ADD R7, 8, R7");
+                    outCommand("PUSH R6");
+                    outCommand("POP R0"); // u R0 je ukupni odmak
+
+                    outCommand("MOVE NIZ_" + postfiks_izraz.getValue() + ", R1");
+                    outCommand("ADD R1, R0, R1"); //izracunavanje ukupne adrese
+                    outCommand("LOAD R0, (R1)");
+
+
                     outCommand("PUSH R0");
                 } else {
                     //dohvaćanje vrijednosti polja
@@ -611,16 +626,47 @@ public class GeneratorKoda {
                     }
 
                     if (idx < parameterSize) {  //ulazni parametar funkcije
+                        outCommand("MOVE %D 4, R0");
+                        outCommand("PUSH R0");
+                        outCommand("CALL mul");
+                        outCommand("ADD R7, 8, R7");
+                        outCommand("PUSH R6");
+                        outCommand("POP R0"); // u R0 je ukupni odmak
+
+                        outCommand("LOAD R1, (R5 + " + toHex((parameterSize - idx) * 4) + ")"); //adresa 1.elementa polja
+                        outCommand("SUB R1, R0, R1"); //izracunavanje ukupne adrese
+                        outCommand("LOAD R0, (R1)");
+
+
+                        outCommand("PUSH R0");
+                        /*
                         outCommand("LOAD R0, (R5 + " + toHex((parameterSize - idx) * 4) + ")"); //adresa 1.elementa polja
                         outCommand("LOAD R0, (R0 - " + toHex(Integer.parseInt(izraz.getValue()) * 4) + ")");
+                        */
                     } else {  //lokalna varijabla
                         idx -= parameterSize;
-                        idx = getVariableStackIndex(idx,codeBlock1);
-                        outCommand("LOAD R0, (R5 - " + toHex((idx+Integer.parseInt(izraz.getValue())+ 2) * 4) + ")");
+                        idx = getVariableStackIndex(idx, codeBlock1);
+
+                        outCommand("POP R0");
+                        outCommand("ADD R0, 2, R0");
+                        outCommand("MOVE %D "+ toHex(idx)+", R1");
+                        outCommand("ADD R0, R1, R0");
+                        outCommand("PUSH R0");
+
+                        outCommand("MOVE %D 4, R0");
+                        outCommand("PUSH R0");
+
+                        outCommand("CALL mul");
+                        outCommand("ADD R7, 8, R7");
+                        outCommand("PUSH R6");
+                        outCommand("POP R0"); // u R0 je ukupni odmak
+                        outCommand("SUB R5, R0, R1");
+                        outCommand("LOAD R0, (R1)");
+                        outCommand("PUSH R0");
+
+                        //outCommand("LOAD R0, (R5 - " + toHex((idx + Integer.parseInt(izraz.getValue()) + 2) * 4) + ")");
                     }
 
-
-                    outCommand("PUSH R0");
                 }
                 break;
 
@@ -637,7 +683,7 @@ public class GeneratorKoda {
 
 
                 outCommand("CALL " + postfiks_izraz.getValue());
-                if(!getFunctionReturnValue(type).equals(VOID)) {
+                if (!getFunctionReturnValue(type).equals(VOID)) {
                     outCommand("PUSH R6");
                 }
                 break;
@@ -681,7 +727,7 @@ public class GeneratorKoda {
                     outCommand("ADD R7, " + toHex(size * 4) + ", R7");
                 }
 
-                if(!getFunctionReturnValue(type).equals(VOID)) {
+                if (!getFunctionReturnValue(type).equals(VOID)) {
                     outCommand("PUSH R6");
                 }
 
@@ -698,7 +744,7 @@ public class GeneratorKoda {
                 }
                 setTypeAndL(leftSide, INT, 0);
 
-                switch(productionIndex){
+                switch (productionIndex) {
                     case 9:
                         outCommand("ADD R0, 1, R0");
                         break;
@@ -707,9 +753,9 @@ public class GeneratorKoda {
                         break;
                 }
 
-                storeValue(postfiks_izraz.getValue(),codeBlock);
+                storeValue(postfiks_izraz.getValue(), codeBlock);
 
-                if(!leftSide.isUnarPush()){
+                if (!leftSide.isUnarPush()) {
                     outCommand("POP R0");
                 }
 
@@ -749,7 +795,7 @@ public class GeneratorKoda {
                 leftSide.setValue(nonTerminalSymbol2.getValue());
 
                 outCommand("POP R0");
-                switch(productionIndex){
+                switch (productionIndex) {
                     case 14:
                         outCommand("ADD R0, 1, R0");
                         break;
@@ -757,11 +803,11 @@ public class GeneratorKoda {
                         outCommand("SUB R0, 1, R0");
                         break;
                 }
-                if(leftSide.isUnarPush()){
+                if (leftSide.isUnarPush()) {
                     outCommand("PUSH R0");
                 }
 
-                storeValue(getNonTerminalSymbol(rightSide.get(1)).getValue(),codeBlock);
+                storeValue(getNonTerminalSymbol(rightSide.get(1)).getValue(), codeBlock);
                 outCommand("");
                 break;
             case 16: //<unarni_izraz> ::= <unarni_operator> <cast_izraz>
@@ -875,6 +921,7 @@ public class GeneratorKoda {
                         outCommand("CALL mul");
                         outCommand("ADD R7, 8, R7");
                         outCommand("PUSH R6");
+                        outCommand("");
                         break;
                     case 30:
                         outCommand("PUSH R0");
@@ -882,6 +929,7 @@ public class GeneratorKoda {
                         outCommand("CALL div");
                         outCommand("ADD R7, 8, R7");
                         outCommand("PUSH R6");
+                        outCommand("");
                         break;
                     case 31:
                         outCommand("PUSH R0");
@@ -889,69 +937,109 @@ public class GeneratorKoda {
                         outCommand("CALL mod");
                         outCommand("ADD R7, 8, R7");
                         outCommand("PUSH R6");
+                        outCommand("");
                         break;
                     case 33://<aditivni_izraz> ::= <aditivni_izraz> PLUS <multiplikativni_izraz>
                         outCommand("ADD R0, R1, R0");
                         outCommand("PUSH R0");
+                        outCommand("");
                         break;
                     case 34://<aditivni_izraz> ::= <aditivni_izraz> MINUS <multiplikativni_izraz>
                         outCommand("SUB R0, R1, R0");
                         outCommand("PUSH R0");
+                        outCommand("");
                         break;
                     case 36://<odnosni_izraz> ::= <odnosni_izraz> OP_LT <aditivni_izraz>
                         outCommand("CMP R0, R1");
-                        leftSide.setValue(SLT);
+                        outCommand("JR_SLT 0C");
+                        outCommand("MOVE 0, R0");
+                        outCommand("JR 8");
+                        outCommand("MOVE 1 ,R0");
+                        outCommand("PUSH R0");
+                        outCommand("");
                         break;
                     case 37://<odnosni_izraz> ::= <odnosni_izraz>  OP_GT <aditivni_izraz>
                         outCommand("CMP R0, R1");
-                        leftSide.setValue(SGT);
+                        outCommand("JR_SGT 0C");
+                        outCommand("MOVE 0, R0");
+                        outCommand("JR 8");
+                        outCommand("MOVE 1 ,R0");
+                        outCommand("PUSH R0");
+                        outCommand("");
                         break;
                     case 38://<odnosni_izraz> ::= <odnosni_izraz>  OP_LTE <aditivni_izraz>
                         outCommand("CMP R0, R1");
-                        leftSide.setValue(SLE);
+                        outCommand("JR_SLE 0C");
+                        outCommand("MOVE 0, R0");
+                        outCommand("JR 8");
+                        outCommand("MOVE 1 ,R0");
+                        outCommand("PUSH R0");
+                        outCommand("");
                         break;
                     case 39://<odnosni_izraz> ::= <odnosni_izraz>  OP_GTE <aditivni_izraz>
                         outCommand("CMP R0, R1");
-                        leftSide.setValue(SGE);
+                        outCommand("JR_SGE 0C");
+                        outCommand("MOVE 0, R0");
+                        outCommand("JR 8");
+                        outCommand("MOVE 1 ,R0");
+                        outCommand("PUSH R0");
+                        outCommand("");
                         break;
                     case 41://<jednakosni_izraz> ::= <jednakosni_izraz> OP_EQ  <odnosni_izraz>
                         outCommand("CMP R0, R1");
-                        leftSide.setValue(EQ);
+                        outCommand("JR_EQ 0C");
+                        outCommand("MOVE 0, R0");
+                        outCommand("JR 8");
+                        outCommand("MOVE 1 ,R0");
+                        outCommand("PUSH R0");
+                        outCommand("");
                         break;
                     case 42://<jednakosni_izraz> ::= <jednakosni_izraz>  OP_NEQ <odnosni_izraz>
                         outCommand("CMP R0, R1");
-                        leftSide.setValue(NE);
+                        outCommand("JR_NE 0C");
+                        outCommand("MOVE 0, R0");
+                        outCommand("JR 8");
+                        outCommand("MOVE 1 ,R0");
+                        outCommand("PUSH R0");
+                        outCommand("");
                         break;
 
                     case 44://<bin_i_izraz> ::= <bin_i_izraz> OP_BIN_I <jednakosni_izraz>
                         outCommand("AND R0, R1, R0");
                         outCommand("PUSH R0");
+                        outCommand("");
                         break;
                     case 46://<bin_xili_izraz> ::= <bin_xili_izraz> OP_BIN_XILI <bin_i_izraz>
                         outCommand("XOR R0, R1, R0");
                         outCommand("PUSH R0");
+                        outCommand("");
                         break;
                     case 48://<bin_ili_izraz> ::= <bin_ili_izraz> OP_BIN_ILI <bin_xili_izraz>
                         outCommand("OR R0, R1, R0");
                         outCommand("PUSH R0");
+                        outCommand("");
                         break;
                     case 50://<log_i_izraz> ::= <log_i_izraz> OP_I <bin_ili_izraz>
                         outCommand("CMP R0, 0");
-                        outCommand("MOVE_EQ 0, R0");
-                        outCommand("JR_EQ 10");
+                        outCommand("JR_EQ 14");
                         outCommand("CMP R1, 0");
-                        outCommand("MOVE_EQ 0, R0");
-                        outCommand("MOVE_NE 1, R0");
+                        outCommand("JR_EQ 0C");
+                        outCommand("MOVE 1, R0");
+                        outCommand("JR 8");
+                        outCommand("MOVE 0, R0");
                         outCommand("PUSH R0");
+                        outCommand("");
                         break;
                     case 52://<log_ili_izraz> ::= <log_ili_izraz> OP_ILI <log_i_izraz>
                         outCommand("CMP R0, 0");
-                        outCommand("MOVE_NE 1, R0");
-                        outCommand("JR_EQ 10");
+                        outCommand("JR_NE 14");
                         outCommand("CMP R1, 0");
-                        outCommand("MOVE_NE 1, R0");
-                        outCommand("MOVE_EQ 0, R0");
+                        outCommand("JR_NE 0C");
+                        outCommand("MOVE 0, R0");
+                        outCommand("JR 8");
+                        outCommand("MOVE 1, R0");
                         outCommand("PUSH R0");
+                        outCommand("");
                         break;
                 }
                 break;
@@ -996,7 +1084,7 @@ public class GeneratorKoda {
                 postfiks_izraz = getNonTerminalSymbol(rightSide.get(0));
                 NonterminalSymbol izraz_pridruzivanja = getNonTerminalSymbol(rightSide.get(2));
 
-                postfiks_izraz.setValue("set"); //pridruzivanje - oznacuje inicijalizaciju vrijednosti elementa polja ili varijable, koja je već deklarirana
+                postfiks_izraz.setValue("set"); //ne dohvaćati vrijednost i stavljati na stog
                 check(rightSide.get(0));
                 if (postfiks_izraz.getL_expression() != 1) {
                     semanticAnalysisFailure(production);
@@ -1008,6 +1096,13 @@ public class GeneratorKoda {
                     semanticAnalysisFailure(production);
                 }
                 setTypeAndL(leftSide, postfiks_izraz.getType(), 0);
+
+                if (leftSide.isLogPush()) {
+                    outCommand("POP R0");
+                    outCommand("MOVE 1, R0");
+                    outCommand("PUSH R0");
+                    return;
+                }
 
                 //Assembler commands
                 String name;
@@ -1021,26 +1116,29 @@ public class GeneratorKoda {
                 if (codeBlock1.equals(startingCodeBlock)) {
                     if (postfiks_izraz.getValue().contains(L_UGL_ZAGRADA)) {
                         //polje
-                        outCommand("POP R0");
+                        //na stogu su indeks polja i vrijednost koju treba pridruziti polju na tom indeksu
+                        outCommand("POP R3"); // vrijednost npr. a[2] = 3; 3->vrijednost
 
-                        String value = postfiks_izraz.getValue();
-                        offset = Integer.parseInt(value.substring(value.indexOf(L_UGL_ZAGRADA) + 1, value.length() - 1)) * 4;
-                        if (offset != 0) {
-                            outCommand("MOVE NIZ_" + name + ", R1");
-                            outCommand("STORE R0, (R1" + " + " + toHex(offset) + ")");
-                        } else {
-                            outCommand("STORE R0, (NIZ_" + name + ")");
-                        }
+                        //indeks niza je na stogu
+                        // treba vrijednost pomnožiti sa 4 (ukupan odmak za indeksiranje)
+                        outCommand("MOVE %D 4, R0");
+                        outCommand("PUSH R0");
+                        outCommand("CALL mul");
+                        outCommand("ADD R7, 8, R7");
+                        outCommand("PUSH R6");
+                        outCommand("POP R0"); // u R0 je ukupni odmak
+
+                        outCommand("MOVE NIZ_" + name + ", R1");
+                        outCommand("ADD R1, R0, R1"); //izracunavanje ukupne adrese
+                        outCommand("STORE R3, (R1)"); //spremi vrijednost na adresu
 
                     } else {
                         outCommand("POP R0");
                         outCommand("STORE R0, (" + postfiks_izraz.getValue() + ")");
                     }
                 } else {
-                    if(postfiks_izraz.getValue().contains(L_UGL_ZAGRADA)){ //polje
-                        outCommand("POP R0");
+                    if (postfiks_izraz.getValue().contains(L_UGL_ZAGRADA)) { //polje
 
-                        String variableName = postfiks_izraz.getValue().substring(0,postfiks_izraz.getValue().indexOf(L_UGL_ZAGRADA));
 
                         int parameterSize = 0;
                         codeBlock1 = findFirstFunctionBlock(codeBlock);
@@ -1050,25 +1148,57 @@ public class GeneratorKoda {
                         int idx = 0;
 
                         for (int i = 0; i < codeBlock1.getVariables().size(); ++i) {
-                            if (codeBlock1.getVariables().get(i).getName().equals(variableName)) {
+                            if (codeBlock1.getVariables().get(i).getName().equals(name)) {
                                 idx = i;
                             }
                         }
 
-                        String value = postfiks_izraz.getValue();
-                        offset = Integer.parseInt(value.substring(value.indexOf(L_UGL_ZAGRADA) + 1, value.length() - 1)) * 4;
+
+                        //na stogu su indeks polja i vrijednost koju treba pridruziti polju na tom indeksu
+                        outCommand("POP R3"); // vrijednost npr. a[2] = 3; 3->vrijednost
+                        //indeks niza je na stogu
+                        // treba vrijednost pomnožiti sa 4 (ukupan odmak za indeksiranje)
 
                         if (idx < parameterSize) {  //ulazni parametar funkcije
+
+                            outCommand("MOVE %D 4, R0");
+                            outCommand("PUSH R0");
+                            outCommand("CALL mul");
+                            outCommand("ADD R7, 8, R7");
+                            outCommand("PUSH R6");
+                            outCommand("POP R0"); // u R0 je ukupni odmak
+
                             outCommand("LOAD R1, (R5 + " + toHex((parameterSize - idx) * 4) + ")"); //adresa 1.elementa polja
-                            outCommand("STORE R0, (R1 - " + toHex(offset) + ")");
+                            outCommand("SUB R1, R0, R1"); //izracunavanje ukupne adrese
+                            outCommand("STORE R3, (R1)"); //spremanje vrijednosti na odgovarajuću adresu
+
+                            /*outCommand("LOAD R1, (R5 + " + toHex((parameterSize - idx) * 4) + ")"); //adresa 1.elementa polja
+                            outCommand("STORE R0, (R1 - " + toHex(offset) + ")");*/
                         } else {  //lokalna varijabla
                             idx -= parameterSize;
-                            idx = getVariableStackIndex(idx,codeBlock1);
-                            outCommand("LOAD R0, (R5 - " + toHex((idx+offset+ 2) * 4) + ")");
+                            idx = getVariableStackIndex(idx, codeBlock1);
+
+                            outCommand("POP R0");
+                            outCommand("ADD R0, 2, R0");
+                            outCommand("MOVE %D "+ toHex(idx)+", R1");
+                            outCommand("ADD R0, R1, R0");
+                            outCommand("PUSH R0");
+
+                            outCommand("MOVE %D 4, R0");
+                            outCommand("PUSH R0");
+
+                            outCommand("CALL mul");
+                            outCommand("ADD R7, 8, R7");
+                            outCommand("PUSH R6");
+                            outCommand("POP R0"); // u R0 je ukupni odmak
+                            outCommand("SUB R5, R0, R1"); //adresa
+                            outCommand("STORE R3, (R1)"); //spremanje vrijednosti na adresu
+
+                            //outCommand("LOAD R0, (R5 - " + toHex((idx + offset + 2) * 4) + ")");
                         }
 
 
-                    }else { //varijabla
+                    } else { //varijabla
                         outCommand("POP R0");
 
                         int parameterSize = 0;
@@ -1087,7 +1217,9 @@ public class GeneratorKoda {
                         if (idx < parameterSize) {  //ulazni parametar funkcije
                             outCommand("STORE R0, (R5 + " + toHex((parameterSize - idx) * 4) + ")");
                         } else {  //lokalna varijabla
-                            outCommand("STORE R0, (R5 - " + toHex((idx - parameterSize + 2) * 4) + ")");
+                            idx -= parameterSize;
+                            idx = getVariableStackIndex(idx, codeBlock1);
+                            outCommand("STORE R0, (R5 - " + toHex((idx + 2) * 4) + ")");
                         }
                     }
                 }
@@ -1170,19 +1302,15 @@ public class GeneratorKoda {
                 }
 
                 izraz = getNonTerminalSymbol(rightSide.get(2));
-                if (!compareOperators.contains(izraz.getValue())) {
-                    //vraćen je brojevni izraz i rezultat je na stogu
-                    outCommand("POP R0");
-                    outCommand("CMP R0, 0");
-                    outCommand("JR_SLE DALJE" + largeVarCounter); //ako je broj 0 ili negativan onda preskoči if
-                } else {
-                    String condition = getOppositeCondition(izraz.getValue());
-                    outCommand("JR_" + condition + " DALJE" + largeVarCounter); //za suprotan uvjet skoči na dalje
-                }
+
+                outCommand("POP R0");
+                outCommand("CMP R0, 0");
+                outCommand("JR_EQ DALJE" + labelCounter++); //0-uvjet nije zadovoljen, inače je zadovoljen
+                int labelcnt = labelCounter - 1;
 
                 check(rightSide.get(4));
 
-                outCommand("DALJE" + largeVarCounter++, "");
+                outCommand("DALJE" + labelcnt, "");
 
                 if (productionIndex == 69) {
                     check(rightSide.get(6));
@@ -1192,33 +1320,63 @@ public class GeneratorKoda {
 
             //<naredba_petlje>
             case 70: ////<naredba_petlje> ::= KR_WHILE L_ZAGRADA <izraz> D_ZAGRADA <naredba>
+                outCommand("");
+                int whileLabel = labelCounter++;
+                outCommand("WHILE_" + whileLabel, "");
+
                 check(rightSide.get(2));
                 if (!checkImplicitCast(getNonTerminalSymbol(rightSide.get(2)).getType(), INT)) {
                     semanticAnalysisFailure(production);
                 }
+
+                outCommand("POP R0");
+                outCommand("CMP R0, 0");
+                outCommand("JR_EQ OUT_" + whileLabel);
+
                 getNonTerminalSymbol(rightSide.get(4)).getCodeBlock().setSetChildAsLoop(true);
                 check(rightSide.get(4));
+
+                outCommand("JR WHILE_" + whileLabel);
+                outCommand("");
+
+                outCommand("OUT_" + whileLabel, "");
                 break;
 
             case 71: //<naredba_petlje> ::= KR_FOR L_ZAGRADA <izraz_naredba>1 <izraz_naredba>2 D_ZAGRADA <naredba>
-                check(rightSide.get(2));
-                check(rightSide.get(3));
-                if (!checkImplicitCast(getNonTerminalSymbol(rightSide.get(3)).getType(), INT)) {
-                    semanticAnalysisFailure(production);
-                }
-                getNonTerminalSymbol(rightSide.get(5)).getCodeBlock().setSetChildAsLoop(true);
-                check(rightSide.get(5));
-                break;
-
             case 72: //<naredba_petlje> ::= KR_FOR L_ZAGRADA <izraz_naredba>1 <izraz_naredba>2 <izraz> D_ZAGRADA <naredba>
+                outCommand("");
                 check(rightSide.get(2));
+
+                int forLabel = labelCounter++;
+                outCommand("FOR_" + forLabel, "");
+
+                getNonTerminalSymbol(rightSide.get(3)).setLogPush(true);
                 check(rightSide.get(3));
                 if (!checkImplicitCast(getNonTerminalSymbol(rightSide.get(3)).getType(), INT)) {
                     semanticAnalysisFailure(production);
                 }
-                check(rightSide.get(4));
-                getNonTerminalSymbol(rightSide.get(6)).getCodeBlock().setSetChildAsLoop(true);
-                check(rightSide.get(6));
+
+                outCommand("POP R0");
+                outCommand("CMP R0, 0");
+                outCommand("JR_EQ OUT_" + forLabel);
+
+                switch (productionIndex) {
+                    case 71:
+                        getNonTerminalSymbol(rightSide.get(5)).getCodeBlock().setSetChildAsLoop(true);
+                        check(rightSide.get(5));
+                        break;
+                    case 72:
+                        check(rightSide.get(4));
+                        getNonTerminalSymbol(rightSide.get(6)).getCodeBlock().setSetChildAsLoop(true);
+                        check(rightSide.get(6));
+                        break;
+                }
+
+
+                outCommand("JR FOR_" + forLabel);
+                outCommand("");
+
+                outCommand("OUT_" + forLabel, "");
                 break;
 
             //<naredba_skoka>
@@ -1267,8 +1425,14 @@ public class GeneratorKoda {
 
                 outCommand("POP R6");
 
-                //skidanje lokalnih parametara sa stoga
                 codeBlock1 = findFirstFunctionBlock(codeBlock);
+                //validacija stoga, ako je nešto slučajno ostalo na njemu
+                outCommand("");
+                validateStack(codeBlock1);
+                outCommand("");
+
+                //skidanje lokalnih parametara sa stoga
+
                 int stackSize = getVariableStackSize(codeBlock1);
 
                 if (stackSize != 0) {
@@ -1336,7 +1500,11 @@ public class GeneratorKoda {
 
                 check(rightSide.get(5));
 
-                if(ime_tipa.getType().equals(VOID)){
+
+                if (ime_tipa.getType().equals(VOID)) {
+                    //validacija stoga, ako je nešto slučajno ostalo na njemu
+                    validateStack(childBlock);
+
                     //skidanje lokalnih parametara sa stoga
                     stackSize = getVariableStackSize(childBlock);
 
@@ -1407,7 +1575,11 @@ public class GeneratorKoda {
                 check(rightSide.get(5));
 
 
-                if(ime_tipa.getType().equals(VOID)){
+                if (ime_tipa.getType().equals(VOID)) {
+
+                    //validacija stoga, ako je nešto slučajno ostalo na njemu
+                    validateStack(childBlock);
+
                     //skidanje lokalnih parametara sa stoga
                     stackSize = getVariableStackSize(childBlock);
 
@@ -1528,7 +1700,6 @@ public class GeneratorKoda {
                 NonterminalSymbol inicijalizator = getNonTerminalSymbol(rightSide.get(2));
                 check(rightSide.get(0));
 
-                inicijalizator.setValue("set");
                 inicijalizator.setUnarPush(true);
                 check(rightSide.get(2));
 
@@ -1602,7 +1773,7 @@ public class GeneratorKoda {
 
                         for (int i = 0; i < array_size; i++) {
                             outCommand("POP R0");
-                            outCommand("STORE R0, (R5 + " + toHex((idx + 2 + array_size - 1 - i) * 4) + ")");
+                            outCommand("STORE R0, (R5 - " + toHex((idx + 2 + array_size - 1 - i) * 4) + ")");
                         }
 
 
@@ -1626,7 +1797,7 @@ public class GeneratorKoda {
                         idx -= parameterSize;
                         //ULAZNA VARIJABLA FUNKCIJE NEĆE OPET BITI DEKLARIRANA - SEMANTIČKA GREŠKA
 
-                        idx = getVariableStackIndex(idx, codeBlock);
+                        idx = getVariableStackIndex(idx, codeBlock1);
                         outCommand("STORE R0, (R5 - " + toHex((idx + 2) * 4) + ")");
 
                     }
@@ -1801,6 +1972,13 @@ public class GeneratorKoda {
 
         }
 
+    }
+
+    private static void validateStack(CodeBlock codeBlock) {
+        int parSize = getVariableStackSize(codeBlock);
+        outCommand("MOVE R5, R4");
+        outCommand("SUB R4, " + toHex((parSize + 1) * 4) + ", R4");
+        outCommand("MOVE R4, R7");
     }
 
 
@@ -1993,23 +2171,6 @@ public class GeneratorKoda {
         return hexValue;
     }
 
-    private static String getOppositeCondition(String value) {
-        switch (value) {
-            case (SGT):
-                return SLE;
-            case (SGE):
-                return SLT;
-            case (SLT):
-                return SGE;
-            case (SLE):
-                return SGT;
-            case (EQ):
-                return NE;
-            default: //NE
-                return EQ;
-        }
-    }
-
     private static int getVariableStackIndex(int idx, CodeBlock codeBlock) {
         List<Variable> variables = codeBlock.getVariables();
         int parameterSize = codeBlock.getFunction().getInputParameters().size();
@@ -2052,7 +2213,7 @@ public class GeneratorKoda {
     }
 
 
-    public static void storeValue(String variable, CodeBlock codeBlock){
+    public static void storeValue(String variable, CodeBlock codeBlock) {
         //Assembler commands
         String name;
         if (variable.contains(L_UGL_ZAGRADA)) {
@@ -2079,9 +2240,9 @@ public class GeneratorKoda {
                 outCommand("STORE R0, (" + variable + ")");
             }
         } else {
-            if(variable.contains(L_UGL_ZAGRADA)){ //polje
+            if (variable.contains(L_UGL_ZAGRADA)) { //polje
 
-                String variableName = variable.substring(0,variable.indexOf(L_UGL_ZAGRADA));
+                String variableName = variable.substring(0, variable.indexOf(L_UGL_ZAGRADA));
 
                 int parameterSize = 0;
                 codeBlock1 = findFirstFunctionBlock(codeBlock);
@@ -2104,12 +2265,12 @@ public class GeneratorKoda {
                     outCommand("STORE R0, (R1 - " + toHex(offset) + ")");
                 } else {  //lokalna varijabla
                     idx -= parameterSize;
-                    idx = getVariableStackIndex(idx,codeBlock1);
-                    outCommand("LOAD R0, (R5 - " + toHex((idx+offset+ 2) * 4) + ")");
+                    idx = getVariableStackIndex(idx, codeBlock1);
+                    outCommand("LOAD R0, (R5 - " + toHex((idx + offset + 2) * 4) + ")");
                 }
 
 
-            }else { //varijabla
+            } else { //varijabla
 
                 int parameterSize = 0;
                 codeBlock1 = findFirstFunctionBlock(codeBlock);
@@ -2127,7 +2288,9 @@ public class GeneratorKoda {
                 if (idx < parameterSize) {  //ulazni parametar funkcije
                     outCommand("STORE R0, (R5 + " + toHex((parameterSize - idx) * 4) + ")");
                 } else {  //lokalna varijabla
-                    outCommand("STORE R0, (R5 - " + toHex((idx - parameterSize + 2) * 4) + ")");
+                    idx -= parameterSize;
+                    idx = getVariableStackIndex(idx, codeBlock1);
+                    outCommand("STORE R0, (R5 - " + toHex((idx+ 2) * 4) + ")");
                 }
             }
         }

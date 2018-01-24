@@ -15,6 +15,7 @@ public class NonterminalSymbol extends Symbol {
     private String Value="";
     private CodeBlock codeBlock; //nasljedno svojstvo
     private boolean unarPush = false;
+    private boolean logPush = false;
 
     public boolean isUnarPush() {
         return unarPush;
@@ -101,6 +102,15 @@ public class NonterminalSymbol extends Symbol {
 
     public void setValue(String value) {
         Value = value;
+    }
+
+
+    public boolean isLogPush() {
+        return logPush;
+    }
+
+    public void setLogPush(boolean logPush) {
+        this.logPush = logPush;
     }
 
     @Override
